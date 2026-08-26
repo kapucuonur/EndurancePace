@@ -31,6 +31,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
@@ -41,3 +42,11 @@ example
 # generated native folders
 /ios
 /android
+
+# claude code
+.claude/
+
+# editor / claude code
+.vscode/
+.claude/
+CLAUDE.md
