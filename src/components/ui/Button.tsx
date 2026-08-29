@@ -12,7 +12,7 @@ interface Props {
 }
 
 const CONTAINER: Record<Variant, string> = {
-  primary: 'bg-brand active:bg-brand-dark',
+  primary: 'bg-brand active:bg-brand-dark hover:opacity-90',
   secondary:
     'bg-surface-alt border border-border dark:bg-surface-alt-dark dark:border-border-dark',
   ghost: 'bg-transparent',

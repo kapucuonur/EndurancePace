@@ -1,5 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
@@ -9,12 +17,22 @@ import { useAppStore } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 
 type Mode = 'signin' | 'signup';
+type FieldName = 'name' | 'email' | 'password';
+
+const cardShadow = {
+  shadowColor: '#000',
+  shadowOpacity: 0.06,
+  shadowRadius: 24,
+  shadowOffset: { width: 0, height: 12 },
+  elevation: 4,
+} as const;
 
 export default function LoginScreen() {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [focused, setFocused] = useState<FieldName | null>(null);
 
   const signIn = useAppStore((s) => s.signIn);
   const signUp = useAppStore((s) => s.signUp);
@@ -34,72 +52,117 @@ export default function LoginScreen() {
   };
 
   return (
-    <Screen className="justify-center px-xl">
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View className="gap-xs">
-          <Text variant="display">EndurancePace</Text>
-          <Text muted>
-            {mode === 'signin' ? 'Sign in to your training log.' : 'Create your account.'}
-          </Text>
-        </View>
+    <Screen className="justify-center">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1">
+        <ScrollView
+          contentContainerClassName="grow justify-center items-center px-lg py-2xl"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View className="w-full max-w-[400px]">
+            {/* Brand mark */}
+            <View className="mb-2xl items-center gap-md">
+              <View className="items-center justify-center">
+                <View className="absolute h-24 w-24 rounded-full bg-brand-tint dark:bg-surface-alt-dark" />
+                <View
+                  className="h-16 w-16 items-center justify-center rounded-xl bg-brand"
+                  style={cardShadow}>
+                  <Ionicons name="pulse" size={30} color="#fff" />
+                </View>
+              </View>
+              <View className="items-center gap-xs">
+                <View className="flex-row">
+                  <Text variant="title">Endurance</Text>
+                  <Text variant="title" className="text-brand">
+                    Pace
+                  </Text>
+                </View>
+                <Text variant="caption" muted>
+                  {mode === 'signin'
+                    ? 'Sign in to your training log'
+                    : 'Create your account to start planning'}
+                </Text>
+              </View>
+            </View>
 
-        <View className="mt-xl gap-md">
-          {mode === 'signup' ? (
-            <Field
-              label="Name"
-              value={name}
-              onChangeText={setName}
-              placeholder="Alex Rivera"
-              autoCapitalize="words"
-            />
-          ) : null}
-          <Field
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="you@example.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-          />
-          <Field
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="At least 8 characters"
-            secureTextEntry
-            autoCapitalize="none"
-          />
+            {/* Form card */}
+            <View
+              className="gap-md rounded-lg border border-border bg-surface p-lg dark:border-border-dark dark:bg-surface-dark"
+              style={cardShadow}>
+              {mode === 'signup' ? (
+                <Field
+                  label="Name"
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Alex Rivera"
+                  autoCapitalize="words"
+                  focused={focused === 'name'}
+                  onFocus={() => setFocused('name')}
+                  onBlur={() => setFocused(null)}
+                />
+              ) : null}
+              <Field
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="you@example.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                focused={focused === 'email'}
+                onFocus={() => setFocused('email')}
+                onBlur={() => setFocused(null)}
+              />
+              <Field
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="At least 8 characters"
+                secureTextEntry
+                autoCapitalize="none"
+                focused={focused === 'password'}
+                onFocus={() => setFocused('password')}
+                onBlur={() => setFocused(null)}
+              />
 
-          {error ? (
-            <Text variant="caption" className="text-danger">
-              {error}
-            </Text>
-          ) : null}
+              {error ? (
+                <View className="flex-row items-center gap-xs rounded-md bg-danger/10 px-md py-2">
+                  <Ionicons name="alert-circle" size={15} color={palette.danger} />
+                  <Text variant="caption" className="flex-1 text-danger">
+                    {error}
+                  </Text>
+                </View>
+              ) : null}
 
-          <Button
-            label={mode === 'signin' ? 'Sign in' : 'Create account'}
-            onPress={submit}
-            loading={busy}
-            disabled={!canSubmit}
-          />
+              <Button
+                label={mode === 'signin' ? 'Sign in' : 'Create account'}
+                onPress={submit}
+                loading={busy}
+                disabled={!canSubmit}
+                className="mt-xs"
+              />
+            </View>
 
-          <Pressable
-            onPress={() => setMode((m) => (m === 'signin' ? 'signup' : 'signin'))}
-            className="items-center py-sm">
-            <Text variant="caption" className="text-brand">
-              {mode === 'signin'
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </Text>
-          </Pressable>
+            {/* Mode toggle */}
+            <Pressable
+              onPress={() => setMode((m) => (m === 'signin' ? 'signup' : 'signin'))}
+              className="mt-lg items-center py-sm">
+              <Text variant="caption" muted>
+                {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+                <Text variant="caption" className="font-semibold text-brand">
+                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                </Text>
+              </Text>
+            </Pressable>
 
-          {USE_MOCK_API ? (
-            <Text variant="caption" muted className="text-center">
-              Mock mode — any email/password works.
-            </Text>
-          ) : null}
-        </View>
+            {USE_MOCK_API ? (
+              <Text variant="caption" muted className="mt-xs text-center">
+                Mock mode — any email and password works.
+              </Text>
+            ) : null}
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -107,8 +170,12 @@ export default function LoginScreen() {
 
 function Field({
   label,
+  focused,
   ...props
-}: { label: string } & React.ComponentProps<typeof TextInput>) {
+}: {
+  label: string;
+  focused?: boolean;
+} & React.ComponentProps<typeof TextInput>) {
   return (
     <View className="gap-xs">
       <Text variant="label" muted>
@@ -117,7 +184,10 @@ function Field({
       <TextInput
         {...props}
         placeholderTextColor={palette.textFaint}
-        className="rounded-md border border-border bg-surface px-md py-3 text-base text-fg dark:border-border-dark dark:bg-surface-dark dark:text-fg-dark"
+        style={focused ? cardShadow : undefined}
+        className={`rounded-md border bg-bg px-md py-3 text-base text-fg dark:bg-bg-dark dark:text-fg-dark ${
+          focused ? 'border-brand' : 'border-border dark:border-border-dark'
+        }`}
       />
     </View>
   );
