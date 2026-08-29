@@ -8,9 +8,11 @@
     "scheme": "endurancepace",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.trihonor.endurancepace"
     },
     "android": {
+      "package": "com.trihonor.endurancepace",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -35,8 +37,15 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
+      "typedRoutes": false,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b2244ff2-64bb-4ab2-9a7d-5b45beef8a68"
+      }
+    },
+    "owner": "onur1"
   }
 }
