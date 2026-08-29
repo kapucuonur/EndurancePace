@@ -234,22 +234,26 @@ function DaySection({
         </Text>
       ) : (
         <View className="gap-sm">
-          {workouts.map((w) => (
-            <Pressable
-              key={w.id}
-              onPress={() => onPressWorkout(w.id)}
-              className="flex-row items-center gap-md rounded-md border border-border bg-surface p-md active:opacity-70 dark:border-border-dark dark:bg-surface-dark">
-              <SportGlyph sport={w.sport} chip size={14} />
-              <View className="flex-1">
-                <Text variant="label" numberOfLines={1}>
-                  {w.title}
-                </Text>
-                <Text variant="caption" muted>
-                  {formatDurationShort(w.plannedDuration)} · {w.plannedTss} TSS · {w.status}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
+          {workouts.map((w) => {
+            const actualTss = w.status === 'completed' ? w.completed?.actualTss : undefined;
+            const dur = w.completed?.durationSeconds ?? w.plannedDuration;
+            return (
+              <Pressable
+                key={w.id}
+                onPress={() => onPressWorkout(w.id)}
+                className="flex-row items-center gap-md rounded-md border border-border bg-surface p-md active:opacity-70 dark:border-border-dark dark:bg-surface-dark">
+                <SportGlyph sport={w.sport} chip size={14} />
+                <View className="flex-1">
+                  <Text variant="label" numberOfLines={1}>
+                    {w.title}
+                  </Text>
+                  <Text variant="caption" muted>
+                    {formatDurationShort(dur)} · {actualTss ?? w.plannedTss} TSS · {w.status}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
       )}
     </View>

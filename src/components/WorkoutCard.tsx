@@ -23,6 +23,12 @@ const STATUS_COLOR: Record<Workout['status'], string> = {
 
 export function WorkoutCard({ workout, onPress }: { workout: Workout; onPress?: () => void }) {
   const statusIcon = STATUS_ICON[workout.status];
+  // For a logged session prefer the logged numbers; fall back to the plan.
+  const done = workout.status === 'completed' ? workout.completed : undefined;
+  const duration = done?.durationSeconds ?? workout.plannedDuration;
+  const tss = done?.actualTss ?? workout.plannedTss;
+  // Only call it "actual" when the TSS shown is genuinely the logged one.
+  const isActual = done?.actualTss != null;
   return (
     <Card onPress={onPress} className="flex-row items-center gap-md">
       <SportGlyph sport={workout.sport} chip size={16} />
@@ -31,7 +37,7 @@ export function WorkoutCard({ workout, onPress }: { workout: Workout; onPress?: 
           {workout.title}
         </Text>
         <Text variant="caption" muted>
-          {formatDurationShort(workout.plannedDuration)} · {workout.plannedTss} TSS
+          {formatDurationShort(duration)} · {tss} TSS{isActual ? ' · actual' : ''}
         </Text>
       </View>
       {statusIcon ? (

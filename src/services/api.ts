@@ -21,6 +21,9 @@ import { ApiError, apiFetch } from '@/services/session';
 import type {
   AppSnapshot,
   Athlete,
+  GarminConnectResult,
+  GarminStatus,
+  GarminSyncResult,
   ID,
   ISODate,
   RaceEvent,
@@ -72,7 +75,20 @@ export interface EnduranceApi {
   deleteWorkout(id: ID): Promise<void>;
   /** Copy a library template onto a date as a planned workout. */
   scheduleFromTemplate(templateId: ID, dateISO: ISODate, planId?: ID | null): Promise<Workout>;
+
+  // Garmin — link a Garmin.com account and pull activities on demand.
+  garminStatus(): Promise<GarminStatus>;
+  /** Start a login. `mfa_required` means call `garminCompleteMfa` next. */
+  garminConnect(email: string, password: string): Promise<GarminConnectResult>;
+  garminCompleteMfa(code: string): Promise<GarminConnectResult>;
+  garminDisconnect(): Promise<void>;
+  /** Import the last `days` (default 30 server-side) of activities as workouts. */
+  garminSync(days?: number): Promise<GarminSyncResult>;
 }
+
+/** Garmin sync only works against the live backend, not the mock layer. */
+const GARMIN_NEEDS_BACKEND =
+  'Garmin sync needs the live backend. Set EXPO_PUBLIC_USE_MOCK_API=false to use it.';
 
 export type NewPlan = Omit<TrainingPlan, 'id' | 'createdAt' | 'updatedAt'>;
 export type NewEvent = Omit<RaceEvent, 'id' | 'createdAt' | 'updatedAt'>;
@@ -322,6 +338,38 @@ class MockApi implements EnduranceApi {
       return structuredCloneSafe(workout);
     });
   }
+
+  // --- Garmin (unsupported in mock mode) ---
+
+  async garminStatus(): Promise<GarminStatus> {
+    await delay();
+    return {
+      connected: false,
+      garminEmail: null,
+      state: 'not_connected',
+      displayName: null,
+      lastSyncAt: null,
+      lastVerifiedAt: null,
+      cooldownRemaining: 0,
+      lastError: null,
+    };
+  }
+
+  async garminConnect(): Promise<GarminConnectResult> {
+    throw new Error(GARMIN_NEEDS_BACKEND);
+  }
+
+  async garminCompleteMfa(): Promise<GarminConnectResult> {
+    throw new Error(GARMIN_NEEDS_BACKEND);
+  }
+
+  async garminDisconnect(): Promise<void> {
+    // no-op — nothing is ever connected in mock mode
+  }
+
+  async garminSync(): Promise<GarminSyncResult> {
+    throw new Error(GARMIN_NEEDS_BACKEND);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -453,6 +501,36 @@ class RestApi implements EnduranceApi {
     return this.req(`/workouts/${templateId}/schedule`, {
       method: 'POST',
       ...RestApi.body({ date: dateISO, planId }),
+    });
+  }
+
+  // --- Garmin ---
+
+  garminStatus(): Promise<GarminStatus> {
+    return this.req('/me/garmin/status');
+  }
+
+  garminConnect(email: string, password: string): Promise<GarminConnectResult> {
+    return this.req('/me/garmin/connect', {
+      method: 'POST',
+      ...RestApi.body({ garminEmail: email, garminPassword: password }),
+    });
+  }
+
+  garminCompleteMfa(code: string): Promise<GarminConnectResult> {
+    return this.req('/me/garmin/connect/mfa', {
+      method: 'POST',
+      ...RestApi.body({ mfaCode: code }),
+    });
+  }
+
+  garminDisconnect(): Promise<void> {
+    return this.req('/me/garmin/connect', { method: 'DELETE' });
+  }
+
+  garminSync(days?: number): Promise<GarminSyncResult> {
+    return this.req(`/me/garmin/sync${RestApi.qs({ days: days?.toString() })}`, {
+      method: 'POST',
     });
   }
 }

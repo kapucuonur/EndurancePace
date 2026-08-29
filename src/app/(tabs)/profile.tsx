@@ -1,15 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { ZoneTable } from '@/components/ZoneTable';
 import { calcSwimPaceZones } from '@/domain/zones';
 import { formatPace } from '@/lib/format';
-import { useAppStore, useAthlete } from '@/store/useAppStore';
+import { useAppStore, useAthlete, useGarmin } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { ThresholdValues } from '@/types/domain';
 
@@ -38,6 +39,12 @@ export default function ProfileScreen() {
   const updateThresholds = useAppStore((s) => s.updateThresholds);
   const resetToSeed = useAppStore((s) => s.resetToSeed);
   const signOut = useAppStore((s) => s.signOut);
+  const garmin = useGarmin();
+  const loadGarminStatus = useAppStore((s) => s.loadGarminStatus);
+
+  useEffect(() => {
+    void loadGarminStatus();
+  }, [loadGarminStatus]);
 
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     thresholdsToDraft(athlete?.thresholds),
@@ -129,6 +136,22 @@ export default function ProfileScreen() {
             unit="pace"
             paceSuffix="/100m"
           />
+        </View>
+
+        <View className="gap-sm">
+          <Text variant="heading">Connections</Text>
+          <Card onPress={() => router.push('/garmin')} className="flex-row items-center gap-md">
+            <Ionicons name="watch-outline" size={22} color={palette.brand} />
+            <View className="flex-1">
+              <Text variant="label">Garmin Connect</Text>
+              <Text variant="caption" muted>
+                {garmin.status?.connected
+                  ? `Connected${garmin.status.garminEmail ? ` · ${garmin.status.garminEmail}` : ''}`
+                  : 'Not connected · import your activities'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
+          </Card>
         </View>
 
         <Button

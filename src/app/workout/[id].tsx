@@ -63,14 +63,32 @@ export default function WorkoutDetailScreen() {
 
         <View className="flex-row gap-md rounded-lg bg-surface p-md dark:bg-surface-dark">
           <Stat label="Planned" value={formatDurationShort(workout.plannedDuration)} />
-          <Stat label="TSS" value={String(workout.plannedTss)} />
-          {workout.completed?.durationSeconds ? (
-            <Stat
-              label="Actual"
-              value={formatDurationShort(workout.completed.durationSeconds)}
-            />
-          ) : null}
+          <Stat label="Planned TSS" value={String(workout.plannedTss)} />
         </View>
+
+        {workout.completed ? (
+          <View className="gap-xs rounded-lg border border-success/40 bg-success/10 p-md">
+            <View className="flex-row items-center gap-xs">
+              <Ionicons name="checkmark-circle" size={16} color={palette.success} />
+              <Text variant="label">Completed</Text>
+            </View>
+            <Text variant="caption" muted>
+              {[
+                workout.completed.durationSeconds &&
+                  formatDurationShort(workout.completed.durationSeconds),
+                workout.completed.actualTss != null && `${workout.completed.actualTss} TSS`,
+                workout.completed.rpe != null && `RPE ${workout.completed.rpe}`,
+              ]
+                .filter(Boolean)
+                .join(' · ') || 'Logged'}
+            </Text>
+            {workout.completed.notes ? (
+              <Text variant="caption" muted>
+                {workout.completed.notes}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
 
         <View className="gap-md">
           <Text variant="heading">Structure</Text>

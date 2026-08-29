@@ -56,6 +56,7 @@ export default function RootLayout() {
               />
               <Stack.Screen name="plan/[id]" options={{ title: 'Plan' }} />
               <Stack.Screen name="trends" options={{ title: 'Fitness Trends' }} />
+              <Stack.Screen name="garmin" options={{ title: 'Garmin Connect' }} />
             </Stack>
           ) : (
             <View className="flex-1 bg-bg dark:bg-bg-dark" />

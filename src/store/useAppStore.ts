@@ -13,9 +13,11 @@ import { useShallow } from 'zustand/react/shallow';
 import api, { type NewEvent, type NewPlan, type NewWorkout } from '@/services/api';
 import * as auth from '@/services/auth';
 import { USE_MOCK_API } from '@/services/config';
-import { getTokenSync, loadToken, setUnauthorizedHandler } from '@/services/session';
+import { ApiError, getTokenSync, loadToken, setUnauthorizedHandler } from '@/services/session';
 import type {
   Athlete,
+  GarminStatus,
+  GarminSyncResult,
   ID,
   ISODate,
   RaceEvent,
@@ -23,6 +25,35 @@ import type {
   TrainingPlan,
   Workout,
 } from '@/types/domain';
+
+const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/**
+ * Map a raw backend Garmin error onto user-facing text and, where relevant,
+ * a change to the MFA step:
+ *   - `require` — the session died and Garmin has sent a fresh code
+ *   - `clear`   — the MFA window closed; send the user back to the login form
+ */
+function garminMessage(e: unknown): { text: string; mfa: 'require' | 'clear' | null } {
+  if (e instanceof ApiError) {
+    const m = e.message.toLowerCase();
+    if (m.includes('mfa_required')) {
+      return {
+        text: 'Your Garmin session ended. Enter the new code Garmin just sent you.',
+        mfa: 'require',
+      };
+    }
+    if (m.includes('expired') || m.includes('was lost') || m.includes('start over')) {
+      return {
+        text: 'The verification window closed. Re-enter your Garmin details to start again.',
+        mfa: 'clear',
+      };
+    }
+    if (e.status === 429) return { text: e.message, mfa: null }; // already readable
+    if (m.includes('not_connected')) return { text: 'Garmin is not connected.', mfa: null };
+  }
+  return { text: errText(e), mfa: null };
+}
 
 interface SessionState {
   /** JWT (or the mock placeholder). `null` = signed out. */
@@ -33,6 +64,29 @@ interface SessionState {
   error: string | null;
   busy: boolean;
 }
+
+interface GarminState {
+  /** Last fetched connection status. `null` until first load. */
+  status: GarminStatus | null;
+  /** Initial status fetch in flight. */
+  loading: boolean;
+  /** A connect / mfa / sync / disconnect call in flight. */
+  busy: boolean;
+  /** Backend needs an MFA code to finish connecting. */
+  needsMfa: boolean;
+  /** Summary of the last successful sync, for the result line. */
+  lastSync: GarminSyncResult | null;
+  error: string | null;
+}
+
+const INITIAL_GARMIN: GarminState = {
+  status: null,
+  loading: false,
+  busy: false,
+  needsMfa: false,
+  lastSync: null,
+  error: null,
+};
 
 interface AppState {
   hydrated: boolean;
@@ -45,6 +99,7 @@ interface AppState {
   plans: TrainingPlan[];
   events: RaceEvent[];
   workouts: Workout[];
+  garmin: GarminState;
 
   // auth
   initSession: () => Promise<void>;
@@ -75,6 +130,13 @@ interface AppState {
   // events
   createEvent: (input: NewEvent) => Promise<RaceEvent>;
   deleteEvent: (id: ID) => Promise<void>;
+
+  // garmin
+  loadGarminStatus: () => Promise<void>;
+  garminConnect: (email: string, password: string) => Promise<void>;
+  garminCompleteMfa: (code: string) => Promise<void>;
+  garminDisconnect: () => Promise<void>;
+  garminSync: (days?: number) => Promise<void>;
 }
 
 const upsert = <T extends { id: ID }>(list: T[], item: T): T[] => {
@@ -90,6 +152,7 @@ const EMPTY_DATA = {
   plans: [] as TrainingPlan[],
   events: [] as RaceEvent[],
   workouts: [] as Workout[],
+  garmin: INITIAL_GARMIN,
   hydrated: false,
 };
 
@@ -104,6 +167,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   plans: [],
   events: [],
   workouts: [],
+  garmin: INITIAL_GARMIN,
 
   initSession: async () => {
     setUnauthorizedHandler(() => {
@@ -262,6 +326,99 @@ export const useAppStore = create<AppState>((set, get) => ({
     const snap = await api.getSnapshot();
     set({ events: snap.events, plans: snap.plans });
   },
+
+  // --- garmin ---
+
+  loadGarminStatus: async () => {
+    set((s) => ({ garmin: { ...s.garmin, loading: true, error: null } }));
+    try {
+      const status = await api.garminStatus();
+      set((s) => ({
+        garmin: {
+          ...s.garmin,
+          status,
+          loading: false,
+          needsMfa: status.state === 'mfa_pending',
+        },
+      }));
+    } catch (e) {
+      set((s) => ({ garmin: { ...s.garmin, loading: false, error: errText(e) } }));
+    }
+  },
+
+  garminConnect: async (email, password) => {
+    set((s) => ({ garmin: { ...s.garmin, busy: true, error: null } }));
+    try {
+      const res = await api.garminConnect(email, password);
+      if (res.status === 'mfa_required') {
+        set((s) => ({ garmin: { ...s.garmin, busy: false, needsMfa: true } }));
+      } else {
+        set((s) => ({ garmin: { ...s.garmin, busy: false, needsMfa: false } }));
+        await get().loadGarminStatus();
+      }
+    } catch (e) {
+      const bad =
+        e instanceof ApiError && e.status === 400
+          ? 'Garmin did not accept that email and password.'
+          : garminMessage(e).text;
+      set((s) => ({ garmin: { ...s.garmin, busy: false, error: bad } }));
+    }
+  },
+
+  garminCompleteMfa: async (code) => {
+    set((s) => ({ garmin: { ...s.garmin, busy: true, error: null } }));
+    try {
+      await api.garminCompleteMfa(code);
+      set((s) => ({ garmin: { ...s.garmin, busy: false, needsMfa: false } }));
+      await get().loadGarminStatus();
+    } catch (e) {
+      const r = garminMessage(e);
+      // A plain 400 here means the code itself was rejected — stay on the step.
+      const wrongCode = r.mfa === null && e instanceof ApiError && e.status === 400;
+      set((s) => ({
+        garmin: {
+          ...s.garmin,
+          busy: false,
+          needsMfa: r.mfa === 'require' ? true : r.mfa === 'clear' ? false : s.garmin.needsMfa,
+          error: wrongCode ? "That code didn't work — double-check it and try again." : r.text,
+        },
+      }));
+    }
+  },
+
+  garminDisconnect: async () => {
+    set((s) => ({ garmin: { ...s.garmin, busy: true, error: null } }));
+    try {
+      await api.garminDisconnect();
+      set({ garmin: { ...INITIAL_GARMIN } }); // wipe status, lastSync, needsMfa, error
+      await get().loadGarminStatus();
+    } catch (e) {
+      set((s) => ({ garmin: { ...s.garmin, busy: false, error: errText(e) } }));
+    }
+  },
+
+  garminSync: async (days) => {
+    set((s) => ({ garmin: { ...s.garmin, busy: true, error: null, lastSync: null } }));
+    try {
+      const result = await api.garminSync(days);
+      set((s) => ({ garmin: { ...s.garmin, busy: false, lastSync: result } }));
+      if (result.status === 'ok' && result.imported + result.updated + result.matched > 0) {
+        await get().hydrate(); // pull the snapshot so the calendar shows the new/completed workouts
+      }
+      await get().loadGarminStatus();
+    } catch (e) {
+      // A dead Garmin session surfaces as a 409 asking to re-enter MFA.
+      const r = garminMessage(e);
+      set((s) => ({
+        garmin: {
+          ...s.garmin,
+          busy: false,
+          needsMfa: r.mfa === 'require' ? true : r.mfa === 'clear' ? false : s.garmin.needsMfa,
+          error: r.text,
+        },
+      }));
+    }
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -299,3 +456,7 @@ export const useLibraryWorkouts = () =>
 
 export const usePlans = () => useAppStore((s) => s.plans);
 export const useEvents = () => useAppStore((s) => s.events);
+
+// `garmin` is only replaced wholesale by the actions above, so a plain
+// reference select is snapshot-stable.
+export const useGarmin = () => useAppStore((s) => s.garmin);

@@ -224,6 +224,48 @@ export interface Workout {
 }
 
 // ---------------------------------------------------------------------------
+// Garmin sync
+// ---------------------------------------------------------------------------
+
+/** Connection + last-sync state for the athlete's linked Garmin.com account. */
+export interface GarminStatus {
+  connected: boolean;
+  garminEmail: string | null;
+  /**
+   * Backend session state:
+   * `not_connected` | `idle` | `active` | `mfa_pending` | `expired` | `error`.
+   */
+  state: string;
+  /** Garmin display name, once a session has been established. */
+  displayName: string | null;
+  lastSyncAt: ISODateTime | null;
+  lastVerifiedAt: ISODateTime | null;
+  /** Seconds left on a login cool-down after Garmin rate-limited us. 0 = none. */
+  cooldownRemaining: number;
+  lastError: string | null;
+}
+
+/** Result of `POST /me/garmin/connect` or `/connect/mfa`. */
+export interface GarminConnectResult {
+  status: 'connected' | 'mfa_required';
+}
+
+/** Result of `POST /me/garmin/sync`. */
+export interface GarminSyncResult {
+  status: 'ok' | 'skipped';
+  /** Why a sync was skipped, e.g. `too_soon` / `already_running`. */
+  reason?: string;
+  /** New activities added as workouts. */
+  imported: number;
+  /** Existing imported workouts refreshed. */
+  updated: number;
+  /** Planned workouts matched to an activity and marked complete. */
+  matched: number;
+  /** Activities ignored (unmapped sport, etc.). */
+  skipped: number;
+}
+
+// ---------------------------------------------------------------------------
 // Convenience aggregates
 // ---------------------------------------------------------------------------
 
