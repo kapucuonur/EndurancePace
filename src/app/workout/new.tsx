@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +25,7 @@ import { computeWorkoutMetrics } from '@/domain/workout';
 import { longDate, shiftDays, todayISO } from '@/lib/date';
 import { formatDurationShort, formatDuration } from '@/lib/format';
 import { uid } from '@/lib/id';
+import { goBack } from '@/lib/nav';
 import { useAppStore } from '@/store/useAppStore';
 import { SPORT_LABEL } from '@/theme/sport';
 import { palette } from '@/theme/tokens';
@@ -74,7 +76,6 @@ function newRepeat(): Step {
 }
 
 export default function WorkoutBuilderScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{ date?: string; id?: string }>();
   const editing = Boolean(params.id);
 
@@ -134,12 +135,17 @@ export default function WorkoutBuilderScreen() {
       completed: existing?.completed,
     };
 
-    if (editing && existing) {
-      await updateWorkout(existing.id, payload);
-    } else {
-      await createWorkout(payload);
+    try {
+      if (editing && existing) {
+        await updateWorkout(existing.id, payload);
+      } else {
+        await createWorkout(payload);
+      }
+    } catch (e) {
+      Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
+      return;
     }
-    router.back();
+    goBack();
   };
 
   return (
@@ -149,7 +155,7 @@ export default function WorkoutBuilderScreen() {
           title: editing ? 'Edit Workout' : 'New Workout',
           headerTitleAlign: 'center',
           headerLeft: () => (
-            <Pressable onPress={() => router.back()} hitSlop={8} className="pr-md">
+            <Pressable onPress={goBack} hitSlop={8} className="pr-md">
               <Text className="text-brand">Cancel</Text>
             </Pressable>
           ),

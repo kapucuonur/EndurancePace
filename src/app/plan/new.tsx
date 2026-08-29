@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -25,6 +25,7 @@ import {
   weeksBetween,
 } from '@/domain/plan';
 import { longDate, shiftDays, shiftWeeks, todayISO, weekStart } from '@/lib/date';
+import { goBack } from '@/lib/nav';
 import { useAppStore, useAthlete, useEvents } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { PlanBlock } from '@/types/domain';
@@ -33,7 +34,6 @@ const schema = z.object({ name: z.string().min(2, 'Name your plan') });
 type FormValues = z.infer<typeof schema>;
 
 export default function NewPlanScreen() {
-  const router = useRouter();
   const athlete = useAthlete();
   const events = useEvents();
   const createPlan = useAppStore((s) => s.createPlan);
@@ -89,7 +89,7 @@ export default function NewPlanScreen() {
       phase: phaseNow,
       blocks,
     });
-    router.back();
+    goBack();
   };
 
   const ranges = blockRanges({ startDate, blocks });
@@ -100,7 +100,7 @@ export default function NewPlanScreen() {
         options={{
           headerTitleAlign: 'center',
           headerLeft: () => (
-            <Pressable onPress={() => router.back()} hitSlop={8} className="pr-md">
+            <Pressable onPress={goBack} hitSlop={8} className="pr-md">
               <Text className="text-brand">Cancel</Text>
             </Pressable>
           ),

@@ -10,6 +10,7 @@ import { Text } from '@/components/ui/Text';
 import { flattenSteps } from '@/domain/workout';
 import { longDate } from '@/lib/date';
 import { formatDuration, formatDurationShort } from '@/lib/format';
+import { goBack } from '@/lib/nav';
 import { useAppStore, useWorkout } from '@/store/useAppStore';
 import { SPORT_LABEL } from '@/theme/sport';
 import { palette, stepColors } from '@/theme/tokens';
@@ -146,7 +147,7 @@ export default function WorkoutDetailScreen() {
           variant="danger"
           onPress={async () => {
             await deleteWorkout(workout.id);
-            router.back();
+            goBack();
           }}
         />
       </ScrollView>
