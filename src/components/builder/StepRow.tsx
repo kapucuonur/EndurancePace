@@ -1,10 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { Platform, TextInput, View } from 'react-native';
 
 import { Segmented } from '@/components/builder/Segmented';
 import { Text } from '@/components/ui/Text';
+import { stepSeconds } from '@/domain/workout';
+import { formatDuration, formatPace, parsePace } from '@/lib/format';
 import { palette } from '@/theme/tokens';
-import type { Step, StepType } from '@/types/domain';
+import type { PaceUnit, Sport, Step, StepTarget, StepType } from '@/types/domain';
 
 const STEP_TYPE_OPTS: { value: StepType; label: string }[] = [
   { value: 'warmup', label: 'W/U' },
@@ -15,28 +18,54 @@ const STEP_TYPE_OPTS: { value: StepType; label: string }[] = [
 ];
 
 type DurationMode = 'time' | 'distance';
-type TargetMode = 'zone' | 'rpe';
+type TargetMode = 'zone' | 'pace' | 'power' | 'rpe';
+
+/** Which target kinds make sense for a sport. HR Zone + RPE are universal. */
+function targetOptions(sport: Sport): { value: TargetMode; label: string }[] {
+  const opts: { value: TargetMode; label: string }[] = [{ value: 'zone', label: 'HR Zone' }];
+  if (sport === 'bike') opts.push({ value: 'power', label: 'Power' });
+  if (sport === 'run' || sport === 'swim') opts.push({ value: 'pace', label: 'Pace' });
+  opts.push({ value: 'rpe', label: 'RPE' });
+  return opts;
+}
 
 function durationMode(step: Step): DurationMode {
   return step.duration?.kind === 'distance' ? 'distance' : 'time';
 }
 function targetMode(step: Step): TargetMode {
-  return typeof step.target?.rpe === 'number' ? 'rpe' : 'zone';
+  const t = step.target;
+  if (t?.paceTarget) return 'pace';
+  if (t?.powerWatts) return 'power';
+  if (typeof t?.rpe === 'number') return 'rpe';
+  return 'zone';
+}
+
+/** Sensible starting pace range (seconds) per sport unit. */
+function defaultPace(unit: PaceUnit): { min: number; max: number } {
+  return unit === 'sec_per_100m' ? { min: 100, max: 120 } : { min: 240, max: 300 };
 }
 
 interface Props {
   step: Step;
+  sport: Sport;
   onChange: (next: Step) => void;
   onRemove: () => void;
   nested?: boolean;
 }
 
 /** Editor for a single leaf step (type / duration / target). */
-export function StepRow({ step, onChange, onRemove, nested }: Props) {
+export function StepRow({ step, sport, onChange, onRemove, nested }: Props) {
   const dMode = durationMode(step);
-  const tMode = targetMode(step);
   const seconds = step.duration?.kind === 'time' ? step.duration.seconds : 0;
   const meters = step.duration?.kind === 'distance' ? step.duration.meters : 0;
+
+  const options = targetOptions(sport);
+  const detected = targetMode(step);
+  // If the sport changed under a step whose target no longer applies, show the
+  // zone editor rather than a dead segment. Data is coerced when the user picks.
+  const tMode: TargetMode = options.some((o) => o.value === detected) ? detected : 'zone';
+  const paceUnit: PaceUnit = sport === 'swim' ? 'sec_per_100m' : 'sec_per_km';
+  const paceSuffix = sport === 'swim' ? '/100m' : '/km';
 
   const setType = (type: StepType) => onChange({ ...step, type });
 
@@ -62,15 +91,36 @@ export function StepRow({ step, onChange, onRemove, nested }: Props) {
   const setMeters = (txt: string) =>
     onChange({ ...step, duration: { kind: 'distance', meters: Number(txt) || 0 } });
 
-  const setTargetMode = (mode: TargetMode) =>
-    onChange({
-      ...step,
-      target:
-        mode === 'zone' ? { hrZone: step.target?.hrZone ?? 2 } : { rpe: step.target?.rpe ?? 5 },
-    });
+  const setTargetMode = (mode: TargetMode) => {
+    const t = step.target;
+    let target: StepTarget;
+    if (mode === 'zone') target = { hrZone: t?.hrZone ?? 2 };
+    else if (mode === 'rpe') target = { rpe: t?.rpe ?? 5 };
+    else if (mode === 'power') target = { powerWatts: t?.powerWatts ?? { min: 200, max: 260 } };
+    else
+      target = {
+        paceTarget:
+          t?.paceTarget?.unit === paceUnit
+            ? t.paceTarget
+            : { unit: paceUnit, ...defaultPace(paceUnit) },
+      };
+    onChange({ ...step, target });
+  };
+
   const setZone = (z: number) => onChange({ ...step, target: { hrZone: z as 1 } });
   const setRpe = (txt: string) =>
     onChange({ ...step, target: { rpe: Math.min(10, Math.max(1, Number(txt) || 1)) } });
+
+  const pace = step.target?.paceTarget ?? { unit: paceUnit, ...defaultPace(paceUnit) };
+  const setPace = (bound: 'min' | 'max', secs: number) =>
+    onChange({
+      ...step,
+      target: { paceTarget: { ...pace, unit: paceUnit, [bound]: secs } },
+    });
+
+  const watts = step.target?.powerWatts ?? { min: 200, max: 260 };
+  const setWatts = (bound: 'min' | 'max', w: number) =>
+    onChange({ ...step, target: { powerWatts: { ...watts, [bound]: w } } });
 
   return (
     <View
@@ -105,25 +155,65 @@ export function StepRow({ step, onChange, onRemove, nested }: Props) {
           <NumBox value={String(seconds % 60)} onChangeText={setSeconds} suffix="sec" />
         </View>
       ) : (
-        <NumBox value={String(meters)} onChangeText={setMeters} suffix="m" />
+        <View className="gap-xs">
+          <NumBox value={String(meters)} onChangeText={setMeters} suffix="m" />
+          <Text variant="caption" muted>
+            ≈ {formatDuration(stepSeconds(step, sport))} at this{' '}
+            {tMode === 'pace' ? 'pace' : 'effort'}
+          </Text>
+        </View>
       )}
 
-      <Segmented
-        options={[
-          { value: 'zone', label: 'HR Zone' },
-          { value: 'rpe', label: 'RPE' },
-        ]}
-        value={tMode}
-        onChange={setTargetMode}
-      />
+      <Segmented options={options} value={tMode} onChange={setTargetMode} />
+
       {tMode === 'zone' ? (
         <Segmented
           options={[1, 2, 3, 4, 5].map((z) => ({ value: String(z), label: `Z${z}` }))}
           value={String(step.target?.hrZone ?? 2)}
           onChange={(v) => setZone(Number(v))}
         />
-      ) : (
+      ) : tMode === 'rpe' ? (
         <NumBox value={String(step.target?.rpe ?? 5)} onChangeText={setRpe} suffix="/ 10" />
+      ) : tMode === 'pace' ? (
+        <View className="gap-xs">
+          <View className="flex-row items-center gap-sm">
+            <PaceBox
+              key={`slow-${paceUnit}`}
+              seconds={pace.max}
+              onCommit={(s) => setPace('max', s)}
+            />
+            <Text variant="caption" muted>
+              to
+            </Text>
+            <PaceBox
+              key={`fast-${paceUnit}`}
+              seconds={pace.min}
+              onCommit={(s) => setPace('min', s)}
+            />
+            <Text variant="caption" muted>
+              {paceSuffix}
+            </Text>
+          </View>
+          <Text variant="caption" muted>
+            Slower → faster bound of the target pace.
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-row items-center gap-sm">
+          <NumBox
+            value={String(watts.min)}
+            onChangeText={(t) => setWatts('min', Number(t) || 0)}
+            suffix="w"
+          />
+          <Text variant="caption" muted>
+            to
+          </Text>
+          <NumBox
+            value={String(watts.max)}
+            onChangeText={(t) => setWatts('max', Number(t) || 0)}
+            suffix="w"
+          />
+        </View>
       )}
     </View>
   );
@@ -152,6 +242,39 @@ function NumBox({
           {suffix}
         </Text>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * `m:ss` text field for one pace bound. Commits a complete `m:ss` as the user
+ * types; on blur it parses whatever's there (incl. a bare seconds count) and
+ * snaps the text back to canonical form.
+ */
+function PaceBox({ seconds, onCommit }: { seconds: number; onCommit: (s: number) => void }) {
+  const [txt, setTxt] = useState(() => formatPace(seconds));
+  const commit = (raw: string) => {
+    const p = parsePace(raw);
+    if (p !== null && p >= 20) {
+      onCommit(p);
+      return p;
+    }
+    return null;
+  };
+  return (
+    <View className="rounded-md border border-border bg-bg px-md py-1.5 dark:border-border-dark dark:bg-bg-dark">
+      <TextInput
+        value={txt}
+        onChangeText={(v) => {
+          setTxt(v);
+          if (/^\d{1,3}:\d{2}$/.test(v.trim())) commit(v);
+        }}
+        onEndEditing={() => setTxt(formatPace(commit(txt) ?? seconds))}
+        keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+        placeholder="4:30"
+        placeholderTextColor={palette.textFaint}
+        className="min-w-[52px] text-base text-fg dark:text-fg-dark"
+      />
     </View>
   );
 }

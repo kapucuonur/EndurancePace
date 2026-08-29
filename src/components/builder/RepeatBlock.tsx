@@ -5,16 +5,17 @@ import { StepRow } from '@/components/builder/StepRow';
 import { Text } from '@/components/ui/Text';
 import { uid } from '@/lib/id';
 import { palette } from '@/theme/tokens';
-import type { Step } from '@/types/domain';
+import type { Sport, Step } from '@/types/domain';
 
 interface Props {
   group: Step;
+  sport: Sport;
   onChange: (next: Step) => void;
   onRemove: () => void;
 }
 
 /** Editor for an interval set: repeatCount x [ child steps ]. */
-export function RepeatBlock({ group, onChange, onRemove }: Props) {
+export function RepeatBlock({ group, sport, onChange, onRemove }: Props) {
   const setCount = (txt: string) =>
     onChange({ ...group, repeatCount: Math.max(1, Number(txt) || 1) });
 
@@ -62,6 +63,7 @@ export function RepeatBlock({ group, onChange, onRemove }: Props) {
           <StepRow
             key={child.id}
             step={child}
+            sport={sport}
             nested
             onChange={(next) => updateChild(idx, next)}
             onRemove={() => removeChild(idx)}

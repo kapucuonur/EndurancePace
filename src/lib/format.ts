@@ -25,6 +25,15 @@ export function formatPace(secPerUnit: number): string {
   return `${m}:${String(s % 60).padStart(2, '0')}`;
 }
 
+/** "m:ss" (or a bare seconds string) -> seconds. `null` when unparseable. */
+export function parsePace(text: string): number | null {
+  const t = text.trim();
+  const mmss = t.match(/^(\d{1,3}):([0-5]?\d)$/);
+  if (mmss) return Number(mmss[1]) * 60 + Number(mmss[2]);
+  const n = Number(t);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+}
+
 export function formatDistance(meters: number): string {
   if (meters >= 1000) return `${(meters / 1000).toFixed(meters % 1000 === 0 ? 0 : 1)} km`;
   return `${Math.round(meters)} m`;

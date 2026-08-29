@@ -265,6 +265,7 @@ export default function WorkoutBuilderScreen() {
                 <RepeatBlock
                   key={step.id}
                   group={step}
+                  sport={watchedSport}
                   onChange={(next) => updateStep(idx, next)}
                   onRemove={() => removeStep(idx)}
                 />
@@ -272,6 +273,7 @@ export default function WorkoutBuilderScreen() {
                 <StepRow
                   key={step.id}
                   step={step}
+                  sport={watchedSport}
                   onChange={(next) => updateStep(idx, next)}
                   onRemove={() => removeStep(idx)}
                 />

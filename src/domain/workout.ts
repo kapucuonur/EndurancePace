@@ -103,7 +103,8 @@ function zoneFromTarget(target: StepTarget | undefined): number | undefined {
   return target?.hrZone ?? target?.powerZone;
 }
 
-function stepSeconds(step: Step, sport: Sport): number {
+/** Planned seconds for a step: its time, or distance ÷ (pace target or sport default). */
+export function stepSeconds(step: Step, sport: Sport): number {
   if (!step.duration) return 0;
   if (step.duration.kind === 'time') return step.duration.seconds;
 
