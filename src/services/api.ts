@@ -22,6 +22,7 @@ import type {
   AppSnapshot,
   Athlete,
   GarminConnectResult,
+  GarminMetrics,
   GarminStatus,
   GarminSyncResult,
   ID,
@@ -84,6 +85,8 @@ export interface EnduranceApi {
   garminDisconnect(): Promise<void>;
   /** Import the last `days` (default 30 server-side) of activities as workouts. */
   garminSync(days?: number): Promise<GarminSyncResult>;
+  /** Preview training thresholds + insights from the linked Garmin account. */
+  garminFetchMetrics(): Promise<GarminMetrics>;
 }
 
 /** Garmin sync only works against the live backend, not the mock layer. */
@@ -370,6 +373,10 @@ class MockApi implements EnduranceApi {
   async garminSync(): Promise<GarminSyncResult> {
     throw new Error(GARMIN_NEEDS_BACKEND);
   }
+
+  async garminFetchMetrics(): Promise<GarminMetrics> {
+    throw new Error(GARMIN_NEEDS_BACKEND);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -532,6 +539,10 @@ class RestApi implements EnduranceApi {
     return this.req(`/me/garmin/sync${RestApi.qs({ days: days?.toString() })}`, {
       method: 'POST',
     });
+  }
+
+  garminFetchMetrics(): Promise<GarminMetrics> {
+    return this.req('/me/garmin/thresholds');
   }
 }
 

@@ -16,6 +16,7 @@ import { USE_MOCK_API } from '@/services/config';
 import { ApiError, getTokenSync, loadToken, setUnauthorizedHandler } from '@/services/session';
 import type {
   Athlete,
+  GarminMetrics,
   GarminStatus,
   GarminSyncResult,
   ID,
@@ -76,6 +77,8 @@ interface GarminState {
   needsMfa: boolean;
   /** Summary of the last successful sync, for the result line. */
   lastSync: GarminSyncResult | null;
+  /** Training metrics previewed from Garmin (before the athlete applies them). */
+  metrics: GarminMetrics | null;
   error: string | null;
 }
 
@@ -85,6 +88,7 @@ const INITIAL_GARMIN: GarminState = {
   busy: false,
   needsMfa: false,
   lastSync: null,
+  metrics: null,
   error: null,
 };
 
@@ -137,6 +141,7 @@ interface AppState {
   garminCompleteMfa: (code: string) => Promise<void>;
   garminDisconnect: () => Promise<void>;
   garminSync: (days?: number) => Promise<void>;
+  garminFetchMetrics: () => Promise<void>;
 }
 
 const upsert = <T extends { id: ID }>(list: T[], item: T): T[] => {
@@ -394,6 +399,24 @@ export const useAppStore = create<AppState>((set, get) => ({
       await get().loadGarminStatus();
     } catch (e) {
       set((s) => ({ garmin: { ...s.garmin, busy: false, error: errText(e) } }));
+    }
+  },
+
+  garminFetchMetrics: async () => {
+    set((s) => ({ garmin: { ...s.garmin, busy: true, error: null } }));
+    try {
+      const metrics = await api.garminFetchMetrics();
+      set((s) => ({ garmin: { ...s.garmin, busy: false, metrics } }));
+    } catch (e) {
+      const r = garminMessage(e);
+      set((s) => ({
+        garmin: {
+          ...s.garmin,
+          busy: false,
+          needsMfa: r.mfa === 'require' ? true : r.mfa === 'clear' ? false : s.garmin.needsMfa,
+          error: r.text,
+        },
+      }));
     }
   },
 

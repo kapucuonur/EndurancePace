@@ -1,12 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
-import { useAppStore, useGarmin } from '@/store/useAppStore';
+import { formatDuration, formatPace } from '@/lib/format';
+import { useAppStore, useAthlete, useGarmin } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
+import type { GarminMetrics, ThresholdValues } from '@/types/domain';
 
 function timeAgo(iso: string | null): string {
   if (!iso) return 'never';
@@ -19,13 +21,24 @@ function timeAgo(iso: string | null): string {
   return `${Math.round(hrs / 24)}d ago`;
 }
 
+type ThreshKey = keyof GarminMetrics['thresholds'];
+
+const THRESH_META: Record<ThreshKey, { label: string; fmt: (n: number) => string }> = {
+  ftpWatts: { label: 'Bike FTP', fmt: (n) => `${n} W` },
+  thresholdHr: { label: 'Threshold HR', fmt: (n) => `${n} bpm` },
+  runThresholdPaceSecPerKm: { label: 'Run threshold pace', fmt: (n) => `${formatPace(n)} /km` },
+};
+
 export default function GarminScreen() {
   const garmin = useGarmin();
+  const athlete = useAthlete();
   const loadGarminStatus = useAppStore((s) => s.loadGarminStatus);
   const garminConnect = useAppStore((s) => s.garminConnect);
   const garminCompleteMfa = useAppStore((s) => s.garminCompleteMfa);
   const garminDisconnect = useAppStore((s) => s.garminDisconnect);
   const garminSync = useAppStore((s) => s.garminSync);
+  const garminFetchMetrics = useAppStore((s) => s.garminFetchMetrics);
+  const updateThresholds = useAppStore((s) => s.updateThresholds);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +48,7 @@ export default function GarminScreen() {
     void loadGarminStatus();
   }, [loadGarminStatus]);
 
-  const { status, loading, busy, needsMfa, lastSync, error } = garmin;
+  const { status, loading, busy, needsMfa, lastSync, metrics, error } = garmin;
   const connected = status?.connected ?? false;
   const cooldown = status?.cooldownRemaining ?? 0;
 
@@ -224,11 +237,150 @@ export default function GarminScreen() {
               </Text>
             ) : null}
 
+            <View className="mt-md gap-sm border-t border-border pt-md dark:border-border-dark">
+              <Text variant="heading">Training thresholds</Text>
+              {metrics ? (
+                <ThresholdImport
+                  metrics={metrics}
+                  current={athlete?.thresholds ?? {}}
+                  busy={busy}
+                  onApply={async (patch) => {
+                    await updateThresholds(patch);
+                    Alert.alert('Applied', 'Thresholds updated and zones recalculated.');
+                  }}
+                />
+              ) : (
+                <>
+                  <Text variant="caption" muted>
+                    Pull FTP, threshold HR and run threshold pace from Garmin. You choose which
+                    to keep before anything changes.
+                  </Text>
+                  <Button
+                    label="Import from Garmin"
+                    variant="secondary"
+                    onPress={() => void garminFetchMetrics()}
+                    loading={busy}
+                    disabled={busy || cooldown > 0}
+                  />
+                </>
+              )}
+            </View>
+
+            {metrics && hasInsights(metrics.insights) ? (
+              <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
+                <Text variant="label">Garmin insights</Text>
+                {metrics.insights.vo2MaxRunning ? (
+                  <Text variant="caption" muted>
+                    VO₂max — run {metrics.insights.vo2MaxRunning}
+                    {metrics.insights.vo2MaxCycling
+                      ? ` · bike ${metrics.insights.vo2MaxCycling}`
+                      : ''}
+                  </Text>
+                ) : null}
+                {metrics.insights.racePredictions ? (
+                  <Text variant="caption" muted>
+                    Race predictions — {racePred(metrics.insights.racePredictions)}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
+
             <Button label="Disconnect Garmin" variant="ghost" onPress={onDisconnect} />
           </View>
         )}
       </ScrollView>
     </Screen>
+  );
+}
+
+function hasInsights(i: GarminMetrics['insights']): boolean {
+  return Boolean(i.vo2MaxRunning || i.vo2MaxCycling || i.racePredictions);
+}
+
+function racePred(r: NonNullable<GarminMetrics['insights']['racePredictions']>): string {
+  const parts: string[] = [];
+  if (r.time5K) parts.push(`5K ${formatDuration(r.time5K)}`);
+  if (r.time10K) parts.push(`10K ${formatDuration(r.time10K)}`);
+  if (r.timeHalfMarathon) parts.push(`HM ${formatDuration(r.timeHalfMarathon)}`);
+  if (r.timeMarathon) parts.push(`M ${formatDuration(r.timeMarathon)}`);
+  return parts.join(' · ');
+}
+
+/** Preview of Garmin's threshold values with a per-field toggle. */
+function ThresholdImport({
+  metrics,
+  current,
+  busy,
+  onApply,
+}: {
+  metrics: GarminMetrics;
+  current: ThresholdValues;
+  busy: boolean;
+  onApply: (patch: ThresholdValues) => Promise<void>;
+}) {
+  const keys = (Object.keys(metrics.thresholds) as ThreshKey[]).filter(
+    (k) => metrics.thresholds[k] != null,
+  );
+  const [picked, setPicked] = useState<Set<ThreshKey>>(() => new Set(keys));
+
+  if (keys.length === 0) {
+    return (
+      <Text variant="caption" muted>
+        Garmin didn&apos;t return any thresholds for this account. Enter them on your profile
+        instead.
+      </Text>
+    );
+  }
+
+  const toggle = (k: ThreshKey) =>
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k);
+      else next.add(k);
+      return next;
+    });
+
+  const apply = () => {
+    const patch: ThresholdValues = {};
+    for (const k of keys) if (picked.has(k)) patch[k] = metrics.thresholds[k];
+    void onApply(patch);
+  };
+
+  return (
+    <View className="gap-sm">
+      {keys.map((k) => {
+        const on = picked.has(k);
+        const garminVal = metrics.thresholds[k] as number;
+        const cur = current[k];
+        return (
+          <Pressable
+            key={k}
+            onPress={() => toggle(k)}
+            className="flex-row items-center gap-md rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
+            <Ionicons
+              name={on ? 'checkbox' : 'square-outline'}
+              size={20}
+              color={on ? palette.brand : palette.textFaint}
+            />
+            <View className="flex-1">
+              <Text variant="label">{THRESH_META[k].label}</Text>
+              <Text variant="caption" muted>
+                {cur != null ? `${THRESH_META[k].fmt(cur)}  →  ` : ''}
+                <Text variant="caption" className="text-brand">
+                  {THRESH_META[k].fmt(garminVal)}
+                </Text>
+              </Text>
+            </View>
+          </Pressable>
+        );
+      })}
+      <Button
+        label={picked.size ? `Apply ${picked.size} to profile` : 'Select at least one'}
+        onPress={apply}
+        loading={busy}
+        disabled={busy || picked.size === 0}
+      />
+    </View>
   );
 }
 

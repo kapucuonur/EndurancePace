@@ -250,6 +250,31 @@ export interface GarminConnectResult {
   status: 'connected' | 'mfa_required';
 }
 
+/**
+ * Training metrics pulled from a connected Garmin account
+ * (`GET /me/garmin/thresholds`). Every value is optional — Garmin exposes
+ * different data per account.
+ */
+export interface GarminMetrics {
+  /** The subset of `ThresholdValues` Garmin could supply. */
+  thresholds: {
+    ftpWatts?: number;
+    thresholdHr?: number;
+    runThresholdPaceSecPerKm?: number;
+  };
+  /** Display-only. Never feeds a calculation and isn't part of the domain model. */
+  insights: {
+    vo2MaxRunning?: number;
+    vo2MaxCycling?: number;
+    racePredictions?: {
+      time5K?: number;
+      time10K?: number;
+      timeHalfMarathon?: number;
+      timeMarathon?: number;
+    };
+  };
+}
+
 /** Result of `POST /me/garmin/sync`. */
 export interface GarminSyncResult {
   status: 'ok' | 'skipped';
