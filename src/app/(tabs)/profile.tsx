@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, TextInput, View } from 'react-native';
+import { Alert, Platform, ScrollView, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -148,22 +148,25 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <View className="gap-sm">
-          <Text variant="heading">{t('profile.language')}</Text>
-          <View className="flex-row flex-wrap gap-sm">
-            {SUPPORTED_LOCALES.map((loc) => {
-              const on = loc === locale;
-              return (
-                <Button
-                  key={loc}
-                  label={LOCALE_LABELS[loc]}
-                  variant={on ? 'primary' : 'secondary'}
-                  onPress={() => void setLocale(loc)}
-                />
-              );
-            })}
+        {/* On web the language menu lives in the top navbar instead. */}
+        {Platform.OS !== 'web' ? (
+          <View className="gap-sm">
+            <Text variant="heading">{t('profile.language')}</Text>
+            <View className="flex-row flex-wrap gap-sm">
+              {SUPPORTED_LOCALES.map((loc) => {
+                const on = loc === locale;
+                return (
+                  <Button
+                    key={loc}
+                    label={LOCALE_LABELS[loc]}
+                    variant={on ? 'primary' : 'secondary'}
+                    onPress={() => void setLocale(loc)}
+                  />
+                );
+              })}
+            </View>
           </View>
-        </View>
+        ) : null}
 
         {isCoach ? (
           <View className="gap-sm">

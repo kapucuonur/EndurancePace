@@ -41,7 +41,8 @@ which Expo Router 57 vendors and re-exports.
 src/app/
   _layout.tsx            Root Stack. Hydrates the store, loads the locale, sets nav theme.
   (tabs)/
-    _layout.tsx          Tab bar — bottom on phones, top navbar on web (tabBarPosition)
+    _layout.tsx          Tab bar — native bottom bar on phones; on web a custom
+                         top navbar (src/components/WebNavBar.tsx) with a language menu
     index.tsx            Calendar / Home  — weekly strip + day list + month grid
     plans.tsx            Plan Overview + upcoming races
     library.tsx          Reusable workout templates, grouped by sport
@@ -144,7 +145,8 @@ the coach can withdraw the ones they assigned.
 **en, tr, de, ru, it, es** — in `src/i18n/locales/*.json`. Every screen pulls copy through a
 `useT()` hook (`t('calendar.today')`). Dates and the calendar grid follow the locale via
 `date-fns` and `react-native-calendars`' `LocaleConfig`. Language follows the device by
-default and can be overridden from a picker on the Profile screen; the choice is persisted.
+default and can be overridden — from a picker on the Profile screen on native, or the
+language menu in the web navbar; the choice is persisted.
 
 ### Styling — NativeWind + one token file
 
