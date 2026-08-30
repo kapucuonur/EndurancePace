@@ -1,23 +1,38 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 
 import { useT } from '@/i18n/useT';
 import { palette } from '@/theme/tokens';
 
+const isWeb = Platform.OS === 'web';
+
 export default function TabsLayout() {
   const dark = useColorScheme() === 'dark';
   const t = useT();
+  const border = dark ? palette.borderDark : palette.border;
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        // A top navbar reads better on the web; keep the thumb-friendly
+        // bottom bar on phones.
+        tabBarPosition: isWeb ? 'top' : 'bottom',
         tabBarActiveTintColor: palette.brand,
         tabBarInactiveTintColor: dark ? palette.textMutedDark : palette.textMuted,
         tabBarStyle: {
           backgroundColor: dark ? palette.bgDark : palette.bg,
-          borderTopColor: dark ? palette.borderDark : palette.border,
+          borderTopColor: border,
+          ...(isWeb
+            ? { borderBottomColor: border, borderBottomWidth: 1, borderTopWidth: 0 }
+            : null),
         },
+        ...(isWeb
+          ? {
+              tabBarItemStyle: { flex: 0, paddingHorizontal: 20 },
+              tabBarLabelPosition: 'beside-icon' as const,
+            }
+          : null),
       }}>
       <Tabs.Screen
         name="index"
