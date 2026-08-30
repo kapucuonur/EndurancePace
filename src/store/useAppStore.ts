@@ -16,6 +16,7 @@ import { USE_MOCK_API } from '@/services/config';
 import { ApiError, getTokenSync, loadToken, setUnauthorizedHandler } from '@/services/session';
 import type {
   Athlete,
+  CoachAthlete,
   GarminMetrics,
   GarminStatus,
   GarminSyncResult,
@@ -92,6 +93,15 @@ const INITIAL_GARMIN: GarminState = {
   error: null,
 };
 
+interface CoachState {
+  /** Roster of assignable athletes. Empty until `loadCoachAthletes` runs. */
+  athletes: CoachAthlete[];
+  loading: boolean;
+  error: string | null;
+}
+
+const INITIAL_COACH: CoachState = { athletes: [], loading: false, error: null };
+
 interface AppState {
   hydrated: boolean;
   loading: boolean;
@@ -104,6 +114,7 @@ interface AppState {
   events: RaceEvent[];
   workouts: Workout[];
   garmin: GarminState;
+  coach: CoachState;
 
   // auth
   initSession: () => Promise<void>;
@@ -142,6 +153,10 @@ interface AppState {
   garminDisconnect: () => Promise<void>;
   garminSync: (days?: number) => Promise<void>;
   garminFetchMetrics: () => Promise<void>;
+
+  // coach
+  loadCoachAthletes: () => Promise<void>;
+  assignWorkoutTo: (athleteId: ID, input: NewWorkout) => Promise<Workout>;
 }
 
 const upsert = <T extends { id: ID }>(list: T[], item: T): T[] => {
@@ -158,6 +173,7 @@ const EMPTY_DATA = {
   events: [] as RaceEvent[],
   workouts: [] as Workout[],
   garmin: INITIAL_GARMIN,
+  coach: INITIAL_COACH,
   hydrated: false,
 };
 
@@ -173,6 +189,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   events: [],
   workouts: [],
   garmin: INITIAL_GARMIN,
+  coach: INITIAL_COACH,
 
   initSession: async () => {
     setUnauthorizedHandler(() => {
@@ -442,6 +459,24 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
     }
   },
+
+  // --- coach ---
+
+  loadCoachAthletes: async () => {
+    set((s) => ({ coach: { ...s.coach, loading: true, error: null } }));
+    try {
+      const athletes = await api.listCoachAthletes();
+      set((s) => ({ coach: { ...s.coach, loading: false, athletes } }));
+    } catch (e) {
+      set((s) => ({ coach: { ...s.coach, loading: false, error: errText(e) } }));
+    }
+  },
+
+  assignWorkoutTo: async (athleteId, input) => {
+    // Assigned to another athlete, so nothing in the coach's own snapshot
+    // changes — the screen re-fetches that athlete's data itself.
+    return api.assignWorkout(athleteId, input);
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -483,3 +518,6 @@ export const useEvents = () => useAppStore((s) => s.events);
 // `garmin` is only replaced wholesale by the actions above, so a plain
 // reference select is snapshot-stable.
 export const useGarmin = () => useAppStore((s) => s.garmin);
+
+export const useCoach = () => useAppStore((s) => s.coach);
+export const useIsCoach = () => useAppStore((s) => s.athlete?.role === 'coach');

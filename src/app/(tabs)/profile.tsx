@@ -10,7 +10,7 @@ import { Text } from '@/components/ui/Text';
 import { ZoneTable } from '@/components/ZoneTable';
 import { calcSwimPaceZones } from '@/domain/zones';
 import { formatPace } from '@/lib/format';
-import { useAppStore, useAthlete, useGarmin } from '@/store/useAppStore';
+import { useAppStore, useAthlete, useGarmin, useIsCoach } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { ThresholdValues } from '@/types/domain';
 
@@ -40,6 +40,7 @@ export default function ProfileScreen() {
   const resetToSeed = useAppStore((s) => s.resetToSeed);
   const signOut = useAppStore((s) => s.signOut);
   const garmin = useGarmin();
+  const isCoach = useIsCoach();
   const loadGarminStatus = useAppStore((s) => s.loadGarminStatus);
 
   useEffect(() => {
@@ -137,6 +138,24 @@ export default function ProfileScreen() {
             paceSuffix="/100m"
           />
         </View>
+
+        {isCoach ? (
+          <View className="gap-sm">
+            <Text variant="heading">Coaching</Text>
+            <Card
+              onPress={() => router.push('/coach')}
+              className="flex-row items-center gap-md">
+              <Ionicons name="people-outline" size={22} color={palette.brand} />
+              <View className="flex-1">
+                <Text variant="label">Athletes</Text>
+                <Text variant="caption" muted>
+                  View calendars and assign workouts
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
+            </Card>
+          </View>
+        ) : null}
 
         <View className="gap-sm">
           <Text variant="heading">Connections</Text>

@@ -76,8 +76,14 @@ function newRepeat(): Step {
 }
 
 export default function WorkoutBuilderScreen() {
-  const params = useLocalSearchParams<{ date?: string; id?: string }>();
+  const params = useLocalSearchParams<{
+    date?: string;
+    id?: string;
+    assignTo?: string;
+    assignName?: string;
+  }>();
   const editing = Boolean(params.id);
+  const assignTo = params.assignTo || undefined;
 
   // Read the workout being edited once, at mount. Screens that link here
   // (Detail, Library) already have data loaded, so `existing` is available
@@ -88,13 +94,14 @@ export default function WorkoutBuilderScreen() {
   );
   const createWorkout = useAppStore((s) => s.createWorkout);
   const updateWorkout = useAppStore((s) => s.updateWorkout);
+  const assignWorkoutTo = useAppStore((s) => s.assignWorkoutTo);
   const thresholds = useAppStore((s) => s.athlete?.thresholds);
 
   const [structure, setStructure] = useState<Step[]>(
     () => existing?.structure ?? [newLeaf('warmup'), newRepeat(), newLeaf('cooldown')],
   );
   const [target, setTarget] = useState<'date' | 'library'>(() =>
-    existing?.isTemplate ? 'library' : 'date',
+    existing?.isTemplate && !assignTo ? 'library' : 'date',
   );
   const [date, setDate] = useState<string>(() => existing?.date ?? params.date ?? todayISO());
 
@@ -120,9 +127,10 @@ export default function WorkoutBuilderScreen() {
 
   const onSubmit = async (values: FormValues) => {
     const { durationSeconds, tss } = computeWorkoutMetrics(structure, values.sport, thresholds);
+    const isLibrary = target === 'library' && !assignTo;
     const payload = {
       planId: existing?.planId ?? null,
-      date: target === 'date' ? date : null,
+      date: isLibrary ? null : date,
       sport: values.sport,
       title: values.title,
       description: values.description || undefined,
@@ -130,13 +138,15 @@ export default function WorkoutBuilderScreen() {
       plannedDuration: durationSeconds,
       plannedTss: tss,
       status: existing?.status ?? ('planned' as const),
-      isTemplate: target === 'library',
-      templateCategory: target === 'library' ? SPORT_LABEL[values.sport] : undefined,
+      isTemplate: isLibrary,
+      templateCategory: isLibrary ? SPORT_LABEL[values.sport] : undefined,
       completed: existing?.completed,
     };
 
     try {
-      if (editing && existing) {
+      if (assignTo) {
+        await assignWorkoutTo(assignTo, payload);
+      } else if (editing && existing) {
         await updateWorkout(existing.id, payload);
       } else {
         await createWorkout(payload);
@@ -152,7 +162,7 @@ export default function WorkoutBuilderScreen() {
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen
         options={{
-          title: editing ? 'Edit Workout' : 'New Workout',
+          title: assignTo ? 'Assign Workout' : editing ? 'Edit Workout' : 'New Workout',
           headerTitleAlign: 'center',
           headerLeft: () => (
             <Pressable onPress={goBack} hitSlop={8} className="pr-md">
@@ -211,17 +221,26 @@ export default function WorkoutBuilderScreen() {
 
           <View className="gap-sm">
             <Text variant="label" muted>
-              Schedule
+              {assignTo ? 'Assign to' : 'Schedule'}
             </Text>
-            <Segmented
-              options={[
-                { value: 'date', label: 'On a date' },
-                { value: 'library', label: 'Library' },
-              ]}
-              value={target}
-              onChange={setTarget}
-            />
-            {target === 'date' ? (
+            {assignTo ? (
+              <View className="flex-row items-center gap-xs rounded-md bg-brand/10 px-md py-2">
+                <Ionicons name="person" size={14} color={palette.brand} />
+                <Text variant="caption" className="text-brand">
+                  {params.assignName || 'this athlete'}
+                </Text>
+              </View>
+            ) : (
+              <Segmented
+                options={[
+                  { value: 'date', label: 'On a date' },
+                  { value: 'library', label: 'Library' },
+                ]}
+                value={target}
+                onChange={setTarget}
+              />
+            )}
+            {target === 'date' || assignTo ? (
               <View className="flex-row items-center justify-between rounded-md border border-border bg-surface px-sm py-2 dark:border-border-dark dark:bg-surface-dark">
                 <Pressable
                   onPress={() => setDate((d) => shiftDays(d, -1))}
@@ -307,7 +326,7 @@ export default function WorkoutBuilderScreen() {
           </View>
 
           <Button
-            label={editing ? 'Save changes' : 'Create workout'}
+            label={assignTo ? 'Assign workout' : editing ? 'Save changes' : 'Create workout'}
             onPress={handleSubmit(onSubmit)}
           />
           <Text variant="caption" muted className="text-center">
