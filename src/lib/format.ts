@@ -1,5 +1,7 @@
 /** Display formatters for durations, paces, and distances. */
 
+import type { Sport } from '@/types/domain';
+
 export function formatDuration(seconds: number): string {
   const s = Math.max(0, Math.round(seconds));
   const h = Math.floor(s / 3600);
@@ -37,6 +39,17 @@ export function parsePace(text: string): number | null {
 export function formatDistance(meters: number): string {
   if (meters >= 1000) return `${(meters / 1000).toFixed(meters % 1000 === 0 ? 0 : 1)} km`;
   return `${Math.round(meters)} m`;
+}
+
+/**
+ * Average speed (m/s) rendered the way each sport is usually read: pace per km
+ * for the run, pace per 100 m for the swim, km/h for the bike.
+ */
+export function formatSpeed(mps: number, sport: Sport): { value: string; unit: string } {
+  if (mps <= 0) return { value: '—', unit: '' };
+  if (sport === 'bike') return { value: (mps * 3.6).toFixed(1), unit: 'km/h' };
+  if (sport === 'swim') return { value: formatPace(100 / mps), unit: '/100m' };
+  return { value: formatPace(1000 / mps), unit: '/km' };
 }
 
 export function capitalize(s: string): string {

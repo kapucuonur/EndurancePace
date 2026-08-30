@@ -21,6 +21,7 @@ import { ApiError, apiFetch } from '@/services/session';
 import type {
   AppSnapshot,
   Athlete,
+  CoachAthlete,
   GarminConnectResult,
   GarminMetrics,
   GarminStatus,
@@ -87,15 +88,36 @@ export interface EnduranceApi {
   garminSync(days?: number): Promise<GarminSyncResult>;
   /** Preview training thresholds + insights from the linked Garmin account. */
   garminFetchMetrics(): Promise<GarminMetrics>;
+
+  // Coach — only usable when the current athlete's `role` is `'coach'`.
+  /** Every other athlete, as an assignable roster. */
+  listCoachAthletes(): Promise<CoachAthlete[]>;
+  /** Full dataset for one athlete the coach is managing. */
+  coachAthleteSnapshot(athleteId: ID): Promise<AppSnapshot>;
+  /** Create a `source: 'coach'` workout on the athlete's calendar. */
+  assignWorkout(athleteId: ID, input: NewWorkout): Promise<Workout>;
+  /** Edit a workout this coach previously assigned. */
+  updateAssignedWorkout(
+    athleteId: ID,
+    workoutId: ID,
+    patch: Partial<Workout>,
+  ): Promise<Workout>;
+  /** Withdraw a workout this coach assigned. */
+  withdrawAssignedWorkout(athleteId: ID, workoutId: ID): Promise<void>;
 }
 
 /** Garmin sync only works against the live backend, not the mock layer. */
 const GARMIN_NEEDS_BACKEND =
   'Garmin sync needs the live backend. Set EXPO_PUBLIC_USE_MOCK_API=false to use it.';
 
+/** Coaching is a live-backend feature (needs real multi-athlete data). */
+const COACH_NEEDS_BACKEND =
+  'Coaching needs the live backend. Set EXPO_PUBLIC_USE_MOCK_API=false to use it.';
+
 export type NewPlan = Omit<TrainingPlan, 'id' | 'createdAt' | 'updatedAt'>;
 export type NewEvent = Omit<RaceEvent, 'id' | 'createdAt' | 'updatedAt'>;
-export type NewWorkout = Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>;
+// `source` is server-owned — always `'manual'` for app-built workouts.
+export type NewWorkout = Omit<Workout, 'id' | 'createdAt' | 'updatedAt' | 'source'>;
 
 // ---------------------------------------------------------------------------
 // Mock implementation
@@ -291,6 +313,7 @@ class MockApi implements EnduranceApi {
       const workout: Workout = {
         ...input,
         id: makeId('wko'),
+        source: 'manual',
         createdAt: nowTs(),
         updatedAt: nowTs(),
       };
@@ -376,6 +399,28 @@ class MockApi implements EnduranceApi {
 
   async garminFetchMetrics(): Promise<GarminMetrics> {
     throw new Error(GARMIN_NEEDS_BACKEND);
+  }
+
+  // --- Coach (unsupported in mock mode) ---
+
+  async listCoachAthletes(): Promise<CoachAthlete[]> {
+    return [];
+  }
+
+  async coachAthleteSnapshot(): Promise<AppSnapshot> {
+    throw new Error(COACH_NEEDS_BACKEND);
+  }
+
+  async assignWorkout(): Promise<Workout> {
+    throw new Error(COACH_NEEDS_BACKEND);
+  }
+
+  async updateAssignedWorkout(): Promise<Workout> {
+    throw new Error(COACH_NEEDS_BACKEND);
+  }
+
+  async withdrawAssignedWorkout(): Promise<void> {
+    throw new Error(COACH_NEEDS_BACKEND);
   }
 }
 
@@ -543,6 +588,40 @@ class RestApi implements EnduranceApi {
 
   garminFetchMetrics(): Promise<GarminMetrics> {
     return this.req('/me/garmin/thresholds');
+  }
+
+  // --- Coach ---
+
+  listCoachAthletes(): Promise<CoachAthlete[]> {
+    return this.req('/coach/athletes');
+  }
+
+  coachAthleteSnapshot(athleteId: ID): Promise<AppSnapshot> {
+    return this.req(`/coach/athletes/${athleteId}/snapshot`);
+  }
+
+  assignWorkout(athleteId: ID, input: NewWorkout): Promise<Workout> {
+    return this.req(`/coach/athletes/${athleteId}/workouts`, {
+      method: 'POST',
+      ...RestApi.body(input),
+    });
+  }
+
+  updateAssignedWorkout(
+    athleteId: ID,
+    workoutId: ID,
+    patch: Partial<Workout>,
+  ): Promise<Workout> {
+    return this.req(`/coach/athletes/${athleteId}/workouts/${workoutId}`, {
+      method: 'PATCH',
+      ...RestApi.body(patch),
+    });
+  }
+
+  withdrawAssignedWorkout(athleteId: ID, workoutId: ID): Promise<void> {
+    return this.req(`/coach/athletes/${athleteId}/workouts/${workoutId}`, {
+      method: 'DELETE',
+    });
   }
 }
 

@@ -39,6 +39,12 @@ export type PeriodizationPhase = (typeof PERIODIZATION_PHASES)[number];
 export const WORKOUT_STATUSES = ['planned', 'completed', 'skipped', 'modified'] as const;
 export type WorkoutStatus = (typeof WORKOUT_STATUSES)[number];
 
+export const WORKOUT_SOURCES = ['manual', 'garmin', 'coach'] as const;
+export type WorkoutSource = (typeof WORKOUT_SOURCES)[number];
+
+export const ATHLETE_ROLES = ['athlete', 'coach'] as const;
+export type AthleteRole = (typeof ATHLETE_ROLES)[number];
+
 export const STEP_TYPES = ['warmup', 'interval', 'recovery', 'cooldown', 'steady'] as const;
 export type StepType = (typeof STEP_TYPES)[number];
 
@@ -92,8 +98,18 @@ export interface Athlete {
   runPaceZones?: PaceZones;
   weightKg?: number;
   birthdate?: ISODate;
+  /** `'coach'` unlocks the coaching screens. Derived server-side from a config
+   *  allowlist; `'athlete'` for everyone else. */
+  role: AthleteRole;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
+}
+
+/** One athlete in a coach's roster (`GET /coach/athletes`). */
+export interface CoachAthlete {
+  id: ID;
+  name: string;
+  email: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -214,11 +230,25 @@ export interface Workout {
     actualTss?: number;
     rpe?: number;
     notes?: string;
+    // Measured metrics from a synced Garmin activity — all optional, all
+    // metric units. Absent for a hand-logged session.
+    distanceMeters?: number;
+    avgSpeedMps?: number;
+    avgHr?: number;
+    maxHr?: number;
+    elevationGainM?: number;
+    avgCadence?: number;
+    avgPower?: number;
+    calories?: number;
   };
   /** Marks this workout as a reusable library template. */
   isTemplate: boolean;
   /** Optional grouping label for the library view. */
   templateCategory?: string;
+  /** `'garmin'` for synced activities, `'coach'` for assigned workouts, else `'manual'`. */
+  source: WorkoutSource;
+  /** Athlete id of the coach who assigned this workout, when `source === 'coach'`. */
+  assignedById?: ID | null;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
 }

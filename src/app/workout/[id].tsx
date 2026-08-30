@@ -9,11 +9,12 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { flattenSteps } from '@/domain/workout';
 import { longDate } from '@/lib/date';
-import { formatDuration, formatDurationShort } from '@/lib/format';
+import { formatDistance, formatDuration, formatDurationShort, formatSpeed } from '@/lib/format';
 import { goBack } from '@/lib/nav';
 import { useAppStore, useWorkout } from '@/store/useAppStore';
 import { SPORT_LABEL } from '@/theme/sport';
 import { palette, stepColors } from '@/theme/tokens';
+import type { Workout } from '@/types/domain';
 
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,6 +58,18 @@ export default function WorkoutDetailScreen() {
             <Text variant="caption" muted>
               {workout.date ? longDate(workout.date) : 'Library template'} · {workout.status}
             </Text>
+            {workout.source !== 'manual' ? (
+              <View className="mt-1 flex-row items-center gap-1 self-start rounded-full bg-brand-tint px-2 py-0.5 dark:bg-surface-alt-dark">
+                <Ionicons
+                  name={workout.source === 'garmin' ? 'watch-outline' : 'person-outline'}
+                  size={11}
+                  color={palette.brand}
+                />
+                <Text variant="caption" className="text-brand">
+                  {workout.source === 'garmin' ? 'Garmin' : 'From coach'}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -67,34 +80,14 @@ export default function WorkoutDetailScreen() {
           <Stat label="Planned TSS" value={String(workout.plannedTss)} />
         </View>
 
-        {workout.completed ? (
-          <View className="gap-xs rounded-lg border border-success/40 bg-success/10 p-md">
-            <View className="flex-row items-center gap-xs">
-              <Ionicons name="checkmark-circle" size={16} color={palette.success} />
-              <Text variant="label">Completed</Text>
-            </View>
-            <Text variant="caption" muted>
-              {[
-                workout.completed.durationSeconds &&
-                  formatDurationShort(workout.completed.durationSeconds),
-                workout.completed.actualTss != null && `${workout.completed.actualTss} TSS`,
-                workout.completed.rpe != null && `RPE ${workout.completed.rpe}`,
-              ]
-                .filter(Boolean)
-                .join(' · ') || 'Logged'}
-            </Text>
-            {workout.completed.notes ? (
-              <Text variant="caption" muted>
-                {workout.completed.notes}
-              </Text>
-            ) : null}
+        {workout.completed ? <ActualCard workout={workout} /> : null}
+
+        {workout.structure.length ? (
+          <View className="gap-md">
+            <Text variant="heading">Structure</Text>
+            <StepTimeline structure={workout.structure} sport={workout.sport} />
           </View>
         ) : null}
-
-        <View className="gap-md">
-          <Text variant="heading">Structure</Text>
-          <StepTimeline structure={workout.structure} sport={workout.sport} />
-        </View>
 
         <View className="gap-sm">
           {blocks.map((b, i) => (
@@ -152,6 +145,102 @@ export default function WorkoutDetailScreen() {
         />
       </ScrollView>
     </Screen>
+  );
+}
+
+/** Measured results for a logged / synced session. Shows whatever metrics are
+ *  present, with the planned figure alongside duration and TSS. */
+function ActualCard({ workout }: { workout: Workout }) {
+  const c = workout.completed;
+  if (!c) return null;
+
+  const metrics: { label: string; value: string; sub?: string }[] = [];
+
+  if (c.durationSeconds != null) {
+    metrics.push({
+      label: 'Duration',
+      value: formatDurationShort(c.durationSeconds),
+      sub: workout.plannedDuration
+        ? `planned ${formatDurationShort(workout.plannedDuration)}`
+        : undefined,
+    });
+  }
+  if (c.distanceMeters != null) {
+    metrics.push({ label: 'Distance', value: formatDistance(c.distanceMeters) });
+  }
+  if (c.avgSpeedMps != null) {
+    const s = formatSpeed(c.avgSpeedMps, workout.sport);
+    metrics.push({
+      label: workout.sport === 'bike' ? 'Avg speed' : 'Avg pace',
+      value: `${s.value} ${s.unit}`.trim(),
+    });
+  }
+  if (c.actualTss != null) {
+    metrics.push({
+      label: 'TSS',
+      value: String(Math.round(c.actualTss)),
+      sub: workout.plannedTss ? `planned ${workout.plannedTss}` : undefined,
+    });
+  }
+  if (c.avgHr != null) metrics.push({ label: 'Avg HR', value: `${Math.round(c.avgHr)} bpm` });
+  if (c.maxHr != null) metrics.push({ label: 'Max HR', value: `${Math.round(c.maxHr)} bpm` });
+  if (c.avgPower != null) {
+    metrics.push({ label: 'Avg power', value: `${Math.round(c.avgPower)} W` });
+  }
+  if (c.avgCadence != null) {
+    metrics.push({
+      label: 'Avg cadence',
+      value: `${Math.round(c.avgCadence)} ${workout.sport === 'bike' ? 'rpm' : 'spm'}`,
+    });
+  }
+  if (c.elevationGainM != null) {
+    metrics.push({ label: 'Elevation', value: `${Math.round(c.elevationGainM)} m` });
+  }
+  if (c.calories != null) {
+    metrics.push({ label: 'Calories', value: `${Math.round(c.calories)} kcal` });
+  }
+  if (c.rpe != null) metrics.push({ label: 'RPE', value: String(c.rpe) });
+
+  return (
+    <View className="gap-md rounded-lg border border-success/40 bg-success/10 p-md">
+      <View className="flex-row items-center gap-xs">
+        <Ionicons name="checkmark-circle" size={16} color={palette.success} />
+        <Text variant="label">Actual</Text>
+        {workout.source === 'garmin' ? (
+          <Text variant="caption" muted>
+            · from Garmin
+          </Text>
+        ) : null}
+      </View>
+
+      {metrics.length ? (
+        <View className="flex-row flex-wrap gap-y-md">
+          {metrics.map((m) => (
+            <View key={m.label} className="w-1/2 gap-0.5 pr-md">
+              <Text variant="caption" muted>
+                {m.label}
+              </Text>
+              <Text variant="heading">{m.value}</Text>
+              {m.sub ? (
+                <Text variant="caption" muted>
+                  {m.sub}
+                </Text>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      ) : (
+        <Text variant="caption" muted>
+          Logged
+        </Text>
+      )}
+
+      {c.notes ? (
+        <Text variant="caption" muted>
+          {c.notes}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 

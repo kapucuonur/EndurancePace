@@ -137,6 +137,50 @@ interface Plan {
   description?: string;
 }
 
+/** Plausible per-sport measured metrics for a synced session, so the mock
+ * calendar shows a populated "Actual" card. */
+function sampleActuals(
+  sport: Sport,
+  durationSeconds: number,
+): Partial<NonNullable<Workout['completed']>> {
+  const hours = durationSeconds / 3600;
+  const jitter = (base: number, spread: number) =>
+    Math.round(base * (1 - spread + Math.random() * spread * 2));
+  if (sport === 'run') {
+    const speed = 3.1 + Math.random() * 0.5; // ~5:00–5:30 /km
+    return {
+      distanceMeters: Math.round(speed * durationSeconds),
+      avgSpeedMps: Number(speed.toFixed(2)),
+      avgHr: jitter(150, 0.05),
+      maxHr: jitter(168, 0.03),
+      elevationGainM: jitter(80 * hours, 0.3),
+      avgCadence: jitter(168, 0.03),
+      calories: Math.round(680 * hours),
+    };
+  }
+  if (sport === 'bike') {
+    const speed = 8.3 + Math.random() * 1.4; // ~30–35 km/h
+    return {
+      distanceMeters: Math.round(speed * durationSeconds),
+      avgSpeedMps: Number(speed.toFixed(2)),
+      avgHr: jitter(142, 0.05),
+      maxHr: jitter(162, 0.03),
+      elevationGainM: jitter(180 * hours, 0.3),
+      avgPower: jitter(205, 0.08),
+      avgCadence: jitter(88, 0.05),
+      calories: Math.round(750 * hours),
+    };
+  }
+  // swim
+  const speed = 1.15 + Math.random() * 0.1; // ~1:27–1:35 /100m
+  return {
+    distanceMeters: Math.round(speed * durationSeconds),
+    avgSpeedMps: Number(speed.toFixed(2)),
+    avgHr: jitter(138, 0.05),
+    calories: Math.round(560 * hours),
+  };
+}
+
 // Two training weeks: -7 .. +6 relative to today.
 const WEEK_PLAN: Plan[] = [
   { offset: -7, sport: 'swim', title: 'Swim — Technique', build: swimTechnique },
@@ -175,6 +219,7 @@ export function buildSeed(): AppSnapshot {
     ...deriveZones(thresholds),
     weightKg: 70,
     birthdate: '1992-04-18',
+    role: 'athlete',
     createdAt: ts,
     updatedAt: ts,
   };
@@ -231,6 +276,8 @@ export function buildSeed(): AppSnapshot {
     const { durationSeconds, tss } = computeWorkoutMetrics(structure, p.sport, thresholds);
     const date = shiftDays(todayISO(), p.offset);
     const isPast = p.offset < 0;
+    const wasDone = isPast && p.offset !== -4;
+    const actualDuration = Math.round(durationSeconds * (0.95 + Math.random() * 0.1));
     return {
       id: uid('wko'),
       planId,
@@ -242,16 +289,19 @@ export function buildSeed(): AppSnapshot {
       plannedDuration: durationSeconds,
       plannedTss: tss,
       status: isPast ? (p.offset === -4 ? 'skipped' : 'completed') : 'planned',
-      completed:
-        isPast && p.offset !== -4
-          ? {
-              date: shiftDays(todayISO(), p.offset) + 'T07:00:00.000Z',
-              durationSeconds: Math.round(durationSeconds * (0.95 + Math.random() * 0.1)),
-              actualTss: Math.round(tss * (0.95 + Math.random() * 0.1)),
-              rpe: 5 + Math.floor(Math.random() * 3),
-            }
-          : undefined,
+      completed: wasDone
+        ? {
+            date: shiftDays(todayISO(), p.offset) + 'T07:00:00.000Z',
+            durationSeconds: actualDuration,
+            actualTss: Math.round(tss * (0.95 + Math.random() * 0.1)),
+            rpe: 5 + Math.floor(Math.random() * 3),
+            ...sampleActuals(p.sport, actualDuration),
+          }
+        : undefined,
       isTemplate: false,
+      // Past sessions stand in for Garmin-synced activities; upcoming ones are
+      // plain planned workouts.
+      source: wasDone ? 'garmin' : 'manual',
       createdAt: ts,
       updatedAt: ts,
     } satisfies Workout;
@@ -292,6 +342,7 @@ export function buildSeed(): AppSnapshot {
       status: 'planned',
       isTemplate: true,
       templateCategory: t.category,
+      source: 'manual',
       createdAt: ts,
       updatedAt: ts,
     } satisfies Workout;
