@@ -9,15 +9,17 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { WorkoutCard } from '@/components/WorkoutCard';
 import { currentPhase } from '@/domain/plan';
+import { useT } from '@/i18n/useT';
 import { longDate, todayISO } from '@/lib/date';
 import { useAppStore, useEvents, usePlans } from '@/store/useAppStore';
-import { PHASE_COLOR, PHASE_LABEL } from '@/theme/phase';
+import { PHASE_COLOR } from '@/theme/phase';
 import { sportColor } from '@/theme/sport';
 import { palette } from '@/theme/tokens';
 
 export default function PlanDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const t = useT();
   const plan = usePlans().find((p) => p.id === id);
   const events = useEvents();
   const allWorkouts = useAppStore((s) => s.workouts);
@@ -35,7 +37,7 @@ export default function PlanDetailScreen() {
   if (!plan) {
     return (
       <Screen className="items-center justify-center">
-        <Text muted>Plan not found.</Text>
+        <Text muted>{t('planDetail.notFound')}</Text>
       </Screen>
     );
   }
@@ -51,7 +53,7 @@ export default function PlanDetailScreen() {
             {plan.name}
           </Text>
           <Badge
-            label={PHASE_LABEL[currentPhase(plan, todayISO())]}
+            label={t(`phase.${currentPhase(plan, todayISO())}`)}
             color={PHASE_COLOR[currentPhase(plan, todayISO())]}
           />
         </View>
@@ -62,7 +64,7 @@ export default function PlanDetailScreen() {
         {plan.blocks?.length ? (
           <View className="gap-xs">
             <Text variant="label" muted>
-              Periodization
+              {t('planDetail.periodization')}
             </Text>
             <PhaseTimeline plan={plan} />
           </View>
@@ -71,7 +73,7 @@ export default function PlanDetailScreen() {
         {plan.notes ? <Text muted>{plan.notes}</Text> : null}
         {goal ? (
           <Text variant="caption" className="text-brand">
-            Goal: {goal.name} ({longDate(goal.date)})
+            {t('planDetail.goal', { name: goal.name, date: longDate(goal.date) })}
           </Text>
         ) : null}
 
@@ -88,7 +90,9 @@ export default function PlanDetailScreen() {
           theme={{ arrowColor: palette.brand, todayTextColor: palette.brand }}
         />
 
-        <Text variant="heading">Workouts ({workouts.length})</Text>
+        <Text variant="heading">
+          {t('planDetail.workoutsCount', { count: workouts.length })}
+        </Text>
         <View className="gap-sm">
           {workouts
             .slice()

@@ -2,8 +2,9 @@ import { View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { blockRanges, totalWeeks } from '@/domain/plan';
+import { useT } from '@/i18n/useT';
 import { daysBetween, todayISO } from '@/lib/date';
-import { PHASE_LABEL, PHASE_COLOR } from '@/theme/phase';
+import { PHASE_COLOR } from '@/theme/phase';
 import type { TrainingPlan } from '@/types/domain';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 
 /** Read-only proportional periodization strip. */
 export function PhaseTimeline({ plan, showToday = true, compact = false }: Props) {
+  const t = useT();
   const blocks = plan.blocks ?? [];
   const total = totalWeeks(blocks);
   if (blocks.length === 0 || total === 0) return null;
@@ -59,7 +61,7 @@ export function PhaseTimeline({ plan, showToday = true, compact = false }: Props
                 style={{ backgroundColor: PHASE_COLOR[b.phase] }}
               />
               <Text variant="caption" muted>
-                {PHASE_LABEL[b.phase]} · {b.weeks}w
+                {t(`phase.${b.phase}`)} · {t('units.weeksShort', { count: b.weeks })}
               </Text>
             </View>
           ))}

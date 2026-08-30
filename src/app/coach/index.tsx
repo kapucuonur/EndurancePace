@@ -6,11 +6,13 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { useAppStore, useCoach } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 
 export default function CoachRosterScreen() {
   const router = useRouter();
+  const t = useT();
   const { athletes, loading, error } = useCoach();
   const loadCoachAthletes = useAppStore((s) => s.loadCoachAthletes);
 
@@ -20,14 +22,14 @@ export default function CoachRosterScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ title: 'Coaching' }} />
+      <Stack.Screen options={{ title: t('nav.coaching') }} />
       <ScrollView
         contentContainerClassName="p-lg gap-md pb-24"
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={() => void loadCoachAthletes()} />
         }>
         <Text variant="caption" muted>
-          Pick an athlete to see their calendar and assign workouts.
+          {t('coach.rosterSubtitle')}
         </Text>
 
         {error ? (
@@ -40,7 +42,7 @@ export default function CoachRosterScreen() {
         ) : null}
 
         {!loading && athletes.length === 0 && !error ? (
-          <Text muted>No other athletes yet.</Text>
+          <Text muted>{t('coach.noAthletes')}</Text>
         ) : null}
 
         {athletes.map((a) => (

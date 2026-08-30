@@ -2,10 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
+import { useT } from '@/i18n/useT';
 import { palette } from '@/theme/tokens';
 
 export default function TabsLayout() {
   const dark = useColorScheme() === 'dark';
+  const t = useT();
   return (
     <Tabs
       screenOptions={{
@@ -20,7 +22,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Calendar',
+          title: t('nav.calendar'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar" color={color} size={size} />
           ),
@@ -29,14 +31,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="plans"
         options={{
-          title: 'Plans',
+          title: t('nav.plans'),
           tabBarIcon: ({ color, size }) => <Ionicons name="map" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="library"
         options={{
-          title: 'Library',
+          title: t('nav.library'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="library" color={color} size={size} />
           ),
@@ -45,7 +47,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('nav.profile'),
           tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} />,
         }}
       />

@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { formatPace } from '@/lib/format';
 import type { Zone } from '@/types/domain';
 
@@ -13,12 +14,13 @@ interface Props {
 }
 
 export function ZoneTable({ title, zones, unit, paceSuffix }: Props) {
+  const t = useT();
   return (
     <View className="gap-xs rounded-lg border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
       <Text variant="label">{title}</Text>
       {!zones ? (
         <Text variant="caption" muted>
-          Set the matching threshold to calculate.
+          {t('zoneTable.setThreshold')}
         </Text>
       ) : (
         zones.map((z) => (

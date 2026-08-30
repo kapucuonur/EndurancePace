@@ -3,6 +3,7 @@ import { Pressable, TextInput, View } from 'react-native';
 
 import { StepRow } from '@/components/builder/StepRow';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { uid } from '@/lib/id';
 import { palette } from '@/theme/tokens';
 import type { Sport, Step } from '@/types/domain';
@@ -16,6 +17,7 @@ interface Props {
 
 /** Editor for an interval set: repeatCount x [ child steps ]. */
 export function RepeatBlock({ group, sport, onChange, onRemove }: Props) {
+  const t = useT();
   const setCount = (txt: string) =>
     onChange({ ...group, repeatCount: Math.max(1, Number(txt) || 1) });
 
@@ -53,7 +55,7 @@ export function RepeatBlock({ group, sport, onChange, onRemove }: Props) {
             keyboardType="number-pad"
             className="w-10 rounded-md border border-border bg-bg px-sm py-1 text-center text-base text-fg dark:border-border-dark dark:bg-bg-dark"
           />
-          <Text variant="label">× repeats</Text>
+          <Text variant="label">{t('stepRow.repeats')}</Text>
         </View>
         <Ionicons name="trash-outline" size={18} color={palette.danger} onPress={onRemove} />
       </View>
@@ -76,7 +78,7 @@ export function RepeatBlock({ group, sport, onChange, onRemove }: Props) {
         className="flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-sm dark:border-border-dark">
         <Ionicons name="add" size={16} color={palette.brand} />
         <Text variant="caption" className="text-brand">
-          Add step to set
+          {t('stepRow.addStepToSet')}
         </Text>
       </Pressable>
     </View>

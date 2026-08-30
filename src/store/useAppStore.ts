@@ -7,9 +7,11 @@
  * that should update the UI.
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
+import { applyLocale, deviceLocale, i18n, isSupported, type Locale } from '@/i18n';
 import api, { type NewEvent, type NewPlan, type NewWorkout } from '@/services/api';
 import * as auth from '@/services/auth';
 import { USE_MOCK_API } from '@/services/config';
@@ -40,19 +42,15 @@ function garminMessage(e: unknown): { text: string; mfa: 'require' | 'clear' | n
   if (e instanceof ApiError) {
     const m = e.message.toLowerCase();
     if (m.includes('mfa_required')) {
-      return {
-        text: 'Your Garmin session ended. Enter the new code Garmin just sent you.',
-        mfa: 'require',
-      };
+      return { text: i18n.t('errors.sessionEnded'), mfa: 'require' };
     }
     if (m.includes('expired') || m.includes('was lost') || m.includes('start over')) {
-      return {
-        text: 'The verification window closed. Re-enter your Garmin details to start again.',
-        mfa: 'clear',
-      };
+      return { text: i18n.t('errors.windowClosed'), mfa: 'clear' };
     }
     if (e.status === 429) return { text: e.message, mfa: null }; // already readable
-    if (m.includes('not_connected')) return { text: 'Garmin is not connected.', mfa: null };
+    if (m.includes('not_connected')) {
+      return { text: i18n.t('errors.garminNotConnected'), mfa: null };
+    }
   }
   return { text: errText(e), mfa: null };
 }
@@ -102,10 +100,15 @@ interface CoachState {
 
 const INITIAL_COACH: CoachState = { athletes: [], loading: false, error: null };
 
+const LOCALE_KEY = 'endurancepace:locale';
+
 interface AppState {
   hydrated: boolean;
   loading: boolean;
   error: string | null;
+
+  /** Active UI language. Persisted; defaults to the device language. */
+  locale: Locale;
 
   session: SessionState;
 
@@ -115,6 +118,10 @@ interface AppState {
   workouts: Workout[];
   garmin: GarminState;
   coach: CoachState;
+
+  // locale
+  initLocale: () => Promise<void>;
+  setLocale: (locale: Locale) => Promise<void>;
 
   // auth
   initSession: () => Promise<void>;
@@ -182,6 +189,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   loading: false,
   error: null,
 
+  // Best guess before `initLocale` reads the saved preference.
+  locale: deviceLocale(),
+
   session: { token: null, ready: false, error: null, busy: false },
 
   athlete: null,
@@ -190,6 +200,28 @@ export const useAppStore = create<AppState>((set, get) => ({
   workouts: [],
   garmin: INITIAL_GARMIN,
   coach: INITIAL_COACH,
+
+  initLocale: async () => {
+    let locale: Locale = deviceLocale();
+    try {
+      const saved = await AsyncStorage.getItem(LOCALE_KEY);
+      if (isSupported(saved)) locale = saved;
+    } catch {
+      // fall back to the device locale
+    }
+    applyLocale(locale);
+    set({ locale });
+  },
+
+  setLocale: async (locale) => {
+    applyLocale(locale);
+    set({ locale });
+    try {
+      await AsyncStorage.setItem(LOCALE_KEY, locale);
+    } catch {
+      // a non-persisted switch still applies for this session
+    }
+  },
 
   initSession: async () => {
     setUnauthorizedHandler(() => {
@@ -212,7 +244,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         session: {
           ...s.session,
           busy: false,
-          error: e instanceof Error ? e.message : 'Sign in failed',
+          error: e instanceof Error ? e.message : i18n.t('errors.signInFailed'),
         },
       }));
       throw e;
@@ -231,7 +263,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         session: {
           ...s.session,
           busy: false,
-          error: e instanceof Error ? e.message : 'Sign up failed',
+          error: e instanceof Error ? e.message : i18n.t('errors.signUpFailed'),
         },
       }));
       throw e;
@@ -381,7 +413,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (e) {
       const bad =
         e instanceof ApiError && e.status === 400
-          ? 'Garmin did not accept that email and password.'
+          ? i18n.t('errors.badCredentials')
           : garminMessage(e).text;
       set((s) => ({ garmin: { ...s.garmin, busy: false, error: bad } }));
     }
@@ -521,3 +553,5 @@ export const useGarmin = () => useAppStore((s) => s.garmin);
 
 export const useCoach = () => useAppStore((s) => s.coach);
 export const useIsCoach = () => useAppStore((s) => s.athlete?.role === 'coach');
+
+export const useLocale = () => useAppStore((s) => s.locale);

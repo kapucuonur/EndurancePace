@@ -8,13 +8,15 @@ import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { currentPhase } from '@/domain/plan';
+import { useT } from '@/i18n/useT';
 import { daysBetween, longDate, todayISO } from '@/lib/date';
 import { useAppStore, useEvents, usePlans } from '@/store/useAppStore';
-import { PHASE_COLOR, PHASE_LABEL } from '@/theme/phase';
+import { PHASE_COLOR } from '@/theme/phase';
 import { palette } from '@/theme/tokens';
 
 export default function PlanOverviewScreen() {
   const router = useRouter();
+  const t = useT();
   const plans = usePlans();
   const events = useEvents();
   const workouts = useAppStore((s) => s.workouts);
@@ -22,7 +24,7 @@ export default function PlanOverviewScreen() {
   return (
     <Screen>
       <View className="flex-row items-center justify-between px-lg py-sm">
-        <Text variant="title">Training Plans</Text>
+        <Text variant="title">{t('plans.title')}</Text>
         <Pressable
           onPress={() => router.push('/plan/new')}
           className="h-10 w-10 items-center justify-center rounded-full bg-brand">
@@ -32,7 +34,7 @@ export default function PlanOverviewScreen() {
 
       <ScrollView contentContainerClassName="p-lg gap-md pb-24">
         {plans.length === 0 ? (
-          <Text muted>No plans yet. Create one to structure your season.</Text>
+          <Text muted>{t('plans.empty')}</Text>
         ) : (
           plans.map((plan) => {
             const goal = events.find((e) => e.id === plan.goalEventId);
@@ -48,7 +50,7 @@ export default function PlanOverviewScreen() {
                     {plan.name}
                   </Text>
                   <Badge
-                    label={PHASE_LABEL[currentPhase(plan, todayISO())]}
+                    label={t(`phase.${currentPhase(plan, todayISO())}`)}
                     color={PHASE_COLOR[currentPhase(plan, todayISO())]}
                   />
                 </View>
@@ -58,11 +60,11 @@ export default function PlanOverviewScreen() {
                 {plan.blocks?.length ? <PhaseTimeline plan={plan} compact /> : null}
                 <View className="flex-row gap-md">
                   <Text variant="caption" muted>
-                    {count} workouts
+                    {t('plans.workoutsCount', { count })}
                   </Text>
                   {daysToEnd >= 0 ? (
                     <Text variant="caption" muted>
-                      {daysToEnd} days remaining
+                      {t('plans.daysRemaining', { count: daysToEnd })}
                     </Text>
                   ) : null}
                 </View>
@@ -70,7 +72,7 @@ export default function PlanOverviewScreen() {
                   <View className="flex-row items-center gap-xs">
                     <Ionicons name="flag" size={13} color={palette.brand} />
                     <Text variant="caption" className="text-brand">
-                      {goal.name} · {goal.priority} race
+                      {t('plans.goalRace', { name: goal.name, priority: goal.priority })}
                     </Text>
                   </View>
                 ) : null}
@@ -80,7 +82,7 @@ export default function PlanOverviewScreen() {
         )}
 
         <Text variant="heading" className="mt-md">
-          Upcoming Races
+          {t('plans.upcomingRaces')}
         </Text>
         {events
           .slice()

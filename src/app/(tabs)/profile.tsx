@@ -9,28 +9,34 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { ZoneTable } from '@/components/ZoneTable';
 import { calcSwimPaceZones } from '@/domain/zones';
+import { LOCALE_LABELS, SUPPORTED_LOCALES } from '@/i18n';
+import { useT } from '@/i18n/useT';
 import { formatPace } from '@/lib/format';
-import { useAppStore, useAthlete, useGarmin, useIsCoach } from '@/store/useAppStore';
+import { useAppStore, useAthlete, useGarmin, useIsCoach, useLocale } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { ThresholdValues } from '@/types/domain';
 
 type FieldKey = keyof ThresholdValues;
 
-function thresholdsToDraft(t: ThresholdValues | undefined): Record<string, string> {
+function thresholdsToDraft(values: ThresholdValues | undefined): Record<string, string> {
   const next: Record<string, string> = {};
   for (const f of FIELDS) {
-    const v = t?.[f.key];
+    const v = values?.[f.key];
     next[f.key] = v != null ? String(v) : '';
   }
   return next;
 }
 
-const FIELDS: { key: FieldKey; label: string; hint: string }[] = [
-  { key: 'ftpWatts', label: 'Bike FTP', hint: 'watts' },
-  { key: 'runThresholdPaceSecPerKm', label: 'Run threshold pace', hint: 'sec/km' },
-  { key: 'cssSecPer100m', label: 'Swim CSS', hint: 'sec/100m' },
-  { key: 'thresholdHr', label: 'Threshold HR (LTHR)', hint: 'bpm' },
-  { key: 'maxHr', label: 'Max HR', hint: 'bpm' },
+const FIELDS: { key: FieldKey; labelKey: string; hintKey: string }[] = [
+  { key: 'ftpWatts', labelKey: 'profile.fieldFtp', hintKey: 'profile.hintWatts' },
+  {
+    key: 'runThresholdPaceSecPerKm',
+    labelKey: 'profile.fieldRunPace',
+    hintKey: 'profile.hintSecPerKm',
+  },
+  { key: 'cssSecPer100m', labelKey: 'profile.fieldCss', hintKey: 'profile.hintSecPer100m' },
+  { key: 'thresholdHr', labelKey: 'profile.fieldLthr', hintKey: 'profile.hintBpm' },
+  { key: 'maxHr', labelKey: 'profile.fieldMaxHr', hintKey: 'profile.hintBpm' },
 ];
 
 export default function ProfileScreen() {
@@ -41,6 +47,9 @@ export default function ProfileScreen() {
   const signOut = useAppStore((s) => s.signOut);
   const garmin = useGarmin();
   const isCoach = useIsCoach();
+  const t = useT();
+  const locale = useLocale();
+  const setLocale = useAppStore((s) => s.setLocale);
   const loadGarminStatus = useAppStore((s) => s.loadGarminStatus);
 
   useEffect(() => {
@@ -63,7 +72,7 @@ export default function ProfileScreen() {
   if (!athlete) {
     return (
       <Screen className="items-center justify-center">
-        <Text muted>Loading profile…</Text>
+        <Text muted>{t('profile.loadingProfile')}</Text>
       </Screen>
     );
   }
@@ -87,7 +96,7 @@ export default function ProfileScreen() {
         <View>
           <Text variant="title">{athlete.name}</Text>
           <Text variant="caption" muted>
-            {athlete.disciplines.join(' · ')}
+            {athlete.disciplines.map((d) => t(`sport.${d}`)).join(' · ')}
           </Text>
         </View>
         <Ionicons name="person-circle-outline" size={36} color={palette.brand} />
@@ -95,15 +104,15 @@ export default function ProfileScreen() {
 
       <ScrollView contentContainerClassName="p-lg gap-lg pb-24">
         <View className="gap-sm">
-          <Text variant="heading">Thresholds</Text>
+          <Text variant="heading">{t('profile.thresholds')}</Text>
           {FIELDS.map((f) => (
             <View
               key={f.key}
               className="flex-row items-center justify-between rounded-md border border-border bg-surface px-md py-2 dark:border-border-dark dark:bg-surface-dark">
               <View className="flex-1">
-                <Text variant="label">{f.label}</Text>
+                <Text variant="label">{t(f.labelKey)}</Text>
                 <Text variant="caption" muted>
-                  {f.hint}
+                  {t(f.hintKey)}
                   {(f.key === 'runThresholdPaceSecPerKm' || f.key === 'cssSecPer100m') &&
                   draft[f.key]
                     ? ` · ${formatPace(Number(draft[f.key]))}`
@@ -112,44 +121,61 @@ export default function ProfileScreen() {
               </View>
               <TextInput
                 value={draft[f.key] ?? ''}
-                onChangeText={(t) => setDraft((d) => ({ ...d, [f.key]: t }))}
+                onChangeText={(v) => setDraft((d) => ({ ...d, [f.key]: v }))}
                 keyboardType="number-pad"
                 className="w-20 rounded-md border border-border bg-bg px-sm py-1.5 text-right text-base text-fg dark:border-border-dark dark:bg-bg-dark dark:text-fg-dark"
               />
             </View>
           ))}
-          <Button label="Save & recalculate zones" onPress={onSave} loading={saving} />
+          <Button label={t('profile.saveZones')} onPress={onSave} loading={saving} />
         </View>
 
         <View className="gap-sm">
-          <Text variant="heading">Calculated Zones</Text>
-          <ZoneTable title="Heart Rate (from LTHR)" zones={athlete.hrZones} unit="bpm" />
-          <ZoneTable title="Power (from FTP)" zones={athlete.powerZones} unit="w" />
+          <Text variant="heading">{t('profile.calculatedZones')}</Text>
+          <ZoneTable title={t('profile.zonesHr')} zones={athlete.hrZones} unit="bpm" />
+          <ZoneTable title={t('profile.zonesPower')} zones={athlete.powerZones} unit="w" />
           <ZoneTable
-            title="Run Pace (from threshold pace)"
+            title={t('profile.zonesRunPace')}
             zones={athlete.runPaceZones}
             unit="pace"
             paceSuffix="/km"
           />
           <ZoneTable
-            title="Swim Pace (from CSS)"
+            title={t('profile.zonesSwimPace')}
             zones={swimZones}
             unit="pace"
             paceSuffix="/100m"
           />
         </View>
 
+        <View className="gap-sm">
+          <Text variant="heading">{t('profile.language')}</Text>
+          <View className="flex-row flex-wrap gap-sm">
+            {SUPPORTED_LOCALES.map((loc) => {
+              const on = loc === locale;
+              return (
+                <Button
+                  key={loc}
+                  label={LOCALE_LABELS[loc]}
+                  variant={on ? 'primary' : 'secondary'}
+                  onPress={() => void setLocale(loc)}
+                />
+              );
+            })}
+          </View>
+        </View>
+
         {isCoach ? (
           <View className="gap-sm">
-            <Text variant="heading">Coaching</Text>
+            <Text variant="heading">{t('profile.coaching')}</Text>
             <Card
               onPress={() => router.push('/coach')}
               className="flex-row items-center gap-md">
               <Ionicons name="people-outline" size={22} color={palette.brand} />
               <View className="flex-1">
-                <Text variant="label">Athletes</Text>
+                <Text variant="label">{t('profile.coachingAthletes')}</Text>
                 <Text variant="caption" muted>
-                  View calendars and assign workouts
+                  {t('profile.coachingSubtitle')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
@@ -158,15 +184,19 @@ export default function ProfileScreen() {
         ) : null}
 
         <View className="gap-sm">
-          <Text variant="heading">Connections</Text>
+          <Text variant="heading">{t('profile.connections')}</Text>
           <Card onPress={() => router.push('/garmin')} className="flex-row items-center gap-md">
             <Ionicons name="watch-outline" size={22} color={palette.brand} />
             <View className="flex-1">
-              <Text variant="label">Garmin Connect</Text>
+              <Text variant="label">{t('nav.garminConnect')}</Text>
               <Text variant="caption" muted>
                 {garmin.status?.connected
-                  ? `Connected${garmin.status.garminEmail ? ` · ${garmin.status.garminEmail}` : ''}`
-                  : 'Not connected · import your activities'}
+                  ? t('profile.garminConnected', {
+                      suffix: garmin.status.garminEmail
+                        ? ` · ${garmin.status.garminEmail}`
+                        : '',
+                    })
+                  : t('profile.garminNotConnected')}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
@@ -174,20 +204,23 @@ export default function ProfileScreen() {
         </View>
 
         <Button
-          label="View fitness trends"
+          label={t('profile.viewTrends')}
           variant="secondary"
           onPress={() => router.push('/trends')}
         />
         <Button
-          label="Reset demo data"
+          label={t('profile.resetDemo')}
           variant="ghost"
           onPress={() => {
             resetToSeed().catch((e) =>
-              Alert.alert('Reset unavailable', e instanceof Error ? e.message : String(e)),
+              Alert.alert(
+                t('profile.resetUnavailable'),
+                e instanceof Error ? e.message : String(e),
+              ),
             );
           }}
         />
-        <Button label="Sign out" variant="ghost" onPress={() => signOut()} />
+        <Button label={t('profile.signOut')} variant="ghost" onPress={() => signOut()} />
         {/* TODO: implement weight/birthdate editing, discipline toggles, and manual zone overrides */}
       </ScrollView>
     </Screen>

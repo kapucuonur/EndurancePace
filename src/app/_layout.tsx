@@ -14,19 +14,23 @@ import { useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useT } from '@/i18n/useT';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function RootLayout() {
   const scheme = useColorScheme();
+  const t = useT();
   const initSession = useAppStore((s) => s.initSession);
+  const initLocale = useAppStore((s) => s.initLocale);
   const ready = useAppStore((s) => s.session.ready);
   const token = useAppStore((s) => s.session.token);
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
+    void initLocale();
     void initSession();
-  }, [initSession]);
+  }, [initLocale, initSession]);
 
   // Auth gate: bounce between /login and the tabs based on the token.
   useEffect(() => {
@@ -47,18 +51,18 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen
                 name="workout/new"
-                options={{ presentation: 'modal', title: 'New Workout' }}
+                options={{ presentation: 'modal', title: t('nav.newWorkout') }}
               />
-              <Stack.Screen name="workout/[id]" options={{ title: 'Workout' }} />
+              <Stack.Screen name="workout/[id]" options={{ title: t('nav.workout') }} />
               <Stack.Screen
                 name="plan/new"
-                options={{ presentation: 'modal', title: 'New Plan' }}
+                options={{ presentation: 'modal', title: t('nav.newPlan') }}
               />
-              <Stack.Screen name="plan/[id]" options={{ title: 'Plan' }} />
-              <Stack.Screen name="trends" options={{ title: 'Fitness Trends' }} />
-              <Stack.Screen name="garmin" options={{ title: 'Garmin Connect' }} />
-              <Stack.Screen name="coach/index" options={{ title: 'Coaching' }} />
-              <Stack.Screen name="coach/[athleteId]" options={{ title: 'Athlete' }} />
+              <Stack.Screen name="plan/[id]" options={{ title: t('nav.plan') }} />
+              <Stack.Screen name="trends" options={{ title: t('nav.fitnessTrends') }} />
+              <Stack.Screen name="garmin" options={{ title: t('nav.garminConnect') }} />
+              <Stack.Screen name="coach/index" options={{ title: t('nav.coaching') }} />
+              <Stack.Screen name="coach/[athleteId]" options={{ title: t('nav.athlete') }} />
             </Stack>
           ) : (
             <View className="flex-1 bg-bg dark:bg-bg-dark" />

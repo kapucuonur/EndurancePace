@@ -5,31 +5,36 @@ import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useT, type TranslateFn } from '@/i18n/useT';
 import { formatDuration, formatPace } from '@/lib/format';
 import { useAppStore, useAthlete, useGarmin } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { GarminMetrics, ThresholdValues } from '@/types/domain';
 
-function timeAgo(iso: string | null): string {
-  if (!iso) return 'never';
+function timeAgo(iso: string | null, t: TranslateFn): string {
+  if (!iso) return t('time.never');
   const secs = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
-  if (secs < 60) return 'just now';
+  if (secs < 60) return t('time.justNow');
   const mins = Math.round(secs / 60);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
   const hrs = Math.round(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.round(hrs / 24)}d ago`;
+  if (hrs < 24) return t('time.hoursAgo', { count: hrs });
+  return t('time.daysAgo', { count: Math.round(hrs / 24) });
 }
 
 type ThreshKey = keyof GarminMetrics['thresholds'];
 
-const THRESH_META: Record<ThreshKey, { label: string; fmt: (n: number) => string }> = {
-  ftpWatts: { label: 'Bike FTP', fmt: (n) => `${n} W` },
-  thresholdHr: { label: 'Threshold HR', fmt: (n) => `${n} bpm` },
-  runThresholdPaceSecPerKm: { label: 'Run threshold pace', fmt: (n) => `${formatPace(n)} /km` },
+const THRESH_META: Record<ThreshKey, { labelKey: string; fmt: (n: number) => string }> = {
+  ftpWatts: { labelKey: 'garmin.threshBikeFtp', fmt: (n) => `${n} W` },
+  thresholdHr: { labelKey: 'garmin.threshHr', fmt: (n) => `${n} bpm` },
+  runThresholdPaceSecPerKm: {
+    labelKey: 'garmin.threshRunPace',
+    fmt: (n) => `${formatPace(n)} /km`,
+  },
 };
 
 export default function GarminScreen() {
+  const t = useT();
   const garmin = useGarmin();
   const athlete = useAthlete();
   const loadGarminStatus = useAppStore((s) => s.loadGarminStatus);
@@ -69,10 +74,10 @@ export default function GarminScreen() {
   };
 
   const onDisconnect = () => {
-    Alert.alert('Disconnect Garmin?', 'Imported workouts stay. You can reconnect any time.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('garmin.disconnectTitle'), t('garmin.disconnectBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Disconnect',
+        text: t('garmin.disconnect'),
         style: 'destructive',
         onPress: () => {
           setEmail('');
@@ -94,16 +99,16 @@ export default function GarminScreen() {
             <Ionicons name="watch-outline" size={24} color="#fff" />
           </View>
           <View className="flex-1">
-            <Text variant="title">Garmin Connect</Text>
+            <Text variant="title">{t('garmin.title')}</Text>
             <Text variant="caption" muted>
-              Pull completed activities into your calendar
+              {t('garmin.subtitle')}
             </Text>
           </View>
         </View>
 
         {/* Status */}
         {loading && !status ? (
-          <Text muted>Checking connection…</Text>
+          <Text muted>{t('garmin.checking')}</Text>
         ) : (
           <View className="gap-sm rounded-lg border border-border bg-surface p-lg dark:border-border-dark dark:bg-surface-dark">
             <View className="flex-row items-center gap-sm">
@@ -111,7 +116,9 @@ export default function GarminScreen() {
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: connected ? palette.success : palette.textFaint }}
               />
-              <Text variant="label">{connected ? 'Connected' : 'Not connected'}</Text>
+              <Text variant="label">
+                {connected ? t('garmin.connected') : t('garmin.notConnected')}
+              </Text>
             </View>
             {connected ? (
               <>
@@ -119,18 +126,18 @@ export default function GarminScreen() {
                   {status?.displayName || status?.garminEmail}
                 </Text>
                 <Text variant="caption" muted>
-                  Last sync: {timeAgo(status?.lastSyncAt ?? null)}
+                  {t('garmin.lastSync', { time: timeAgo(status?.lastSyncAt ?? null, t) })}
                 </Text>
               </>
             ) : null}
             {cooldown > 0 ? (
               <Text variant="caption" className="text-warning">
-                Garmin is rate-limiting logins. Try again in ~{Math.ceil(cooldown / 60)}m.
+                {t('garmin.rateLimited', { minutes: Math.ceil(cooldown / 60) })}
               </Text>
             ) : null}
             {status?.lastError && status.state === 'error' ? (
               <Text variant="caption" className="text-warning">
-                Last error: {status.lastError}
+                {t('garmin.lastError', { error: status.lastError })}
               </Text>
             ) : null}
           </View>
@@ -148,26 +155,25 @@ export default function GarminScreen() {
         {/* MFA step */}
         {needsMfa ? (
           <View className="gap-md">
-            <Text variant="heading">Enter the code</Text>
+            <Text variant="heading">{t('garmin.enterCode')}</Text>
             <Text variant="caption" muted>
-              Garmin just sent a one-time code to your email or phone. Enter it to finish
-              connecting.
+              {t('garmin.codeSubtitle')}
             </Text>
             <Field
-              label="Verification code"
+              label={t('garmin.verificationCode')}
               value={code}
               onChangeText={setCode}
-              placeholder="6-digit code"
+              placeholder={t('garmin.codePlaceholder')}
               keyboardType="number-pad"
               autoComplete="one-time-code"
             />
             <Button
-              label="Verify & connect"
+              label={t('garmin.verifyConnect')}
               onPress={onVerify}
               loading={busy}
               disabled={code.trim().length < 4 || busy}
             />
-            <Button label="Start over" variant="ghost" onPress={onStartOver} />
+            <Button label={t('garmin.startOver')} variant="ghost" onPress={onStartOver} />
           </View>
         ) : !connected ? (
           <View className="gap-md">
@@ -175,35 +181,32 @@ export default function GarminScreen() {
             <View className="gap-xs rounded-lg border border-border bg-brand-tint p-md dark:border-border-dark dark:bg-surface-alt-dark">
               <View className="flex-row items-center gap-xs">
                 <Ionicons name="lock-closed" size={14} color={palette.brand} />
-                <Text variant="label">Before you sign in</Text>
+                <Text variant="label">{t('garmin.beforeSignIn')}</Text>
               </View>
               <Text variant="caption" muted>
-                Garmin has no third-party sign-in for this, so EndurancePace signs in with your
-                Garmin.com email and password directly. They are sent over HTTPS to your
-                EndurancePace server, stored encrypted, and used only to read your activities.
-                Disconnecting deletes them.
+                {t('garmin.privacyNote')}
               </Text>
             </View>
 
             <Field
-              label="Garmin email"
+              label={t('garmin.garminEmail')}
               value={email}
               onChangeText={setEmail}
-              placeholder="you@example.com"
+              placeholder={t('login.emailPlaceholder')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
             />
             <Field
-              label="Garmin password"
+              label={t('garmin.garminPassword')}
               value={password}
               onChangeText={setPassword}
-              placeholder="Your Garmin.com password"
+              placeholder={t('garmin.passwordPlaceholder')}
               secureTextEntry
               autoCapitalize="none"
             />
             <Button
-              label="Connect"
+              label={t('garmin.connect')}
               onPress={onConnect}
               loading={busy}
               disabled={email.trim().length < 4 || password.length < 1 || busy || cooldown > 0}
@@ -212,51 +215,59 @@ export default function GarminScreen() {
         ) : (
           <View className="gap-md">
             <Button
-              label="Sync now"
+              label={t('garmin.syncNow')}
               onPress={() => void garminSync()}
               loading={busy}
               disabled={busy || cooldown > 0}
             />
             <Text variant="caption" muted className="text-center">
-              Imports the last 30 days. Runs only when you tap it.
+              {t('garmin.syncNote')}
             </Text>
 
             {lastSync?.status === 'ok' ? (
               <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
-                <Text variant="label">Last sync</Text>
+                <Text variant="label">{t('garmin.lastSyncLabel')}</Text>
                 <Text variant="caption" muted>
-                  {lastSync.imported} imported · {lastSync.matched} matched to plan ·{' '}
-                  {lastSync.updated} updated
-                  {lastSync.skipped ? ` · ${lastSync.skipped} skipped` : ''}
+                  {t('garmin.lastSyncResult', {
+                    imported: lastSync.imported,
+                    matched: lastSync.matched,
+                    updated: lastSync.updated,
+                  })}
+                  {lastSync.skipped
+                    ? t('garmin.skippedSuffix', { count: lastSync.skipped })
+                    : ''}
                 </Text>
               </View>
             ) : null}
             {lastSync?.status === 'skipped' ? (
               <Text variant="caption" muted className="text-center">
-                Synced very recently — give it a minute and try again.
+                {t('garmin.syncedRecently')}
               </Text>
             ) : null}
 
             <View className="mt-md gap-sm border-t border-border pt-md dark:border-border-dark">
-              <Text variant="heading">Training thresholds</Text>
+              <Text variant="heading">{t('garmin.trainingThresholds')}</Text>
               {metrics ? (
                 <ThresholdImport
+                  t={t}
                   metrics={metrics}
                   current={athlete?.thresholds ?? {}}
                   busy={busy}
                   onApply={async (patch) => {
                     await updateThresholds(patch);
-                    Alert.alert('Applied', 'Thresholds updated and zones recalculated.');
+                    Alert.alert(
+                      t('garmin.thresholdsApplied'),
+                      t('garmin.thresholdsAppliedBody'),
+                    );
                   }}
                 />
               ) : (
                 <>
                   <Text variant="caption" muted>
-                    Pull FTP, threshold HR and run threshold pace from Garmin. You choose which
-                    to keep before anything changes.
+                    {t('garmin.thresholdsIntro')}
                   </Text>
                   <Button
-                    label="Import from Garmin"
+                    label={t('garmin.importFromGarmin')}
                     variant="secondary"
                     onPress={() => void garminFetchMetrics()}
                     loading={busy}
@@ -268,24 +279,26 @@ export default function GarminScreen() {
 
             {metrics && hasInsights(metrics.insights) ? (
               <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
-                <Text variant="label">Garmin insights</Text>
+                <Text variant="label">{t('garmin.insights')}</Text>
                 {metrics.insights.vo2MaxRunning ? (
                   <Text variant="caption" muted>
-                    VO₂max — run {metrics.insights.vo2MaxRunning}
+                    {t('garmin.vo2max', { run: metrics.insights.vo2MaxRunning })}
                     {metrics.insights.vo2MaxCycling
-                      ? ` · bike ${metrics.insights.vo2MaxCycling}`
+                      ? t('garmin.vo2maxBike', { bike: metrics.insights.vo2MaxCycling })
                       : ''}
                   </Text>
                 ) : null}
                 {metrics.insights.racePredictions ? (
                   <Text variant="caption" muted>
-                    Race predictions — {racePred(metrics.insights.racePredictions)}
+                    {t('garmin.racePredictions', {
+                      value: racePred(metrics.insights.racePredictions),
+                    })}
                   </Text>
                 ) : null}
               </View>
             ) : null}
 
-            <Button label="Disconnect Garmin" variant="ghost" onPress={onDisconnect} />
+            <Button label={t('garmin.disconnect')} variant="ghost" onPress={onDisconnect} />
           </View>
         )}
       </ScrollView>
@@ -308,11 +321,13 @@ function racePred(r: NonNullable<GarminMetrics['insights']['racePredictions']>):
 
 /** Preview of Garmin's threshold values with a per-field toggle. */
 function ThresholdImport({
+  t,
   metrics,
   current,
   busy,
   onApply,
 }: {
+  t: TranslateFn;
   metrics: GarminMetrics;
   current: ThresholdValues;
   busy: boolean;
@@ -326,8 +341,7 @@ function ThresholdImport({
   if (keys.length === 0) {
     return (
       <Text variant="caption" muted>
-        Garmin didn&apos;t return any thresholds for this account. Enter them on your profile
-        instead.
+        {t('garmin.thresholdsMissing')}
       </Text>
     );
   }
@@ -363,7 +377,7 @@ function ThresholdImport({
               color={on ? palette.brand : palette.textFaint}
             />
             <View className="flex-1">
-              <Text variant="label">{THRESH_META[k].label}</Text>
+              <Text variant="label">{t(THRESH_META[k].labelKey)}</Text>
               <Text variant="caption" muted>
                 {cur != null ? `${THRESH_META[k].fmt(cur)}  →  ` : ''}
                 <Text variant="caption" className="text-brand">
@@ -375,7 +389,11 @@ function ThresholdImport({
         );
       })}
       <Button
-        label={picked.size ? `Apply ${picked.size} to profile` : 'Select at least one'}
+        label={
+          picked.size
+            ? t('garmin.applyToProfile', { count: picked.size })
+            : t('garmin.selectAtLeastOne')
+        }
         onPress={apply}
         loading={busy}
         disabled={busy || picked.size === 0}

@@ -9,6 +9,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { WeekStrip } from '@/components/WeekStrip';
 import { WorkoutCard } from '@/components/WorkoutCard';
+import { useT, type TranslateFn } from '@/i18n/useT';
 import {
   dayLabel,
   dayNumber,
@@ -28,6 +29,7 @@ type Mode = 'week' | 'month';
 
 export default function CalendarHomeScreen() {
   const router = useRouter();
+  const t = useT();
   const [anchor, setAnchor] = useState<ISODate>(todayISO());
   const [selected, setSelected] = useState<ISODate>(todayISO());
   const [mode, setMode] = useState<Mode>('week');
@@ -81,10 +83,15 @@ export default function CalendarHomeScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-lg pb-sm pt-xs">
         <View>
-          <Text variant="title">{mode === 'week' ? 'This Week' : monthTitle(anchor)}</Text>
+          <Text variant="title">
+            {mode === 'week' ? t('calendar.thisWeek') : monthTitle(anchor)}
+          </Text>
           <Text variant="caption" muted>
-            {weekStats.count} sessions · {formatDurationShort(weekStats.duration)} ·{' '}
-            {weekStats.tss} TSS
+            {t('calendar.summary', {
+              count: weekStats.count,
+              duration: formatDurationShort(weekStats.duration),
+              tss: weekStats.tss,
+            })}
           </Text>
         </View>
         <Pressable
@@ -110,7 +117,7 @@ export default function CalendarHomeScreen() {
                 setSelected(todayISO());
               }}>
               <Text variant="label" className="text-brand">
-                Today
+                {t('calendar.today')}
               </Text>
             </Pressable>
             <Pressable onPress={() => setAnchor((a) => shiftWeeks(a, 1))} hitSlop={12}>
@@ -124,11 +131,12 @@ export default function CalendarHomeScreen() {
             className="mt-sm flex-1"
             contentContainerClassName="px-lg pb-32 gap-lg pt-sm">
             {loading ? (
-              <Text muted>Loading your plan…</Text>
+              <Text muted>{t('calendar.loadingPlan')}</Text>
             ) : (
               week.map((d) => (
                 <DaySection
                   key={d}
+                  t={t}
                   date={d}
                   workouts={byDay[d] ?? []}
                   highlighted={d === selected}
@@ -160,7 +168,7 @@ export default function CalendarHomeScreen() {
             <Text variant="heading">{longDate(selected)}</Text>
             <View className="mt-sm gap-sm">
               {(byDay[selected] ?? []).length === 0 ? (
-                <Text muted>No workouts scheduled.</Text>
+                <Text muted>{t('calendar.noWorkouts')}</Text>
               ) : (
                 (byDay[selected] ?? []).map((w) => (
                   <WorkoutCard
@@ -175,8 +183,8 @@ export default function CalendarHomeScreen() {
               {Object.entries(sportColors).map(([sp, c]) => (
                 <View key={sp} className="flex-row items-center gap-xs">
                   <View className="h-2 w-2 rounded-full" style={{ backgroundColor: c }} />
-                  <Text variant="caption" muted className="capitalize">
-                    {sp}
+                  <Text variant="caption" muted>
+                    {t(`sport.${sp}`)}
                   </Text>
                 </View>
               ))}
@@ -196,12 +204,14 @@ export default function CalendarHomeScreen() {
 }
 
 function DaySection({
+  t,
   date,
   workouts,
   highlighted,
   onPressWorkout,
   onAdd,
 }: {
+  t: TranslateFn;
   date: ISODate;
   workouts: ReturnType<typeof useAppStore.getState>['workouts'];
   highlighted: boolean;
@@ -230,7 +240,7 @@ function DaySection({
 
       {workouts.length === 0 ? (
         <Text variant="caption" muted className="italic">
-          Rest day
+          {t('calendar.restDay')}
         </Text>
       ) : (
         <View className="gap-sm">
@@ -248,7 +258,8 @@ function DaySection({
                     {w.title}
                   </Text>
                   <Text variant="caption" muted>
-                    {formatDurationShort(dur)} · {actualTss ?? w.plannedTss} TSS · {w.status}
+                    {formatDurationShort(dur)} · {actualTss ?? w.plannedTss} TSS ·{' '}
+                    {t(`status.${w.status}`)}
                   </Text>
                 </View>
               </Pressable>

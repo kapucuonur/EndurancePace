@@ -8,10 +8,11 @@ import { SportGlyph } from '@/components/SportGlyph';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { longDate } from '@/lib/date';
 import { formatDurationShort } from '@/lib/format';
 import { useAppStore, useLibraryWorkouts } from '@/store/useAppStore';
-import { SPORT_LABEL, sportColor } from '@/theme/sport';
+import { sportColor } from '@/theme/sport';
 import { palette } from '@/theme/tokens';
 import { SPORTS, type Sport, type Workout } from '@/types/domain';
 
@@ -19,6 +20,7 @@ type SportFilter = Sport | 'all';
 
 export default function LibraryScreen() {
   const router = useRouter();
+  const t = useT();
   const templates = useLibraryWorkouts();
   const scheduleFromTemplate = useAppStore((s) => s.scheduleFromTemplate);
 
@@ -45,16 +47,19 @@ export default function LibraryScreen() {
 
   const schedule = async (dateISO: string) => {
     if (!scheduling) return;
-    const t = scheduling;
+    const tpl = scheduling;
     setScheduling(null);
-    await scheduleFromTemplate(t.id, dateISO);
-    Alert.alert('Added', `"${t.title}" → ${longDate(dateISO)}`);
+    await scheduleFromTemplate(tpl.id, dateISO);
+    Alert.alert(
+      t('library.addedTitle'),
+      t('library.added', { title: tpl.title, date: longDate(dateISO) }),
+    );
   };
 
   return (
     <Screen>
       <View className="flex-row items-center justify-between px-lg py-sm">
-        <Text variant="title">Workout Library</Text>
+        <Text variant="title">{t('library.title')}</Text>
         <Pressable
           onPress={() => router.push('/workout/new')}
           className="h-10 w-10 items-center justify-center rounded-full bg-brand">
@@ -69,7 +74,7 @@ export default function LibraryScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search templates"
+            placeholder={t('library.searchPlaceholder')}
             placeholderTextColor={palette.textFaint}
             className="flex-1 py-2.5 text-base text-fg dark:text-fg-dark"
           />
@@ -103,7 +108,7 @@ export default function LibraryScreen() {
                   className={
                     active ? 'font-semibold text-white' : 'text-muted dark:text-muted-dark'
                   }>
-                  {s === 'all' ? 'All' : SPORT_LABEL[s]}
+                  {s === 'all' ? t('sport.all') : t(`sport.${s}`)}
                 </Text>
               </Pressable>
             );
@@ -113,39 +118,37 @@ export default function LibraryScreen() {
 
       <ScrollView contentContainerClassName="p-lg gap-lg pb-24">
         {templates.length === 0 ? (
-          <Text muted>
-            No templates yet. Build a workout and save it to the Library to reuse it.
-          </Text>
+          <Text muted>{t('library.empty')}</Text>
         ) : filtered.length === 0 ? (
-          <Text muted>No templates match your filters.</Text>
+          <Text muted>{t('library.noMatch')}</Text>
         ) : (
           (Object.keys(grouped) as Sport[]).map((s) => (
             <View key={s} className="gap-sm">
               <View className="flex-row items-center gap-sm">
                 <SportGlyph sport={s} size={16} />
-                <Text variant="heading">{SPORT_LABEL[s]}</Text>
+                <Text variant="heading">{t(`sport.${s}`)}</Text>
                 <Text variant="caption" muted>
                   {grouped[s].length}
                 </Text>
               </View>
-              {grouped[s].map((t) => (
-                <Card key={t.id} className="flex-row items-center gap-md">
+              {grouped[s].map((tpl) => (
+                <Card key={tpl.id} className="flex-row items-center gap-md">
                   <View className="flex-1">
-                    <Text variant="label">{t.title}</Text>
+                    <Text variant="label">{tpl.title}</Text>
                     <Text variant="caption" muted>
-                      {formatDurationShort(t.plannedDuration)} · {t.plannedTss} TSS
-                      {t.templateCategory ? ` · ${t.templateCategory}` : ''}
+                      {formatDurationShort(tpl.plannedDuration)} · {tpl.plannedTss} TSS
+                      {tpl.templateCategory ? ` · ${tpl.templateCategory}` : ''}
                     </Text>
                   </View>
                   <Pressable
                     onPress={() =>
-                      router.push({ pathname: '/workout/new', params: { id: t.id } })
+                      router.push({ pathname: '/workout/new', params: { id: tpl.id } })
                     }
                     hitSlop={8}
                     className="p-xs">
                     <Ionicons name="create-outline" size={18} color={palette.textMuted} />
                   </Pressable>
-                  <Pressable onPress={() => setScheduling(t)} hitSlop={8} className="p-xs">
+                  <Pressable onPress={() => setScheduling(tpl)} hitSlop={8} className="p-xs">
                     <Ionicons name="calendar-outline" size={20} color={palette.brand} />
                   </Pressable>
                 </Card>

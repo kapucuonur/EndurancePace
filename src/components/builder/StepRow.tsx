@@ -5,27 +5,32 @@ import { Platform, TextInput, View } from 'react-native';
 import { Segmented } from '@/components/builder/Segmented';
 import { Text } from '@/components/ui/Text';
 import { stepSeconds } from '@/domain/workout';
+import { useT, type TranslateFn } from '@/i18n/useT';
 import { formatDuration, formatPace, parsePace } from '@/lib/format';
 import { palette } from '@/theme/tokens';
 import type { PaceUnit, Sport, Step, StepTarget, StepType } from '@/types/domain';
 
-const STEP_TYPE_OPTS: { value: StepType; label: string }[] = [
-  { value: 'warmup', label: 'W/U' },
-  { value: 'interval', label: 'Work' },
-  { value: 'recovery', label: 'Rec' },
-  { value: 'steady', label: 'Steady' },
-  { value: 'cooldown', label: 'C/D' },
+const STEP_TYPE_OPTS: { value: StepType; labelKey: string }[] = [
+  { value: 'warmup', labelKey: 'stepRow.typeWarmup' },
+  { value: 'interval', labelKey: 'stepRow.typeWork' },
+  { value: 'recovery', labelKey: 'stepRow.typeRecovery' },
+  { value: 'steady', labelKey: 'stepRow.typeSteady' },
+  { value: 'cooldown', labelKey: 'stepRow.typeCooldown' },
 ];
 
 type DurationMode = 'time' | 'distance';
 type TargetMode = 'zone' | 'pace' | 'power' | 'rpe';
 
 /** Which target kinds make sense for a sport. HR Zone + RPE are universal. */
-function targetOptions(sport: Sport): { value: TargetMode; label: string }[] {
-  const opts: { value: TargetMode; label: string }[] = [{ value: 'zone', label: 'HR Zone' }];
-  if (sport === 'bike') opts.push({ value: 'power', label: 'Power' });
-  if (sport === 'run' || sport === 'swim') opts.push({ value: 'pace', label: 'Pace' });
-  opts.push({ value: 'rpe', label: 'RPE' });
+function targetOptions(sport: Sport, t: TranslateFn): { value: TargetMode; label: string }[] {
+  const opts: { value: TargetMode; label: string }[] = [
+    { value: 'zone', label: t('stepRow.targetHrZone') },
+  ];
+  if (sport === 'bike') opts.push({ value: 'power', label: t('stepRow.targetPower') });
+  if (sport === 'run' || sport === 'swim') {
+    opts.push({ value: 'pace', label: t('stepRow.targetPace') });
+  }
+  opts.push({ value: 'rpe', label: t('stepRow.targetRpe') });
   return opts;
 }
 
@@ -55,11 +60,12 @@ interface Props {
 
 /** Editor for a single leaf step (type / duration / target). */
 export function StepRow({ step, sport, onChange, onRemove, nested }: Props) {
+  const t = useT();
   const dMode = durationMode(step);
   const seconds = step.duration?.kind === 'time' ? step.duration.seconds : 0;
   const meters = step.duration?.kind === 'distance' ? step.duration.meters : 0;
 
-  const options = targetOptions(sport);
+  const options = targetOptions(sport, t);
   const detected = targetMode(step);
   // If the sport changed under a step whose target no longer applies, show the
   // zone editor rather than a dead segment. Data is coerced when the user picks.
@@ -128,18 +134,20 @@ export function StepRow({ step, sport, onChange, onRemove, nested }: Props) {
         nested ? 'bg-surface-alt dark:bg-surface-alt-dark' : 'bg-surface dark:bg-surface-dark'
       }`}>
       <View className="flex-row items-center justify-between">
-        <Text variant="label" className="capitalize">
-          {step.type}
-        </Text>
+        <Text variant="label">{t(`stepType.${step.type}`)}</Text>
         <Ionicons name="trash-outline" size={18} color={palette.danger} onPress={onRemove} />
       </View>
 
-      <Segmented options={STEP_TYPE_OPTS} value={step.type} onChange={setType} />
+      <Segmented
+        options={STEP_TYPE_OPTS.map((o) => ({ value: o.value, label: t(o.labelKey) }))}
+        value={step.type}
+        onChange={setType}
+      />
 
       <Segmented
         options={[
-          { value: 'time', label: 'Time' },
-          { value: 'distance', label: 'Distance' },
+          { value: 'time', label: t('stepRow.time') },
+          { value: 'distance', label: t('stepRow.distance') },
         ]}
         value={dMode}
         onChange={setDurationMode}
@@ -150,16 +158,25 @@ export function StepRow({ step, sport, onChange, onRemove, nested }: Props) {
           <NumBox
             value={String(Math.floor(seconds / 60))}
             onChangeText={setMinutes}
-            suffix="min"
+            suffix={t('stepRow.min')}
           />
-          <NumBox value={String(seconds % 60)} onChangeText={setSeconds} suffix="sec" />
+          <NumBox
+            value={String(seconds % 60)}
+            onChangeText={setSeconds}
+            suffix={t('stepRow.sec')}
+          />
         </View>
       ) : (
         <View className="gap-xs">
-          <NumBox value={String(meters)} onChangeText={setMeters} suffix="m" />
+          <NumBox value={String(meters)} onChangeText={setMeters} suffix={t('units.metres')} />
           <Text variant="caption" muted>
-            ≈ {formatDuration(stepSeconds(step, sport))} at this{' '}
-            {tMode === 'pace' ? 'pace' : 'effort'}
+            {tMode === 'pace'
+              ? t('stepRow.atThisPace', {
+                  duration: formatDuration(stepSeconds(step, sport)),
+                })
+              : t('stepRow.atThisEffort', {
+                  duration: formatDuration(stepSeconds(step, sport)),
+                })}
           </Text>
         </View>
       )}
@@ -183,7 +200,7 @@ export function StepRow({ step, sport, onChange, onRemove, nested }: Props) {
               onCommit={(s) => setPace('max', s)}
             />
             <Text variant="caption" muted>
-              to
+              {t('common.to')}
             </Text>
             <PaceBox
               key={`fast-${paceUnit}`}
@@ -195,22 +212,22 @@ export function StepRow({ step, sport, onChange, onRemove, nested }: Props) {
             </Text>
           </View>
           <Text variant="caption" muted>
-            Slower → faster bound of the target pace.
+            {t('stepRow.slowerFaster')}
           </Text>
         </View>
       ) : (
         <View className="flex-row items-center gap-sm">
           <NumBox
             value={String(watts.min)}
-            onChangeText={(t) => setWatts('min', Number(t) || 0)}
+            onChangeText={(v) => setWatts('min', Number(v) || 0)}
             suffix="w"
           />
           <Text variant="caption" muted>
-            to
+            {t('common.to')}
           </Text>
           <NumBox
             value={String(watts.max)}
-            onChangeText={(t) => setWatts('max', Number(t) || 0)}
+            onChangeText={(v) => setWatts('max', Number(v) || 0)}
             suffix="w"
           />
         </View>

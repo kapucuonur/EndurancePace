@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { SportGlyph } from '@/components/SportGlyph';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { formatDurationShort } from '@/lib/format';
 import type { Workout } from '@/types/domain';
 
@@ -22,6 +23,7 @@ const STATUS_COLOR: Record<Workout['status'], string> = {
 };
 
 export function WorkoutCard({ workout, onPress }: { workout: Workout; onPress?: () => void }) {
+  const t = useT();
   const statusIcon = STATUS_ICON[workout.status];
   // For a logged session prefer the logged numbers; fall back to the plan.
   const done = workout.status === 'completed' ? workout.completed : undefined;
@@ -37,7 +39,8 @@ export function WorkoutCard({ workout, onPress }: { workout: Workout; onPress?: 
           {workout.title}
         </Text>
         <Text variant="caption" muted>
-          {formatDurationShort(duration)} · {tss} TSS{isActual ? ' · actual' : ''}
+          {formatDurationShort(duration)} · {tss} {t('units.tss')}
+          {isActual ? ` · ${t('common.actualTag')}` : ''}
         </Text>
       </View>
       {statusIcon ? (

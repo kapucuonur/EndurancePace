@@ -5,6 +5,7 @@ import Svg, { Line, Path, Rect } from 'react-native-svg';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { buildLoadSeries } from '@/domain/trends';
+import { useT } from '@/i18n/useT';
 import { useAppStore } from '@/store/useAppStore';
 import { palette, sportColors } from '@/theme/tokens';
 
@@ -18,6 +19,7 @@ import { palette, sportColors } from '@/theme/tokens';
  * `victory-native` — the `series` data shape is already what it expects.
  */
 export default function TrendsScreen() {
+  const t = useT();
   const workouts = useAppStore((s) => s.workouts);
   const series = useMemo(() => buildLoadSeries(workouts), [workouts]);
   const { width } = useWindowDimensions();
@@ -27,24 +29,24 @@ export default function TrendsScreen() {
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerClassName="p-lg gap-lg">
-        <Text variant="title">Fitness Trends</Text>
+        <Text variant="title">{t('trends.title')}</Text>
         <Text variant="caption" muted>
-          Performance Management Chart — CTL (fitness), ATL (fatigue), TSB (form).
+          {t('trends.subtitle')}
         </Text>
 
         <View className="flex-row gap-md">
           <Stat
-            label="Fitness (CTL)"
+            label={t('trends.fitness')}
             value={String(Math.round(last?.ctl ?? 0))}
             color={palette.brand}
           />
           <Stat
-            label="Fatigue (ATL)"
+            label={t('trends.fatigue')}
             value={String(Math.round(last?.atl ?? 0))}
             color={sportColors.bike}
           />
           <Stat
-            label="Form (TSB)"
+            label={t('trends.form')}
             value={String(Math.round(last?.tsb ?? 0))}
             color={sportColors.run}
           />
@@ -55,7 +57,7 @@ export default function TrendsScreen() {
         <View className="flex-row gap-md">
           <Legend label="CTL" color={palette.brand} />
           <Legend label="ATL" color={sportColors.bike} />
-          <Legend label="Daily TSS" color={palette.border} />
+          <Legend label={t('trends.dailyTss')} color={palette.border} />
         </View>
 
         {/* TODO: implement date-range selector, per-sport breakdown, and swap in victory-native on a dev build */}

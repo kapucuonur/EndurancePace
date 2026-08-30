@@ -2,6 +2,7 @@ import { Modal, Pressable, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { todayISO } from '@/lib/date';
 import { palette } from '@/theme/tokens';
 
@@ -14,6 +15,7 @@ interface Props {
 
 /** Bottom-sheet date picker for "add a template to the calendar". */
 export function ScheduleModal({ visible, title, onClose, onPick }: Props) {
+  const t = useT();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable className="flex-1 justify-end bg-black/40" onPress={onClose}>
@@ -21,9 +23,9 @@ export function ScheduleModal({ visible, title, onClose, onPick }: Props) {
           className="gap-md rounded-t-xl bg-bg p-lg dark:bg-bg-dark"
           onPress={() => {}}>
           <View className="flex-row items-center justify-between">
-            <Text variant="heading">Add to calendar</Text>
+            <Text variant="heading">{t('scheduleModal.addToCalendar')}</Text>
             <Pressable onPress={onClose} hitSlop={10}>
-              <Text className="text-brand">Close</Text>
+              <Text className="text-brand">{t('common.close')}</Text>
             </Pressable>
           </View>
           {title ? (

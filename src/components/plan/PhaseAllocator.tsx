@@ -3,7 +3,8 @@ import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { totalWeeks } from '@/domain/plan';
-import { PHASE_LABEL, PHASE_COLOR } from '@/theme/phase';
+import { useT } from '@/i18n/useT';
+import { PHASE_COLOR } from '@/theme/phase';
 import { palette } from '@/theme/tokens';
 import { PERIODIZATION_PHASES, type PeriodizationPhase, type PlanBlock } from '@/types/domain';
 
@@ -20,6 +21,7 @@ function nextPhase(p: PeriodizationPhase): PeriodizationPhase {
 }
 
 export function PhaseAllocator({ blocks, onChange, targetWeeks }: Props) {
+  const t = useT();
   const total = totalWeeks(blocks);
 
   const set = (idx: number, patch: Partial<PlanBlock>) =>
@@ -50,16 +52,16 @@ export function PhaseAllocator({ blocks, onChange, targetWeeks }: Props) {
       </View>
 
       <View className="flex-row items-center justify-between">
-        <Text variant="label">
-          {total} week{total === 1 ? '' : 's'} total
-        </Text>
+        <Text variant="label">{t('phaseAllocator.weeksTotal', { count: total })}</Text>
         {targetWeeks != null && diff !== 0 ? (
           <Text variant="caption" className="text-warning">
-            {diff > 0 ? `${diff}w past` : `${-diff}w short of`} your race
+            {diff > 0
+              ? t('phaseAllocator.pastRace', { count: diff })
+              : t('phaseAllocator.shortRace', { count: -diff })}
           </Text>
         ) : targetWeeks != null ? (
           <Text variant="caption" className="text-success">
-            matches your race
+            {t('phaseAllocator.matchesRace')}
           </Text>
         ) : null}
       </View>
@@ -77,7 +79,7 @@ export function PhaseAllocator({ blocks, onChange, targetWeeks }: Props) {
               onPress={() => set(i, { phase: nextPhase(b.phase) })}
               className="flex-1"
               hitSlop={6}>
-              <Text variant="label">{PHASE_LABEL[b.phase]}</Text>
+              <Text variant="label">{t(`phase.${b.phase}`)}</Text>
             </Pressable>
 
             <Pressable
@@ -87,7 +89,7 @@ export function PhaseAllocator({ blocks, onChange, targetWeeks }: Props) {
               <Ionicons name="remove-circle-outline" size={22} color={palette.brand} />
             </Pressable>
             <Text variant="label" className="w-12 text-center">
-              {b.weeks}w
+              {t('units.weeksShort', { count: b.weeks })}
             </Text>
             <Pressable
               onPress={() => set(i, { weeks: b.weeks + 1 })}
@@ -107,12 +109,12 @@ export function PhaseAllocator({ blocks, onChange, targetWeeks }: Props) {
         className="flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-sm dark:border-border-dark">
         <Ionicons name="add" size={16} color={palette.brand} />
         <Text variant="caption" className="text-brand">
-          Add phase
+          {t('phaseAllocator.addPhase')}
         </Text>
       </Pressable>
 
       <Text variant="caption" muted>
-        Tap a phase name to change it. Blocks run in order from the start date.
+        {t('phaseAllocator.hint')}
       </Text>
     </View>
   );

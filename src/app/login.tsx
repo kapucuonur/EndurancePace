@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n/useT';
 import { USE_MOCK_API } from '@/services/config';
 import { useAppStore } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
@@ -28,6 +29,7 @@ const cardShadow = {
 } as const;
 
 export default function LoginScreen() {
+  const t = useT();
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -79,9 +81,7 @@ export default function LoginScreen() {
                   </Text>
                 </View>
                 <Text variant="caption" muted>
-                  {mode === 'signin'
-                    ? 'Sign in to your training log'
-                    : 'Create your account to start planning'}
+                  {mode === 'signin' ? t('login.signInSubtitle') : t('login.signUpSubtitle')}
                 </Text>
               </View>
             </View>
@@ -92,10 +92,10 @@ export default function LoginScreen() {
               style={cardShadow}>
               {mode === 'signup' ? (
                 <Field
-                  label="Name"
+                  label={t('login.name')}
                   value={name}
                   onChangeText={setName}
-                  placeholder="Alex Rivera"
+                  placeholder={t('login.namePlaceholder')}
                   autoCapitalize="words"
                   focused={focused === 'name'}
                   onFocus={() => setFocused('name')}
@@ -103,10 +103,10 @@ export default function LoginScreen() {
                 />
               ) : null}
               <Field
-                label="Email"
+                label={t('login.email')}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="you@example.com"
+                placeholder={t('login.emailPlaceholder')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -115,10 +115,10 @@ export default function LoginScreen() {
                 onBlur={() => setFocused(null)}
               />
               <Field
-                label="Password"
+                label={t('login.password')}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="At least 8 characters"
+                placeholder={t('login.passwordPlaceholder')}
                 secureTextEntry
                 autoCapitalize="none"
                 focused={focused === 'password'}
@@ -136,7 +136,7 @@ export default function LoginScreen() {
               ) : null}
 
               <Button
-                label={mode === 'signin' ? 'Sign in' : 'Create account'}
+                label={mode === 'signin' ? t('login.signIn') : t('login.createAccount')}
                 onPress={submit}
                 loading={busy}
                 disabled={!canSubmit}
@@ -149,16 +149,16 @@ export default function LoginScreen() {
               onPress={() => setMode((m) => (m === 'signin' ? 'signup' : 'signin'))}
               className="mt-lg items-center py-sm">
               <Text variant="caption" muted>
-                {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+                {mode === 'signin' ? t('login.noAccount') : t('login.haveAccount')}
                 <Text variant="caption" className="font-semibold text-brand">
-                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                  {mode === 'signin' ? t('login.signUpLink') : t('login.signInLink')}
                 </Text>
               </Text>
             </Pressable>
 
             {USE_MOCK_API ? (
               <Text variant="caption" muted className="mt-xs text-center">
-                Mock mode — any email and password works.
+                {t('login.mockNote')}
               </Text>
             ) : null}
           </View>

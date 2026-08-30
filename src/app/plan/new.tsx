@@ -24,16 +24,19 @@ import {
   totalWeeks,
   weeksBetween,
 } from '@/domain/plan';
+import { useT } from '@/i18n/useT';
 import { longDate, shiftDays, shiftWeeks, todayISO, weekStart } from '@/lib/date';
 import { goBack } from '@/lib/nav';
 import { useAppStore, useAthlete, useEvents } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { PlanBlock } from '@/types/domain';
 
-const schema = z.object({ name: z.string().min(2, 'Name your plan') });
+// Error text is resolved via i18n at render (planBuilder.nameError), not shown from here.
+const schema = z.object({ name: z.string().min(2) });
 type FormValues = z.infer<typeof schema>;
 
 export default function NewPlanScreen() {
+  const t = useT();
   const athlete = useAthlete();
   const events = useEvents();
   const createPlan = useAppStore((s) => s.createPlan);
@@ -101,7 +104,7 @@ export default function NewPlanScreen() {
           headerTitleAlign: 'center',
           headerLeft: () => (
             <Pressable onPress={goBack} hitSlop={8} className="pr-md">
-              <Text className="text-brand">Cancel</Text>
+              <Text className="text-brand">{t('common.cancel')}</Text>
             </Pressable>
           ),
         }}
@@ -110,12 +113,12 @@ export default function NewPlanScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-xl pb-40">
-          <Text variant="title">New Training Plan</Text>
+          <Text variant="title">{t('planBuilder.title')}</Text>
 
           {/* Name */}
           <View className="gap-sm">
             <Text variant="label" muted>
-              Name
+              {t('planBuilder.name')}
             </Text>
             <Controller
               control={control}
@@ -125,13 +128,13 @@ export default function NewPlanScreen() {
                   <TextInput
                     value={field.value}
                     onChangeText={field.onChange}
-                    placeholder="e.g. Base → Build: Spring 70.3"
+                    placeholder={t('planBuilder.namePlaceholder')}
                     placeholderTextColor={palette.textFaint}
                     className="rounded-md border border-border bg-surface px-md py-3 text-base text-fg dark:border-border-dark dark:bg-surface-dark dark:text-fg-dark"
                   />
                   {fieldState.error ? (
                     <Text variant="caption" className="text-danger">
-                      {fieldState.error.message}
+                      {t('planBuilder.nameError')}
                     </Text>
                   ) : null}
                 </>
@@ -142,7 +145,7 @@ export default function NewPlanScreen() {
           {/* Goal race */}
           <View className="gap-sm">
             <Text variant="label" muted>
-              Goal race
+              {t('planBuilder.goalRace')}
             </Text>
             <Pressable
               onPress={() => pickEvent(null)}
@@ -151,7 +154,7 @@ export default function NewPlanScreen() {
                   ? 'border-brand bg-brand/10'
                   : 'border-border dark:border-border-dark'
               }`}>
-              <Text>No goal race</Text>
+              <Text>{t('planBuilder.noGoalRace')}</Text>
             </Pressable>
             {events.map((e) => (
               <Pressable
@@ -164,8 +167,10 @@ export default function NewPlanScreen() {
                 }`}>
                 <Text>{e.name}</Text>
                 <Text variant="caption" muted>
-                  {longDate(e.date)} · {e.priority} race
-                  {goalEventId === e.id && targetWeeks ? ` · ${targetWeeks} weeks out` : ''}
+                  {t('planBuilder.raceLine', { date: longDate(e.date), priority: e.priority })}
+                  {goalEventId === e.id && targetWeeks
+                    ? t('planBuilder.weeksOut', { count: targetWeeks })
+                    : ''}
                 </Text>
               </Pressable>
             ))}
@@ -174,7 +179,7 @@ export default function NewPlanScreen() {
           {/* Start date */}
           <View className="gap-sm">
             <Text variant="label" muted>
-              Starts
+              {t('planBuilder.starts')}
             </Text>
             <View className="flex-row items-center justify-between rounded-md border border-border bg-surface px-sm py-2 dark:border-border-dark dark:bg-surface-dark">
               <Pressable onPress={() => shiftStart(-7)} hitSlop={12} className="p-sm">
@@ -189,7 +194,7 @@ export default function NewPlanScreen() {
 
           {/* Phase breakdown */}
           <View className="gap-sm">
-            <Text variant="heading">Periodization</Text>
+            <Text variant="heading">{t('planBuilder.periodization')}</Text>
             <PhaseAllocator blocks={blocks} onChange={editBlocks} targetWeeks={targetWeeks} />
           </View>
 
@@ -197,7 +202,7 @@ export default function NewPlanScreen() {
           <View className="gap-xs rounded-lg bg-surface p-md dark:bg-surface-dark">
             <View className="flex-row justify-between">
               <Text variant="caption" muted>
-                Plan runs
+                {t('planBuilder.planRuns')}
               </Text>
               <Text variant="caption">
                 {longDate(startDate)} → {longDate(endDate)}
@@ -205,8 +210,8 @@ export default function NewPlanScreen() {
             </View>
             {ranges.map((r) => (
               <View key={r.index} className="flex-row justify-between">
-                <Text variant="caption" muted className="capitalize">
-                  {r.block.phase}
+                <Text variant="caption" muted>
+                  {t(`phase.${r.block.phase}`)}
                 </Text>
                 <Text variant="caption">
                   {longDate(r.startDate)} → {longDate(r.endDate)}
@@ -216,7 +221,7 @@ export default function NewPlanScreen() {
           </View>
 
           <Button
-            label="Create plan"
+            label={t('planBuilder.createPlan')}
             onPress={handleSubmit(onSubmit)}
             disabled={blocks.length === 0}
           />

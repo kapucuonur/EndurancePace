@@ -14,6 +14,7 @@ import { SportGlyph } from '@/components/SportGlyph';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useT, type TranslateFn } from '@/i18n/useT';
 import { longDate, todayISO } from '@/lib/date';
 import { formatDurationShort } from '@/lib/format';
 import api from '@/services/api';
@@ -22,6 +23,7 @@ import type { AppSnapshot, Workout } from '@/types/domain';
 
 export default function CoachAthleteScreen() {
   const router = useRouter();
+  const t = useT();
   const { athleteId } = useLocalSearchParams<{ athleteId: string }>();
   const [snapshot, setSnapshot] = useState<AppSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,19 +58,25 @@ export default function CoachAthleteScreen() {
 
   const withdraw = (w: Workout) =>
     Alert.alert(
-      'Withdraw workout?',
-      `Remove "${w.title}" from ${athlete?.name ?? 'this athlete'}'s calendar.`,
+      t('coach.withdrawTitle'),
+      t('coach.withdrawBody', {
+        title: w.title,
+        name: athlete?.name ?? t('workoutBuilder.thisAthlete'),
+      }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Withdraw',
+          text: t('coach.withdraw'),
           style: 'destructive',
           onPress: async () => {
             try {
               await api.withdrawAssignedWorkout(athleteId!, w.id);
               await load();
             } catch (e) {
-              Alert.alert('Could not withdraw', e instanceof Error ? e.message : String(e));
+              Alert.alert(
+                t('coach.couldNotWithdraw'),
+                e instanceof Error ? e.message : String(e),
+              );
             }
           },
         },
@@ -77,7 +85,7 @@ export default function CoachAthleteScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ title: athlete?.name ?? 'Athlete' }} />
+      <Stack.Screen options={{ title: athlete?.name ?? t('nav.athlete') }} />
       <ScrollView
         contentContainerClassName="p-lg gap-lg pb-28"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}>
@@ -93,7 +101,7 @@ export default function CoachAthleteScreen() {
         ) : (
           <>
             <Button
-              label="Assign a workout"
+              label={t('coach.assignWorkout')}
               onPress={() =>
                 router.push({
                   pathname: '/workout/new',
@@ -102,8 +110,18 @@ export default function CoachAthleteScreen() {
               }
             />
 
-            <Section title="Upcoming" workouts={upcoming} onWithdraw={withdraw} />
-            <Section title="Recent" workouts={past.slice(0, 12)} onWithdraw={withdraw} />
+            <Section
+              t={t}
+              title={t('coach.upcoming')}
+              workouts={upcoming}
+              onWithdraw={withdraw}
+            />
+            <Section
+              t={t}
+              title={t('coach.recent')}
+              workouts={past.slice(0, 12)}
+              onWithdraw={withdraw}
+            />
           </>
         )}
       </ScrollView>
@@ -112,10 +130,12 @@ export default function CoachAthleteScreen() {
 }
 
 function Section({
+  t,
   title,
   workouts,
   onWithdraw,
 }: {
+  t: TranslateFn;
   title: string;
   workouts: Workout[];
   onWithdraw: (w: Workout) => void;
@@ -125,7 +145,7 @@ function Section({
       <Text variant="heading">{title}</Text>
       {workouts.length === 0 ? (
         <Text variant="caption" muted>
-          Nothing here.
+          {t('coach.nothingHere')}
         </Text>
       ) : (
         workouts.map((w) => {
@@ -141,15 +161,18 @@ function Section({
                   {w.title}
                 </Text>
                 <Text variant="caption" muted>
-                  {w.date ? longDate(w.date) : ''} ·{' '}
-                  {formatDurationShort(done?.durationSeconds ?? w.plannedDuration)} ·{' '}
-                  {done?.actualTss ?? w.plannedTss} TSS · {w.status}
+                  {t('coach.workoutLine', {
+                    date: w.date ? longDate(w.date) : '—',
+                    duration: formatDurationShort(done?.durationSeconds ?? w.plannedDuration),
+                    tss: done?.actualTss ?? w.plannedTss,
+                    status: t(`status.${w.status}`),
+                  })}
                 </Text>
               </View>
               {fromCoach ? (
                 <View className="rounded-full bg-brand-tint px-2 py-0.5 dark:bg-surface-alt-dark">
                   <Text variant="caption" className="text-brand">
-                    yours
+                    {t('coach.yours')}
                   </Text>
                 </View>
               ) : null}

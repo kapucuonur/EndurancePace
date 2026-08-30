@@ -12,10 +12,19 @@ import {
   parseISO,
   startOfWeek,
 } from 'date-fns';
+import { de, enUS, es, it, ru, tr } from 'date-fns/locale';
 
+import { activeLocale } from '@/i18n';
 import type { ISODate } from '@/types/domain';
 
 const WEEK_OPTS = { weekStartsOn: 1 } as const; // Monday
+
+const DATE_FNS_LOCALES = { en: enUS, tr, de, ru, it, es } as const;
+
+/** date-fns format options carrying the app's current locale. */
+function fmtOpts() {
+  return { locale: DATE_FNS_LOCALES[activeLocale()] };
+}
 
 export function toISODate(d: Date): ISODate {
   return format(d, 'yyyy-MM-dd');
@@ -60,17 +69,17 @@ export function daysBetween(a: ISODate, b: ISODate): number {
 }
 
 export function dayLabel(dateISO: ISODate): string {
-  return format(fromISODate(dateISO), 'EEE');
+  return format(fromISODate(dateISO), 'EEE', fmtOpts());
 }
 
 export function dayNumber(dateISO: ISODate): string {
-  return format(fromISODate(dateISO), 'd');
+  return format(fromISODate(dateISO), 'd', fmtOpts());
 }
 
 export function longDate(dateISO: ISODate): string {
-  return format(fromISODate(dateISO), 'EEEE, MMMM d');
+  return format(fromISODate(dateISO), 'EEEE, d MMMM', fmtOpts());
 }
 
 export function monthTitle(dateISO: ISODate): string {
-  return format(fromISODate(dateISO), 'MMMM yyyy');
+  return format(fromISODate(dateISO), 'LLLL yyyy', fmtOpts());
 }
