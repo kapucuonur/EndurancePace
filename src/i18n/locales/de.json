@@ -90,7 +90,12 @@
     "haveAccount": "Schon ein Konto? ",
     "signUpLink": "Registrieren",
     "signInLink": "Anmelden",
-    "mockNote": "Demo-Modus — jede E-Mail und jedes Passwort funktioniert."
+    "mockNote": "Demo-Modus — jede E-Mail und jedes Passwort funktioniert.",
+    "tagline": "Training mit Absicht.",
+    "taglineSub": "Plane deine Saison, synchronisiere jede Einheit, beobachte den Trend.",
+    "welcomeBack": "Willkommen zurück",
+    "getStarted": "Konto erstellen",
+    "heroAlt": "Triathlet im Rennen auf einem Zeitfahrrad"
   },
   "calendar": {
     "thisWeek": "Diese Woche",

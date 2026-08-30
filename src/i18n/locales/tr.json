@@ -90,7 +90,12 @@
     "haveAccount": "Zaten hesabın var mı? ",
     "signUpLink": "Kaydol",
     "signInLink": "Giriş yap",
-    "mockNote": "Demo modu — herhangi bir e-posta ve şifre çalışır."
+    "mockNote": "Demo modu — herhangi bir e-posta ve şifre çalışır.",
+    "tagline": "Bilinçli antrenman.",
+    "taglineSub": "Sezonunu kur, her seansı eşitle, trendi izle.",
+    "welcomeBack": "Tekrar hoş geldin",
+    "getStarted": "Hesabını oluştur",
+    "heroAlt": "Zamana karşı bisikletinde yarışan triatlet"
   },
   "calendar": {
     "thisWeek": "Bu Hafta",

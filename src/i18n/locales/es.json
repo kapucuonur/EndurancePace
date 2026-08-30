@@ -90,7 +90,12 @@
     "haveAccount": "¿Ya tienes cuenta? ",
     "signUpLink": "Regístrate",
     "signInLink": "Inicia sesión",
-    "mockNote": "Modo demo — funciona cualquier correo y contraseña."
+    "mockNote": "Modo demo — funciona cualquier correo y contraseña.",
+    "tagline": "Entrena con intención.",
+    "taglineSub": "Estructura tu temporada, sincroniza cada sesión, observa la tendencia.",
+    "welcomeBack": "Bienvenido de nuevo",
+    "getStarted": "Crea tu cuenta",
+    "heroAlt": "Triatleta compitiendo en una bici de contrarreloj"
   },
   "calendar": {
     "thisWeek": "Esta semana",

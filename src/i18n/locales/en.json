@@ -90,7 +90,12 @@
     "haveAccount": "Already have an account? ",
     "signUpLink": "Sign up",
     "signInLink": "Sign in",
-    "mockNote": "Mock mode — any email and password works."
+    "mockNote": "Mock mode — any email and password works.",
+    "tagline": "Train with intent.",
+    "taglineSub": "Structure your season, sync every session, watch the trend.",
+    "welcomeBack": "Welcome back",
+    "getStarted": "Create your account",
+    "heroAlt": "Triathlete racing on a time-trial bike"
   },
   "calendar": {
     "thisWeek": "This Week",
