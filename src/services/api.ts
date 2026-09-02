@@ -28,6 +28,9 @@ import type {
   GarminSyncResult,
   ID,
   ISODate,
+  Message,
+  MessagePartner,
+  MessageThread,
   RaceEvent,
   ThresholdValues,
   TrainingPlan,
@@ -104,6 +107,19 @@ export interface EnduranceApi {
   ): Promise<Workout>;
   /** Withdraw a workout this coach assigned. */
   withdrawAssignedWorkout(athleteId: ID, workoutId: ID): Promise<void>;
+
+  // Messaging — coach ↔ athlete 1:1 chat (live backend only).
+  /** One row per conversation partner, most recent activity first. */
+  listMessageThreads(): Promise<MessageThread[]>;
+  /** The conversation with `partnerId`. Marks their messages read as a side effect. */
+  listMessages(
+    partnerId: ID,
+    before?: ISODate,
+  ): Promise<{ partner: MessagePartner; messages: Message[] }>;
+  /** Send a message to `partnerId`. */
+  sendMessage(partnerId: ID, body: string): Promise<Message>;
+  /** Total unread messages, for the tab badge. */
+  unreadMessageCount(): Promise<number>;
 }
 
 /** Garmin sync only works against the live backend, not the mock layer. */
@@ -113,6 +129,10 @@ const GARMIN_NEEDS_BACKEND =
 /** Coaching is a live-backend feature (needs real multi-athlete data). */
 const COACH_NEEDS_BACKEND =
   'Coaching needs the live backend. Set EXPO_PUBLIC_USE_MOCK_API=false to use it.';
+
+/** Messaging is a live-backend feature (needs two real accounts). */
+const MESSAGING_NEEDS_BACKEND =
+  'Messaging needs the live backend. Set EXPO_PUBLIC_USE_MOCK_API=false to use it.';
 
 export type NewPlan = Omit<TrainingPlan, 'id' | 'createdAt' | 'updatedAt'>;
 export type NewEvent = Omit<RaceEvent, 'id' | 'createdAt' | 'updatedAt'>;
@@ -422,6 +442,24 @@ class MockApi implements EnduranceApi {
   async withdrawAssignedWorkout(): Promise<void> {
     throw new Error(COACH_NEEDS_BACKEND);
   }
+
+  // --- Messaging (unsupported in mock mode) ---
+
+  async listMessageThreads(): Promise<MessageThread[]> {
+    return [];
+  }
+
+  async listMessages(): Promise<{ partner: MessagePartner; messages: Message[] }> {
+    throw new Error(MESSAGING_NEEDS_BACKEND);
+  }
+
+  async sendMessage(): Promise<Message> {
+    throw new Error(MESSAGING_NEEDS_BACKEND);
+  }
+
+  async unreadMessageCount(): Promise<number> {
+    return 0;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -622,6 +660,31 @@ class RestApi implements EnduranceApi {
     return this.req(`/coach/athletes/${athleteId}/workouts/${workoutId}`, {
       method: 'DELETE',
     });
+  }
+
+  // --- Messaging ---
+
+  listMessageThreads(): Promise<MessageThread[]> {
+    return this.req('/messages/threads');
+  }
+
+  listMessages(
+    partnerId: ID,
+    before?: ISODate,
+  ): Promise<{ partner: MessagePartner; messages: Message[] }> {
+    return this.req(`/messages/with/${partnerId}${RestApi.qs({ before })}`);
+  }
+
+  sendMessage(partnerId: ID, body: string): Promise<Message> {
+    return this.req(`/messages/with/${partnerId}`, {
+      method: 'POST',
+      ...RestApi.body({ body }),
+    });
+  }
+
+  async unreadMessageCount(): Promise<number> {
+    const { count } = await this.req<{ count: number }>('/messages/unread-count');
+    return count;
   }
 }
 

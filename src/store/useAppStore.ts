@@ -24,6 +24,8 @@ import type {
   GarminSyncResult,
   ID,
   ISODate,
+  Message,
+  MessageThread,
   RaceEvent,
   ThresholdValues,
   TrainingPlan,
@@ -100,6 +102,22 @@ interface CoachState {
 
 const INITIAL_COACH: CoachState = { athletes: [], loading: false, error: null };
 
+interface MessagesState {
+  /** Conversation list, newest activity first. */
+  threads: MessageThread[];
+  /** Total unread across all threads — drives the tab badge. */
+  unreadCount: number;
+  loading: boolean;
+  error: string | null;
+}
+
+const INITIAL_MESSAGES: MessagesState = {
+  threads: [],
+  unreadCount: 0,
+  loading: false,
+  error: null,
+};
+
 const LOCALE_KEY = 'endurancepace:locale';
 
 interface AppState {
@@ -118,6 +136,7 @@ interface AppState {
   workouts: Workout[];
   garmin: GarminState;
   coach: CoachState;
+  messages: MessagesState;
 
   // locale
   initLocale: () => Promise<void>;
@@ -164,6 +183,11 @@ interface AppState {
   // coach
   loadCoachAthletes: () => Promise<void>;
   assignWorkoutTo: (athleteId: ID, input: NewWorkout) => Promise<Workout>;
+
+  // messaging
+  loadMessageThreads: () => Promise<void>;
+  loadUnreadMessageCount: () => Promise<void>;
+  sendMessage: (partnerId: ID, body: string) => Promise<Message>;
 }
 
 const upsert = <T extends { id: ID }>(list: T[], item: T): T[] => {
@@ -181,6 +205,7 @@ const EMPTY_DATA = {
   workouts: [] as Workout[],
   garmin: INITIAL_GARMIN,
   coach: INITIAL_COACH,
+  messages: INITIAL_MESSAGES,
   hydrated: false,
 };
 
@@ -200,6 +225,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   workouts: [],
   garmin: INITIAL_GARMIN,
   coach: INITIAL_COACH,
+  messages: INITIAL_MESSAGES,
 
   initLocale: async () => {
     let locale: Locale = deviceLocale();
@@ -509,6 +535,35 @@ export const useAppStore = create<AppState>((set, get) => ({
     // changes — the screen re-fetches that athlete's data itself.
     return api.assignWorkout(athleteId, input);
   },
+
+  // --- messaging ---
+
+  loadMessageThreads: async () => {
+    set((s) => ({ messages: { ...s.messages, loading: true, error: null } }));
+    try {
+      const threads = await api.listMessageThreads();
+      const unreadCount = threads.reduce((n, t) => n + t.unreadCount, 0);
+      set((s) => ({ messages: { ...s.messages, loading: false, threads, unreadCount } }));
+    } catch (e) {
+      set((s) => ({ messages: { ...s.messages, loading: false, error: errText(e) } }));
+    }
+  },
+
+  loadUnreadMessageCount: async () => {
+    try {
+      const unreadCount = await api.unreadMessageCount();
+      set((s) => ({ messages: { ...s.messages, unreadCount } }));
+    } catch {
+      // A transient failure here just leaves the badge stale — not worth surfacing.
+    }
+  },
+
+  sendMessage: async (partnerId, body) => {
+    const message = await api.sendMessage(partnerId, body);
+    // Refresh the thread list so the preview / ordering stays current.
+    void get().loadMessageThreads();
+    return message;
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -553,5 +608,9 @@ export const useGarmin = () => useAppStore((s) => s.garmin);
 
 export const useCoach = () => useAppStore((s) => s.coach);
 export const useIsCoach = () => useAppStore((s) => s.athlete?.role === 'coach');
+
+// `messages` is only replaced wholesale by the actions above — reference-stable.
+export const useMessages = () => useAppStore((s) => s.messages);
+export const useUnreadMessageCount = () => useAppStore((s) => s.messages.unreadCount);
 
 export const useLocale = () => useAppStore((s) => s.locale);

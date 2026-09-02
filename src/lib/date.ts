@@ -9,13 +9,16 @@ import {
   eachDayOfInterval,
   endOfWeek,
   format,
+  formatDistanceToNow,
+  isToday,
+  isYesterday,
   parseISO,
   startOfWeek,
 } from 'date-fns';
 import { de, enUS, es, it, ru, tr } from 'date-fns/locale';
 
-import { activeLocale } from '@/i18n';
-import type { ISODate } from '@/types/domain';
+import { activeLocale, i18n } from '@/i18n';
+import type { ISODate, ISODateTime } from '@/types/domain';
 
 const WEEK_OPTS = { weekStartsOn: 1 } as const; // Monday
 
@@ -82,4 +85,22 @@ export function longDate(dateISO: ISODate): string {
 
 export function monthTitle(dateISO: ISODate): string {
   return format(fromISODate(dateISO), 'LLLL yyyy', fmtOpts());
+}
+
+/** "3 min ago", "2 days ago" — for message timestamps and last-seen lines. */
+export function relativeTime(iso: ISODateTime): string {
+  return formatDistanceToNow(parseISO(iso), { addSuffix: true, ...fmtOpts() });
+}
+
+/** Day separator label for a chat: "Today" / "Yesterday" / "Monday, 1 September". */
+export function dayHeading(iso: ISODateTime): string {
+  const d = parseISO(iso);
+  if (isToday(d)) return i18n.t('time.today');
+  if (isYesterday(d)) return i18n.t('time.yesterday');
+  return format(d, 'EEEE, d MMMM', fmtOpts());
+}
+
+/** Clock time for a single message bubble, e.g. "14:32". */
+export function clockTime(iso: ISODateTime): string {
+  return format(parseISO(iso), 'HH:mm');
 }

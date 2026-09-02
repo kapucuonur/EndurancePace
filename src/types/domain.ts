@@ -254,6 +254,36 @@ export interface Workout {
 }
 
 // ---------------------------------------------------------------------------
+// Messaging — coach ↔ athlete 1:1 chat
+// ---------------------------------------------------------------------------
+
+/** One direct message. `senderId` / `recipientId` are athlete ids. */
+export interface Message {
+  id: ID;
+  senderId: ID;
+  recipientId: ID;
+  body: string;
+  createdAt: ISODateTime;
+  /** `null` until the recipient opens the thread. */
+  readAt: ISODateTime | null;
+}
+
+/** The other athlete in a conversation. */
+export interface MessagePartner {
+  id: ID;
+  name: string;
+  email: string;
+  role: AthleteRole;
+}
+
+/** One row in the conversation list. */
+export interface MessageThread {
+  partner: MessagePartner;
+  lastMessage: Message;
+  unreadCount: number;
+}
+
+// ---------------------------------------------------------------------------
 // Garmin sync
 // ---------------------------------------------------------------------------
 
