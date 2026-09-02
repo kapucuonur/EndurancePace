@@ -226,6 +226,7 @@
     "calories": "Kalori",
     "tss": "TSS",
     "rpe": "RPE",
+    "rpeValue": "RPE %{value}",
     "plannedValue": "planlanan %{value}",
     "logged": "Kaydedildi",
     "structure": "Yapı",

@@ -10,11 +10,17 @@ import { Text } from '@/components/ui/Text';
 import { flattenSteps } from '@/domain/workout';
 import { useT, type TranslateFn } from '@/i18n/useT';
 import { longDate } from '@/lib/date';
-import { formatDistance, formatDuration, formatDurationShort, formatSpeed } from '@/lib/format';
+import {
+  formatDistance,
+  formatDuration,
+  formatDurationShort,
+  formatPace,
+  formatSpeed,
+} from '@/lib/format';
 import { goBack } from '@/lib/nav';
 import { useAppStore, useWorkout } from '@/store/useAppStore';
 import { palette, stepColors } from '@/theme/tokens';
-import type { Workout } from '@/types/domain';
+import type { StepTarget, Workout } from '@/types/domain';
 
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -108,8 +114,13 @@ export default function WorkoutDetailScreen() {
               <View className="flex-1">
                 <Text variant="label">{b.label ?? t(`stepType.${b.type}`)}</Text>
                 <Text variant="caption" muted>
-                  {formatDuration(b.seconds)}
-                  {b.zone ? ` · ${t('workoutDetail.zone', { zone: b.zone })}` : ''}
+                  {[
+                    b.distanceMeters ? formatDistance(b.distanceMeters) : null,
+                    formatDuration(b.seconds),
+                    describeTarget(b.target, t),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </Text>
               </View>
             </View>
@@ -287,6 +298,26 @@ function ActualCard({ workout, t }: { workout: Workout; t: TranslateFn }) {
       ) : null}
     </View>
   );
+}
+
+/** One-line "how hard / how fast" summary for a step's target. */
+function describeTarget(target: StepTarget | undefined, t: TranslateFn): string | null {
+  if (!target) return null;
+  if (target.paceTarget) {
+    const { min, max, unit } = target.paceTarget;
+    const suffix = unit === 'sec_per_100m' ? t('units.per100m') : t('units.perKm');
+    // min is the faster (smaller) bound, max the slower (larger) one.
+    return `${formatPace(max)}–${formatPace(min)} ${suffix}`;
+  }
+  if (target.powerWatts) {
+    return `${target.powerWatts.min}–${target.powerWatts.max} ${t('units.watts')}`;
+  }
+  if (target.hrZone) return t('workoutDetail.zone', { zone: target.hrZone });
+  if (target.powerZone) return t('workoutDetail.zone', { zone: target.powerZone });
+  if (typeof target.rpe === 'number') {
+    return t('workoutDetail.rpeValue', { value: target.rpe });
+  }
+  return null;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

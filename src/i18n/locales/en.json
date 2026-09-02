@@ -226,6 +226,7 @@
     "calories": "Calories",
     "tss": "TSS",
     "rpe": "RPE",
+    "rpeValue": "RPE %{value}",
     "plannedValue": "planned %{value}",
     "logged": "Logged",
     "structure": "Structure",

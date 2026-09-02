@@ -53,6 +53,10 @@ export interface TimelineBlock {
   type: Step['type'];
   label?: string;
   seconds: number;
+  /** Planned distance in metres when the step is distance-based, else undefined. */
+  distanceMeters?: number;
+  /** The step's intensity target, verbatim, for rendering "how hard / how fast". */
+  target?: StepTarget;
   /** Zone number 1-5 if the target maps to one, else undefined. */
   zone?: number;
   /** IF used for this block. */
@@ -144,6 +148,8 @@ export function flattenSteps(
           type: step.type,
           label: step.label,
           seconds: Math.round(stepSeconds(step, sport)),
+          distanceMeters: step.duration?.kind === 'distance' ? step.duration.meters : undefined,
+          target: step.target,
           zone: zoneFromTarget(step.target),
           intensityFactor: ifFromTarget(step.target, sport, thresholds),
           isHrEstimate: step.target?.hrZone != null,
