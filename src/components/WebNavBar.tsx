@@ -13,6 +13,7 @@ const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   index: 'calendar',
   plans: 'map',
   library: 'library',
+  messages: 'chatbubble-ellipses',
   profile: 'person',
 };
 

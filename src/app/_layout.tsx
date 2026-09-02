@@ -10,7 +10,7 @@ import {
 } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { AppState, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -24,6 +24,7 @@ export default function RootLayout() {
   const initLocale = useAppStore((s) => s.initLocale);
   const ready = useAppStore((s) => s.session.ready);
   const token = useAppStore((s) => s.session.token);
+  const loadUnreadMessageCount = useAppStore((s) => s.loadUnreadMessageCount);
   const segments = useSegments();
   const router = useRouter();
 
@@ -31,6 +32,21 @@ export default function RootLayout() {
     void initLocale();
     void initSession();
   }, [initLocale, initSession]);
+
+  // Keep the Messages tab badge current: poll while signed in, and refresh
+  // whenever the app returns to the foreground.
+  useEffect(() => {
+    if (!token) return;
+    void loadUnreadMessageCount();
+    const timer = setInterval(() => void loadUnreadMessageCount(), 30_000);
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') void loadUnreadMessageCount();
+    });
+    return () => {
+      clearInterval(timer);
+      sub.remove();
+    };
+  }, [token, loadUnreadMessageCount]);
 
   // Auth gate: bounce between /login and the tabs based on the token.
   useEffect(() => {
@@ -63,6 +79,10 @@ export default function RootLayout() {
               <Stack.Screen name="garmin" options={{ title: t('nav.garminConnect') }} />
               <Stack.Screen name="coach/index" options={{ title: t('nav.coaching') }} />
               <Stack.Screen name="coach/[athleteId]" options={{ title: t('nav.athlete') }} />
+              <Stack.Screen
+                name="messages/[partnerId]"
+                options={{ title: t('nav.messages') }}
+              />
             </Stack>
           ) : (
             <View className="flex-1 bg-bg dark:bg-bg-dark" />

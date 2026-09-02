@@ -25,7 +25,8 @@
     "fitnessTrends": "Andamento della forma",
     "garminConnect": "Garmin Connect",
     "coaching": "Coaching",
-    "athlete": "Atleta"
+    "athlete": "Atleta",
+    "messages": "Messaggi"
   },
   "sport": {
     "swim": "Nuoto",
@@ -73,7 +74,9 @@
     "justNow": "proprio ora",
     "minutesAgo": "%{count} min fa",
     "hoursAgo": "%{count} h fa",
-    "daysAgo": "%{count} g fa"
+    "daysAgo": "%{count} g fa",
+    "today": "Oggi",
+    "yesterday": "Ieri"
   },
   "login": {
     "signInSubtitle": "Accedi al tuo diario di allenamento",
@@ -326,6 +329,13 @@
     "withdraw": "Ritira",
     "couldNotWithdraw": "Impossibile ritirare",
     "workoutLine": "%{date} · %{duration} · %{tss} TSS · %{status}"
+  },
+  "messages": {
+    "empty": "Ancora nessuna conversazione.",
+    "emptyHint": "Qui compaiono i messaggi con il tuo coach e gli atleti.",
+    "conversationEmpty": "Ancora nessun messaggio. Saluta 👋",
+    "composerPlaceholder": "Scrivi un messaggio…",
+    "sendFailed": "Invio non riuscito — riprova."
   },
   "zoneTable": {
     "setThreshold": "Imposta la soglia corrispondente per calcolare."

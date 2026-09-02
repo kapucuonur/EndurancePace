@@ -25,7 +25,8 @@
     "fitnessTrends": "Tendencias de forma",
     "garminConnect": "Garmin Connect",
     "coaching": "Entrenamiento",
-    "athlete": "Atleta"
+    "athlete": "Atleta",
+    "messages": "Mensajes"
   },
   "sport": {
     "swim": "Natación",
@@ -73,7 +74,9 @@
     "justNow": "ahora mismo",
     "minutesAgo": "hace %{count} min",
     "hoursAgo": "hace %{count} h",
-    "daysAgo": "hace %{count} d"
+    "daysAgo": "hace %{count} d",
+    "today": "Hoy",
+    "yesterday": "Ayer"
   },
   "login": {
     "signInSubtitle": "Inicia sesión en tu diario de entrenamiento",
@@ -326,6 +329,13 @@
     "withdraw": "Retirar",
     "couldNotWithdraw": "No se pudo retirar",
     "workoutLine": "%{date} · %{duration} · %{tss} TSS · %{status}"
+  },
+  "messages": {
+    "empty": "Aún no hay conversaciones.",
+    "emptyHint": "Aquí aparecen los mensajes con tu entrenador y atletas.",
+    "conversationEmpty": "Aún no hay mensajes. Saluda 👋",
+    "composerPlaceholder": "Escribe un mensaje…",
+    "sendFailed": "No se pudo enviar — inténtalo de nuevo."
   },
   "zoneTable": {
     "setThreshold": "Establece el umbral correspondiente para calcular."

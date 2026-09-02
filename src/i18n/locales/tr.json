@@ -25,7 +25,8 @@
     "fitnessTrends": "Form Trendleri",
     "garminConnect": "Garmin Connect",
     "coaching": "Antrenörlük",
-    "athlete": "Sporcu"
+    "athlete": "Sporcu",
+    "messages": "Mesajlar"
   },
   "sport": {
     "swim": "Yüzme",
@@ -73,7 +74,9 @@
     "justNow": "az önce",
     "minutesAgo": "%{count} dk önce",
     "hoursAgo": "%{count} sa önce",
-    "daysAgo": "%{count} gün önce"
+    "daysAgo": "%{count} gün önce",
+    "today": "Bugün",
+    "yesterday": "Dün"
   },
   "login": {
     "signInSubtitle": "Antrenman günlüğüne giriş yap",
@@ -326,6 +329,13 @@
     "withdraw": "Geri çek",
     "couldNotWithdraw": "Geri çekilemedi",
     "workoutLine": "%{date} · %{duration} · %{tss} TSS · %{status}"
+  },
+  "messages": {
+    "empty": "Henüz konuşma yok.",
+    "emptyHint": "Antrenörün ve sporcularınla mesajlar burada görünür.",
+    "conversationEmpty": "Henüz mesaj yok. Merhaba de 👋",
+    "composerPlaceholder": "Bir mesaj yaz…",
+    "sendFailed": "Gönderilemedi — tekrar dene."
   },
   "zoneTable": {
     "setThreshold": "Hesaplamak için ilgili eşiği gir."

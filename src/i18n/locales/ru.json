@@ -25,7 +25,8 @@
     "fitnessTrends": "Динамика формы",
     "garminConnect": "Garmin Connect",
     "coaching": "Тренерство",
-    "athlete": "Спортсмен"
+    "athlete": "Спортсмен",
+    "messages": "Сообщения"
   },
   "sport": {
     "swim": "Плавание",
@@ -73,7 +74,9 @@
     "justNow": "только что",
     "minutesAgo": "%{count} мин назад",
     "hoursAgo": "%{count} ч назад",
-    "daysAgo": "%{count} дн назад"
+    "daysAgo": "%{count} дн назад",
+    "today": "Сегодня",
+    "yesterday": "Вчера"
   },
   "login": {
     "signInSubtitle": "Войдите в свой дневник тренировок",
@@ -326,6 +329,13 @@
     "withdraw": "Отозвать",
     "couldNotWithdraw": "Не удалось отозвать",
     "workoutLine": "%{date} · %{duration} · %{tss} TSS · %{status}"
+  },
+  "messages": {
+    "empty": "Пока нет переписок.",
+    "emptyHint": "Здесь появятся сообщения с тренером и спортсменами.",
+    "conversationEmpty": "Сообщений пока нет. Поздоровайтесь 👋",
+    "composerPlaceholder": "Написать сообщение…",
+    "sendFailed": "Не удалось отправить — попробуйте ещё раз."
   },
   "zoneTable": {
     "setThreshold": "Укажите соответствующий порог для расчёта."

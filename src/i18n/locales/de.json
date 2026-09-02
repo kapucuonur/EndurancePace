@@ -25,7 +25,8 @@
     "fitnessTrends": "Formkurven",
     "garminConnect": "Garmin Connect",
     "coaching": "Coaching",
-    "athlete": "Athlet"
+    "athlete": "Athlet",
+    "messages": "Nachrichten"
   },
   "sport": {
     "swim": "Schwimmen",
@@ -73,7 +74,9 @@
     "justNow": "gerade eben",
     "minutesAgo": "vor %{count} Min.",
     "hoursAgo": "vor %{count} Std.",
-    "daysAgo": "vor %{count} T."
+    "daysAgo": "vor %{count} T.",
+    "today": "Heute",
+    "yesterday": "Gestern"
   },
   "login": {
     "signInSubtitle": "Melde dich bei deinem Trainingstagebuch an",
@@ -326,6 +329,13 @@
     "withdraw": "Zurückziehen",
     "couldNotWithdraw": "Konnte nicht zurückgezogen werden",
     "workoutLine": "%{date} · %{duration} · %{tss} TSS · %{status}"
+  },
+  "messages": {
+    "empty": "Noch keine Unterhaltungen.",
+    "emptyHint": "Nachrichten mit deinem Coach und deinen Athleten erscheinen hier.",
+    "conversationEmpty": "Noch keine Nachrichten. Sag Hallo 👋",
+    "composerPlaceholder": "Nachricht schreiben…",
+    "sendFailed": "Senden fehlgeschlagen – erneut versuchen."
   },
   "zoneTable": {
     "setThreshold": "Setze den passenden Schwellenwert zur Berechnung."

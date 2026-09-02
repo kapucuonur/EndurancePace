@@ -25,7 +25,8 @@
     "fitnessTrends": "Fitness Trends",
     "garminConnect": "Garmin Connect",
     "coaching": "Coaching",
-    "athlete": "Athlete"
+    "athlete": "Athlete",
+    "messages": "Messages"
   },
   "sport": {
     "swim": "Swim",
@@ -73,7 +74,9 @@
     "justNow": "just now",
     "minutesAgo": "%{count}m ago",
     "hoursAgo": "%{count}h ago",
-    "daysAgo": "%{count}d ago"
+    "daysAgo": "%{count}d ago",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "login": {
     "signInSubtitle": "Sign in to your training log",
@@ -326,6 +329,13 @@
     "withdraw": "Withdraw",
     "couldNotWithdraw": "Could not withdraw",
     "workoutLine": "%{date} · %{duration} · %{tss} TSS · %{status}"
+  },
+  "messages": {
+    "empty": "No conversations yet.",
+    "emptyHint": "Messages with your coach and athletes show up here.",
+    "conversationEmpty": "No messages yet. Say hello 👋",
+    "composerPlaceholder": "Write a message…",
+    "sendFailed": "Couldn't send — try again."
   },
   "zoneTable": {
     "setThreshold": "Set the matching threshold to calculate."

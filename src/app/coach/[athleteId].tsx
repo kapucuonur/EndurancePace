@@ -85,7 +85,20 @@ export default function CoachAthleteScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ title: athlete?.name ?? t('nav.athlete') }} />
+      <Stack.Screen
+        options={{
+          title: athlete?.name ?? t('nav.athlete'),
+          headerRight: () =>
+            athleteId ? (
+              <Ionicons
+                name="chatbubble-ellipses-outline"
+                size={22}
+                color={palette.brand}
+                onPress={() => router.push(`/messages/${athleteId}`)}
+              />
+            ) : null,
+        }}
+      />
       <ScrollView
         contentContainerClassName="p-lg gap-lg pb-28"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void load()} />}>

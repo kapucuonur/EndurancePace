@@ -4,6 +4,7 @@ import { Platform, useColorScheme } from 'react-native';
 
 import { WebNavBar } from '@/components/WebNavBar';
 import { useT } from '@/i18n/useT';
+import { useUnreadMessageCount } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 
 const isWeb = Platform.OS === 'web';
@@ -11,6 +12,7 @@ const isWeb = Platform.OS === 'web';
 export default function TabsLayout() {
   const dark = useColorScheme() === 'dark';
   const t = useT();
+  const unread = useUnreadMessageCount();
   return (
     <Tabs
       // Web gets a custom top navbar (tab links + a language menu); phones keep
@@ -48,6 +50,16 @@ export default function TabsLayout() {
           title: t('nav.library'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="library" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: t('nav.messages'),
+          tabBarBadge: unread > 0 ? unread : undefined,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble-ellipses" color={color} size={size} />
           ),
         }}
       />
