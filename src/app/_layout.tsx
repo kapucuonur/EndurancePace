@@ -48,12 +48,14 @@ export default function RootLayout() {
     };
   }, [token, loadUnreadMessageCount]);
 
-  // Auth gate: bounce between /login and the tabs based on the token.
+  // Auth gate: bounce between /login and the tabs based on the token,
+  // allowing public informational pages like privacy and terms.
   useEffect(() => {
     if (!ready) return;
-    const onLogin = segments[0] === 'login';
-    if (!token && !onLogin) router.replace('/login');
-    else if (token && onLogin) router.replace('/(tabs)');
+    const isPublicPage =
+      segments[0] === 'login' || segments[0] === 'privacy' || segments[0] === 'terms';
+    if (!token && !isPublicPage) router.replace('/login');
+    else if (token && segments[0] === 'login') router.replace('/(tabs)');
   }, [ready, token, segments, router]);
 
   return (
@@ -64,6 +66,8 @@ export default function RootLayout() {
           {ready ? (
             <Stack screenOptions={{ headerShadowVisible: false }}>
               <Stack.Screen name="login" options={{ headerShown: false }} />
+              <Stack.Screen name="privacy" options={{ headerShown: false }} />
+              <Stack.Screen name="terms" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen
                 name="workout/new"

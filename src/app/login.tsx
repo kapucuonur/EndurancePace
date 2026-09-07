@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -37,6 +38,7 @@ const softShadow = {
 const GRADIENT = ['rgba(9,12,18,0.15)', 'rgba(9,12,18,0.55)', 'rgba(9,12,18,0.92)'] as const;
 
 export default function LoginScreen() {
+  const router = useRouter();
   const t = useT();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -177,6 +179,21 @@ export default function LoginScreen() {
           {t('login.mockNote')}
         </Text>
       ) : null}
+      <View className="flex-row items-center justify-center gap-3 pt-1">
+        <Pressable onPress={() => router.push('/privacy')}>
+          <Text variant="caption" muted className="underline">
+            Privacy Policy
+          </Text>
+        </Pressable>
+        <Text variant="caption" muted>
+          •
+        </Text>
+        <Pressable onPress={() => router.push('/terms')}>
+          <Text variant="caption" muted className="underline">
+            User Agreement
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 
