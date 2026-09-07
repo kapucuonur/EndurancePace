@@ -1,8 +1,8 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/terms", "destination": "/terms.html" },
-    { "source": "/((?!assets/|_expo/).*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
