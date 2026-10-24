@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Platform, ScrollView, TextInput, View } from 'react-native';
 
+import { DeleteAccountCard } from '@/components/DeleteAccountCard';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
@@ -224,6 +225,7 @@ export default function ProfileScreen() {
           }}
         />
         <Button label={t('profile.signOut')} variant="ghost" onPress={() => signOut()} />
+        <DeleteAccountCard />
         {/* TODO: implement weight/birthdate editing, discipline toggles, and manual zone overrides */}
       </ScrollView>
     </Screen>

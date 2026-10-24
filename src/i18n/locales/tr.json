@@ -350,5 +350,14 @@
     "badCredentials": "Garmin bu e-posta ve şifreyi kabul etmedi.",
     "signInFailed": "Giriş başarısız",
     "signUpFailed": "Kayıt başarısız"
+  },
+  "account": {
+    "delete": "Hesabı sil",
+    "deleteTitle": "Hesabını sil",
+    "deleteWarning": "Bu işlem hesabını, planlarını, antrenmanlarını, yarışlarını, mesajlarını ve Garmin bağlantını kalıcı olarak siler. Geri alınamaz. Onaylamak için şifreni gir.",
+    "passwordPlaceholder": "Şifre",
+    "deleteConfirm": "Kalıcı olarak sil",
+    "wrongPassword": "Şifre hatalı.",
+    "deleteFailed": "Hesap silinemedi. Bağlantını kontrol edip tekrar dene."
   }
 }

@@ -350,5 +350,14 @@
     "badCredentials": "Garmin hat diese E-Mail und dieses Passwort nicht akzeptiert.",
     "signInFailed": "Anmeldung fehlgeschlagen",
     "signUpFailed": "Registrierung fehlgeschlagen"
+  },
+  "account": {
+    "delete": "Konto löschen",
+    "deleteTitle": "Konto löschen",
+    "deleteWarning": "Dadurch werden dein Konto, deine Pläne, Trainings, Wettkämpfe, Nachrichten und deine Garmin-Verbindung dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden. Gib zur Bestätigung dein Passwort ein.",
+    "passwordPlaceholder": "Passwort",
+    "deleteConfirm": "Endgültig löschen",
+    "wrongPassword": "Falsches Passwort.",
+    "deleteFailed": "Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut."
   }
 }

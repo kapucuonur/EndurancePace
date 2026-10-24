@@ -350,5 +350,14 @@
     "badCredentials": "Garmin no aceptó ese correo y contraseña.",
     "signInFailed": "Error al iniciar sesión",
     "signUpFailed": "Error al registrarse"
+  },
+  "account": {
+    "delete": "Eliminar cuenta",
+    "deleteTitle": "Eliminar tu cuenta",
+    "deleteWarning": "Esto elimina de forma permanente tu cuenta, planes, entrenamientos, carreras, mensajes y la conexión con Garmin. No se puede deshacer. Introduce tu contraseña para confirmar.",
+    "passwordPlaceholder": "Contraseña",
+    "deleteConfirm": "Eliminar definitivamente",
+    "wrongPassword": "Contraseña incorrecta.",
+    "deleteFailed": "No se pudo eliminar la cuenta. Comprueba tu conexión e inténtalo de nuevo."
   }
 }
