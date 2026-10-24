@@ -68,7 +68,8 @@
     "perKm": "/км",
     "per100m": "/100м",
     "kmh": "км/ч",
-    "weeksShort": "%{count} нед."
+    "weeksShort": "%{count} нед.",
+    "km": "км"
   },
   "time": {
     "never": "никогда",
@@ -266,7 +267,8 @@
     "add_warmup": "Разминка",
     "add_main": "Основной блок",
     "add_interval": "Серия интервалов",
-    "add_cooldown": "Заминка"
+    "add_cooldown": "Заминка",
+    "add_exercise": "Упражнение"
   },
   "stepRow": {
     "time": "Время",
@@ -296,7 +298,20 @@
     "paceZone4": "Порог",
     "paceZone5": "Интервалы",
     "setThresholdHint": "Укажите пороговый темп в Профиле, чтобы видеть здесь свои зоны темпа.",
-    "setCssHint": "Укажите CSS в Профиле, чтобы видеть здесь свои зоны темпа в плавании."
+    "setCssHint": "Укажите CSS в Профиле, чтобы видеть здесь свои зоны темпа в плавании.",
+    "kg": "кг",
+    "bodyweight": "Свой вес",
+    "secShort": "с",
+    "avgSpeed": "Ожидаемая средняя скорость",
+    "atThisSpeed": "≈ %{duration} при %{speed} км/ч",
+    "exerciseLabel": "Упражнение",
+    "sets": "Подходы",
+    "reps": "Повторы",
+    "holdSeconds": "Удержание",
+    "load": "Вес",
+    "rest": "Отдых между подходами",
+    "exerciseTime": "≈ %{duration} с отдыхом",
+    "restShort": "отдых %{sec} с"
   },
   "stepTimeline": {
     "total": "Всего %{duration} · %{count} блоков"
@@ -405,5 +420,47 @@
     "locationPlaceholder": "напр. Москва",
     "save": "Сохранить старт",
     "saveFailed": "Не удалось сохранить старт"
+  },
+  "exercise": {
+    "back_squat": "Приседания со штангой",
+    "front_squat": "Фронтальные приседания",
+    "goblet_squat": "Гоблет-приседания",
+    "bulgarian_split_squat": "Болгарские выпады",
+    "lunge": "Выпады",
+    "step_up": "Зашагивания",
+    "leg_press": "Жим ногами",
+    "calf_raise": "Подъёмы на носки",
+    "deadlift": "Становая тяга",
+    "romanian_deadlift": "Румынская тяга",
+    "hip_thrust": "Ягодичный мост со штангой",
+    "glute_bridge": "Ягодичный мост",
+    "single_leg_rdl": "Румынская тяга на одной ноге",
+    "kettlebell_swing": "Махи гирей",
+    "bench_press": "Жим лёжа",
+    "overhead_press": "Жим стоя",
+    "push_up": "Отжимания",
+    "dips": "Отжимания на брусьях",
+    "pull_up": "Подтягивания",
+    "lat_pulldown": "Тяга верхнего блока",
+    "barbell_row": "Тяга штанги в наклоне",
+    "dumbbell_row": "Тяга гантели",
+    "face_pull": "Тяга к лицу",
+    "plank": "Планка",
+    "side_plank": "Боковая планка",
+    "dead_bug": "Мёртвый жук",
+    "hanging_leg_raise": "Подъём ног в висе",
+    "russian_twist": "Русские скручивания",
+    "pallof_press": "Жим Паллофа",
+    "box_jump": "Прыжки на тумбу",
+    "jump_squat": "Приседания с выпрыгиванием",
+    "skipping": "Скиппинг"
+  },
+  "exerciseGroup": {
+    "legs": "Ноги",
+    "posterior": "Задняя цепь",
+    "push": "Жимы",
+    "pull": "Тяги",
+    "core": "Кор",
+    "power": "Взрывная сила"
   }
 }

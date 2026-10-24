@@ -6,7 +6,14 @@ import { ChipGroup } from '@/components/builder/ChipGroup';
 import { Segmented } from '@/components/builder/Segmented';
 import { Stepper } from '@/components/builder/Stepper';
 import { Text } from '@/components/ui/Text';
-import { stepSeconds } from '@/domain/workout';
+import {
+  defaultExercise,
+  EXERCISE_GROUPS,
+  EXERCISES,
+  exerciseDef,
+  type ExerciseGroup,
+} from '@/domain/exercises';
+import { DEFAULT_SPEED_MPS, stepSeconds } from '@/domain/workout';
 import { calcPaceZones } from '@/domain/zones';
 import { useT, type TranslateFn } from '@/i18n/useT';
 import { formatDistance, formatDuration, formatPace, parsePace } from '@/lib/format';
@@ -24,7 +31,7 @@ const TIME_PRESETS_MIN = [5, 10, 15, 20, 25, 30, 40, 45, 60, 75, 90];
 const DISTANCE_PRESETS: Record<Sport, number[]> = {
   run: [400, 800, 1000, 2000, 3000, 5000, 10000],
   swim: [50, 100, 200, 300, 400, 800],
-  bike: [5000, 10000, 20000, 30000, 40000],
+  bike: [10000, 20000, 30000, 40000, 50000, 60000, 80000, 100000, 120000, 150000, 180000],
   strength: [],
 };
 /** Fallback pace list (no threshold set): run /km, swim /100m. */
@@ -90,13 +97,42 @@ function distanceStep(sport: Sport) {
   return (current: number, dir: 1 | -1): number => {
     const v = dir === -1 ? current - 1 : current;
     if (sport === 'swim') return v < 400 ? 25 : 100;
+    if (sport === 'bike') return v < 20000 ? 1000 : 5000;
     if (v < 1000) return 100;
-    return sport === 'bike' ? 5000 : 500;
+    return v < 10000 ? 500 : 1000;
   };
+}
+
+/** Expected-speed quick picks for bike distance steps (km/h). */
+const BIKE_SPEEDS = [22, 25, 28, 30, 32, 35, 38];
+const DEFAULT_BIKE_KMH = Math.round(DEFAULT_SPEED_MPS.bike * 3.6);
+
+/** Swim distances are set in metres; run and bike in kilometres. */
+function distanceUnit(sport: Sport): 'm' | 'km' {
+  return sport === 'swim' ? 'm' : 'km';
+}
+function formatDistanceValue(meters: number, unit: 'm' | 'km'): string {
+  if (unit === 'm') return String(Math.round(meters));
+  const km = meters / 1000;
+  return Number.isInteger(km) ? String(km) : km.toFixed(km < 10 ? 2 : 1).replace(/0+$/, '');
+}
+/** Accepts "5", "5.5", "5,5", "800m", "10km"; a bare number is in `unit`. */
+function parseDistance(txt: string, unit: 'm' | 'km'): number | null {
+  const m = txt
+    .trim()
+    .toLowerCase()
+    .replace(',', '.')
+    .match(/^(\d+(?:\.\d+)?)\s*(km|k|m)?$/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  const u = m[2] === 'm' ? 'm' : m[2] ? 'km' : unit;
+  const meters = u === 'm' ? n : n * 1000;
+  return meters > 0 ? Math.round(meters) : null;
 }
 
 /** One-line summary of a step's target, e.g. "Z2", "4:30–5:00/km", "200–260 W". */
 export function targetSummary(step: Step, sport: Sport, t: TranslateFn): string {
+  if (step.exercise) return weightLabel(step.exercise.weightKg, t);
   const tg = step.target;
   if (tg?.paceTarget) {
     const suffix =
@@ -108,7 +144,15 @@ export function targetSummary(step: Step, sport: Sport, t: TranslateFn): string 
   return `Z${tg?.hrZone ?? 2}`;
 }
 
-function durationSummary(step: Step): string {
+function weightLabel(kg: number | undefined, t: TranslateFn): string {
+  return kg ? `${kg} ${t('stepRow.kg')}` : t('stepRow.bodyweight');
+}
+
+function durationSummary(step: Step, t: TranslateFn): string {
+  if (step.exercise) {
+    const hold = exerciseDef(step.exercise.key)?.hold;
+    return `${step.exercise.sets}×${step.exercise.reps}${hold ? t('stepRow.secShort') : ''}`;
+  }
   if (step.duration?.kind === 'distance') return formatDistance(step.duration.meters);
   return formatDuration(step.duration?.kind === 'time' ? step.duration.seconds : 0);
 }
@@ -143,7 +187,8 @@ export function StepRow({
   ...actions
 }: Props) {
   const t = useT();
-  const color = stepColors[step.type] ?? palette.textMuted;
+  const color = step.exercise ? palette.brand : (stepColors[step.type] ?? palette.textMuted);
+  const title = step.exercise ? t(`exercise.${step.exercise.key}`) : t(`stepType.${step.type}`);
 
   return (
     <View
@@ -154,13 +199,13 @@ export function StepRow({
         onPress={onToggle}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
-        accessibilityLabel={`${t(`stepType.${step.type}`)}, ${durationSummary(step)}, ${targetSummary(step, sport, t)}`}
+        accessibilityLabel={`${title}, ${durationSummary(step, t)}, ${targetSummary(step, sport, t)}`}
         className="flex-row items-center gap-md py-md pr-md active:opacity-70">
         <View style={{ width: 5, alignSelf: 'stretch', backgroundColor: color }} />
         <Text variant="label" className="flex-1" numberOfLines={1}>
-          {t(`stepType.${step.type}`)}
+          {title}
         </Text>
-        <Text variant="label">{durationSummary(step)}</Text>
+        <Text variant="label">{durationSummary(step, t)}</Text>
         <View className="min-w-[56px] items-center rounded-full bg-surface-alt px-sm py-0.5 dark:bg-surface-alt-dark">
           <Text variant="caption" numberOfLines={1}>
             {targetSummary(step, sport, t)}
@@ -175,7 +220,11 @@ export function StepRow({
 
       {expanded ? (
         <View className="gap-md border-t border-border px-md pb-md pt-md dark:border-border-dark">
-          <StepEditor step={step} sport={sport} onChange={onChange} />
+          {step.exercise ? (
+            <ExerciseEditor step={step} onChange={onChange} />
+          ) : (
+            <StepEditor step={step} sport={sport} onChange={onChange} />
+          )}
           <ActionBar {...actions} />
         </View>
       ) : null}
@@ -196,6 +245,10 @@ function StepEditor({
   const dMode = durationMode(step);
   const seconds = step.duration?.kind === 'time' ? step.duration.seconds : 0;
   const meters = step.duration?.kind === 'distance' ? step.duration.meters : 0;
+  const speedKmh = step.duration?.kind === 'distance' ? step.duration.speedKmh : undefined;
+  const unit = distanceUnit(sport);
+  const setMeters = (m: number) =>
+    onChange({ ...step, duration: { kind: 'distance', meters: m, speedKmh } });
 
   const options = targetOptions(sport, t);
   const detected = targetMode(step);
@@ -211,7 +264,10 @@ function StepEditor({
       duration:
         mode === 'time'
           ? { kind: 'time', seconds: seconds || 300 }
-          : { kind: 'distance', meters: meters || (sport === 'swim' ? 100 : 1000) },
+          : {
+              kind: 'distance',
+              meters: meters || { swim: 100, bike: 20000, run: 5000, strength: 1000 }[sport],
+            },
     });
 
   const setTargetMode = (mode: TargetMode) => {
@@ -294,9 +350,7 @@ function StepEditor({
                   label: formatDistance(m),
                 }))}
                 value={String(meters)}
-                onChange={(v) =>
-                  onChange({ ...step, duration: { kind: 'distance', meters: Number(v) } })
-                }
+                onChange={(v) => setMeters(Number(v))}
               />
             ) : null}
             <Stepper
@@ -304,18 +358,41 @@ function StepEditor({
               value={meters}
               min={25}
               step={distanceStep(sport)}
-              format={(m) => String(m)}
-              parse={(txt) => {
-                const n = Number(txt);
-                return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
-              }}
-              suffix={t('units.metres')}
-              onChange={(m) => onChange({ ...step, duration: { kind: 'distance', meters: m } })}
+              format={(m) => formatDistanceValue(m, unit)}
+              parse={(txt) => parseDistance(txt, unit)}
+              suffix={unit === 'm' ? t('units.metres') : t('units.km')}
+              keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+              onChange={setMeters}
             />
+            {sport === 'bike' ? (
+              <View className="gap-xs">
+                <Text variant="caption" muted>
+                  {t('stepRow.avgSpeed')}
+                </Text>
+                <ChipGroup
+                  options={BIKE_SPEEDS.map((v) => ({
+                    value: String(v),
+                    label: `${v} ${t('units.kmh')}`,
+                  }))}
+                  value={String(speedKmh ?? DEFAULT_BIKE_KMH)}
+                  onChange={(v) =>
+                    onChange({
+                      ...step,
+                      duration: { kind: 'distance', meters, speedKmh: Number(v) },
+                    })
+                  }
+                />
+              </View>
+            ) : null}
             <Text variant="caption" muted>
-              {t(tMode === 'pace' ? 'stepRow.atThisPace' : 'stepRow.atThisEffort', {
-                duration: formatDuration(stepSeconds(step, sport)),
-              })}
+              {sport === 'bike'
+                ? t('stepRow.atThisSpeed', {
+                    duration: formatDuration(stepSeconds(step, sport)),
+                    speed: speedKmh ?? DEFAULT_BIKE_KMH,
+                  })
+                : t(tMode === 'pace' ? 'stepRow.atThisPace' : 'stepRow.atThisEffort', {
+                    duration: formatDuration(stepSeconds(step, sport)),
+                  })}
             </Text>
           </>
         )}
@@ -394,6 +471,126 @@ function StepEditor({
           </View>
         )}
       </Section>
+    </>
+  );
+}
+
+/** Strength: pick a movement, then sets × reps, load and rest. */
+function ExerciseEditor({ step, onChange }: { step: Step; onChange: (next: Step) => void }) {
+  const t = useT();
+  const ex = step.exercise!;
+  const def = exerciseDef(ex.key);
+  const [group, setGroup] = useState<ExerciseGroup>(def?.group ?? 'legs');
+  const set = (patch: Partial<typeof ex>) =>
+    onChange({ ...step, exercise: { ...ex, ...patch } });
+  const pick = (key: string) => {
+    const next = defaultExercise(key);
+    // Keep the load and rest the athlete already dialled in when swapping movement.
+    onChange({
+      ...step,
+      exercise: {
+        ...next,
+        weightKg: exerciseDef(key)?.bodyweight ? undefined : ex.weightKg,
+        restSec: ex.restSec,
+      },
+    });
+  };
+  const intParse = (txt: string) => (Number(txt) > 0 ? Math.round(Number(txt)) : null);
+
+  return (
+    <>
+      <Section label={t('stepRow.exerciseLabel')}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-xs">
+          {EXERCISE_GROUPS.map((g) => (
+            <Pressable
+              key={g}
+              onPress={() => setGroup(g)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: g === group }}
+              className={`rounded-md px-md py-1.5 ${g === group ? 'bg-brand' : 'bg-surface-alt dark:bg-surface-alt-dark'}`}>
+              <Text
+                variant="caption"
+                style={g === group ? { color: '#fff', fontWeight: '600' } : undefined}>
+                {t(`exerciseGroup.${g}`)}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+        <ChipGroup
+          options={EXERCISES.filter((e) => e.group === group).map((e) => ({
+            value: e.key,
+            label: t(`exercise.${e.key}`),
+          }))}
+          value={ex.key}
+          onChange={pick}
+        />
+      </Section>
+
+      <View className="flex-row flex-wrap gap-x-lg gap-y-md">
+        <Section label={t('stepRow.sets')}>
+          <Stepper
+            label={t('stepRow.sets')}
+            value={ex.sets}
+            min={1}
+            max={20}
+            step={() => 1}
+            format={String}
+            parse={intParse}
+            onChange={(sets) => set({ sets })}
+          />
+        </Section>
+        <Section label={def?.hold ? t('stepRow.holdSeconds') : t('stepRow.reps')}>
+          <Stepper
+            label={def?.hold ? t('stepRow.holdSeconds') : t('stepRow.reps')}
+            value={ex.reps}
+            min={1}
+            max={300}
+            step={() => (def?.hold ? 5 : 1)}
+            format={String}
+            parse={intParse}
+            suffix={def?.hold ? t('stepRow.secShort') : undefined}
+            onChange={(reps) => set({ reps })}
+          />
+        </Section>
+      </View>
+
+      <Section label={t('stepRow.load')}>
+        <Stepper
+          label={t('stepRow.load')}
+          value={ex.weightKg ?? 0}
+          min={0}
+          max={500}
+          step={() => 2.5}
+          format={(kg) => (kg ? String(kg) : t('stepRow.bodyweight'))}
+          parse={(txt) => {
+            const n = Number(txt.replace(',', '.'));
+            return Number.isFinite(n) && n >= 0 ? Math.round(n * 2) / 2 : null;
+          }}
+          suffix={ex.weightKg ? t('stepRow.kg') : undefined}
+          keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+          onChange={(kg) => set({ weightKg: kg || undefined })}
+        />
+      </Section>
+
+      <Section label={t('stepRow.rest')}>
+        <ChipGroup
+          options={[30, 60, 90, 120, 180].map((sec) => ({
+            value: String(sec),
+            label:
+              sec < 60 || sec % 60
+                ? `${sec} ${t('stepRow.secShort')}`
+                : t('stepRow.minutesShort', { count: sec / 60 }),
+          }))}
+          value={String(ex.restSec)}
+          onChange={(v) => set({ restSec: Number(v) })}
+        />
+      </Section>
+      <Text variant="caption" muted>
+        {t('stepRow.exerciseTime', { duration: formatDuration(stepSeconds(step, 'strength')) })}
+      </Text>
     </>
   );
 }

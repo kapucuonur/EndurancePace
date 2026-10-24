@@ -8,6 +8,7 @@ import { StepTimeline } from '@/components/StepTimeline';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { exerciseDef } from '@/domain/exercises';
 import { flattenSteps } from '@/domain/workout';
 import { useT, type TranslateFn } from '@/i18n/useT';
 import { longDate } from '@/lib/date';
@@ -99,7 +100,7 @@ export default function WorkoutDetailScreen() {
           <AiCoachNudge context="activity" />
         ) : null}
 
-        {workout.structure.length ? (
+        {workout.structure.length && workout.sport !== 'strength' ? (
           <View className="gap-md">
             <Text variant="heading">{t('workoutDetail.structure')}</Text>
             <StepTimeline structure={workout.structure} sport={workout.sport} />
@@ -113,16 +114,33 @@ export default function WorkoutDetailScreen() {
               className="flex-row items-center gap-md rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
               <View
                 className="h-8 w-1.5 rounded-full"
-                style={{ backgroundColor: stepColors[b.type] ?? palette.textFaint }}
+                style={{
+                  backgroundColor: b.exercise
+                    ? palette.brand
+                    : (stepColors[b.type] ?? palette.textFaint),
+                }}
               />
               <View className="flex-1">
-                <Text variant="label">{b.label ?? t(`stepType.${b.type}`)}</Text>
+                <Text variant="label">
+                  {b.exercise
+                    ? t(`exercise.${b.exercise.key}`)
+                    : (b.label ?? t(`stepType.${b.type}`))}
+                </Text>
                 <Text variant="caption" muted>
-                  {[
-                    b.distanceMeters ? formatDistance(b.distanceMeters) : null,
-                    formatDuration(b.seconds),
-                    describeTarget(b.target, t),
-                  ]
+                  {(b.exercise
+                    ? [
+                        `${b.exercise.sets}×${b.exercise.reps}${exerciseDef(b.exercise.key)?.hold ? t('stepRow.secShort') : ''}`,
+                        b.exercise.weightKg
+                          ? `${b.exercise.weightKg} ${t('stepRow.kg')}`
+                          : t('stepRow.bodyweight'),
+                        t('stepRow.restShort', { sec: b.exercise.restSec }),
+                      ]
+                    : [
+                        b.distanceMeters ? formatDistance(b.distanceMeters) : null,
+                        formatDuration(b.seconds),
+                        describeTarget(b.target, t),
+                      ]
+                  )
                     .filter(Boolean)
                     .join(' · ')}
                 </Text>

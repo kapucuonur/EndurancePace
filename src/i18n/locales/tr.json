@@ -67,8 +67,9 @@
     "metres": "m",
     "perKm": "/km",
     "per100m": "/100m",
-    "kmh": "km/s",
-    "weeksShort": "%{count}h"
+    "kmh": "km/sa",
+    "weeksShort": "%{count}h",
+    "km": "km"
   },
   "time": {
     "never": "hiç",
@@ -266,7 +267,8 @@
     "add_warmup": "Isınma",
     "add_main": "Ana blok",
     "add_interval": "İnterval seti",
-    "add_cooldown": "Soğuma"
+    "add_cooldown": "Soğuma",
+    "add_exercise": "Hareket"
   },
   "stepRow": {
     "time": "Süre",
@@ -296,7 +298,20 @@
     "paceZone4": "Eşik",
     "paceZone5": "İnterval",
     "setThresholdHint": "Kendi tempo bölgelerini burada görmek için Profil'e eşik temponu gir.",
-    "setCssHint": "Kendi yüzme tempo bölgelerini görmek için Profil'e CSS değerini gir."
+    "setCssHint": "Kendi yüzme tempo bölgelerini görmek için Profil'e CSS değerini gir.",
+    "kg": "kg",
+    "bodyweight": "Vücut ağırlığı",
+    "secShort": "sn",
+    "avgSpeed": "Tahmini ortalama hız",
+    "atThisSpeed": "%{speed} km/sa ile ≈ %{duration}",
+    "exerciseLabel": "Hareket",
+    "sets": "Set",
+    "reps": "Tekrar",
+    "holdSeconds": "Süre",
+    "load": "Ağırlık",
+    "rest": "Setler arası dinlenme",
+    "exerciseTime": "Dinlenme dahil ≈ %{duration}",
+    "restShort": "%{sec} sn dinlenme"
   },
   "stepTimeline": {
     "total": "Toplam %{duration} · %{count} blok"
@@ -405,5 +420,47 @@
     "locationPlaceholder": "örn. İstanbul",
     "save": "Yarışı kaydet",
     "saveFailed": "Yarış kaydedilemedi"
+  },
+  "exercise": {
+    "back_squat": "Squat",
+    "front_squat": "Önden squat",
+    "goblet_squat": "Goblet squat",
+    "bulgarian_split_squat": "Bulgar split squat",
+    "lunge": "Lunge",
+    "step_up": "Step-up",
+    "leg_press": "Leg press",
+    "calf_raise": "Baldır kaldırma",
+    "deadlift": "Deadlift",
+    "romanian_deadlift": "Romen deadlift",
+    "hip_thrust": "Hip thrust",
+    "glute_bridge": "Kalça köprüsü",
+    "single_leg_rdl": "Tek bacak RDL",
+    "kettlebell_swing": "Kettlebell swing",
+    "bench_press": "Bench press",
+    "overhead_press": "Omuz press",
+    "push_up": "Şınav",
+    "dips": "Dips",
+    "pull_up": "Barfiks",
+    "lat_pulldown": "Lat pulldown",
+    "barbell_row": "Barbell row",
+    "dumbbell_row": "Dumbbell row",
+    "face_pull": "Face pull",
+    "plank": "Plank",
+    "side_plank": "Yan plank",
+    "dead_bug": "Dead bug",
+    "hanging_leg_raise": "Asılı bacak kaldırma",
+    "russian_twist": "Russian twist",
+    "pallof_press": "Pallof press",
+    "box_jump": "Kutu atlama",
+    "jump_squat": "Sıçramalı squat",
+    "skipping": "Yerinde koşu (skip)"
+  },
+  "exerciseGroup": {
+    "legs": "Bacak",
+    "posterior": "Arka zincir",
+    "push": "İtiş",
+    "pull": "Çekiş",
+    "core": "Core",
+    "power": "Patlayıcılık"
   }
 }

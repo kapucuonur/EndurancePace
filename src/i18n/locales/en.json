@@ -68,7 +68,8 @@
     "perKm": "/km",
     "per100m": "/100m",
     "kmh": "km/h",
-    "weeksShort": "%{count}w"
+    "weeksShort": "%{count}w",
+    "km": "km"
   },
   "time": {
     "never": "never",
@@ -266,7 +267,8 @@
     "add_warmup": "Warm-up",
     "add_main": "Main block",
     "add_interval": "Interval set",
-    "add_cooldown": "Cool-down"
+    "add_cooldown": "Cool-down",
+    "add_exercise": "Exercise"
   },
   "stepRow": {
     "time": "Time",
@@ -296,7 +298,20 @@
     "paceZone4": "Threshold",
     "paceZone5": "Interval",
     "setThresholdHint": "Add your threshold pace in Profile to see your own pace zones here.",
-    "setCssHint": "Add your CSS in Profile to see your own swim pace zones here."
+    "setCssHint": "Add your CSS in Profile to see your own swim pace zones here.",
+    "kg": "kg",
+    "bodyweight": "Bodyweight",
+    "secShort": "s",
+    "avgSpeed": "Expected average speed",
+    "atThisSpeed": "≈ %{duration} at %{speed} km/h",
+    "exerciseLabel": "Exercise",
+    "sets": "Sets",
+    "reps": "Reps",
+    "holdSeconds": "Hold",
+    "load": "Load",
+    "rest": "Rest between sets",
+    "exerciseTime": "≈ %{duration} including rest",
+    "restShort": "%{sec} s rest"
   },
   "stepTimeline": {
     "total": "Total %{duration} · %{count} blocks"
@@ -405,5 +420,47 @@
     "locationPlaceholder": "e.g. Istanbul",
     "save": "Save race",
     "saveFailed": "Couldn't save the race"
+  },
+  "exercise": {
+    "back_squat": "Back squat",
+    "front_squat": "Front squat",
+    "goblet_squat": "Goblet squat",
+    "bulgarian_split_squat": "Bulgarian split squat",
+    "lunge": "Lunge",
+    "step_up": "Step-up",
+    "leg_press": "Leg press",
+    "calf_raise": "Calf raise",
+    "deadlift": "Deadlift",
+    "romanian_deadlift": "Romanian deadlift",
+    "hip_thrust": "Hip thrust",
+    "glute_bridge": "Glute bridge",
+    "single_leg_rdl": "Single-leg RDL",
+    "kettlebell_swing": "Kettlebell swing",
+    "bench_press": "Bench press",
+    "overhead_press": "Overhead press",
+    "push_up": "Push-up",
+    "dips": "Dips",
+    "pull_up": "Pull-up",
+    "lat_pulldown": "Lat pulldown",
+    "barbell_row": "Barbell row",
+    "dumbbell_row": "Dumbbell row",
+    "face_pull": "Face pull",
+    "plank": "Plank",
+    "side_plank": "Side plank",
+    "dead_bug": "Dead bug",
+    "hanging_leg_raise": "Hanging leg raise",
+    "russian_twist": "Russian twist",
+    "pallof_press": "Pallof press",
+    "box_jump": "Box jump",
+    "jump_squat": "Jump squat",
+    "skipping": "Skipping"
+  },
+  "exerciseGroup": {
+    "legs": "Legs",
+    "posterior": "Posterior chain",
+    "push": "Push",
+    "pull": "Pull",
+    "core": "Core",
+    "power": "Power"
   }
 }

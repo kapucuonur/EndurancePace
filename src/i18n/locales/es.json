@@ -68,7 +68,8 @@
     "perKm": "/km",
     "per100m": "/100m",
     "kmh": "km/h",
-    "weeksShort": "%{count} sem."
+    "weeksShort": "%{count} sem.",
+    "km": "km"
   },
   "time": {
     "never": "nunca",
@@ -266,7 +267,8 @@
     "add_warmup": "Calentamiento",
     "add_main": "Bloque principal",
     "add_interval": "Serie de intervalos",
-    "add_cooldown": "Vuelta a la calma"
+    "add_cooldown": "Vuelta a la calma",
+    "add_exercise": "Ejercicio"
   },
   "stepRow": {
     "time": "Tiempo",
@@ -296,7 +298,20 @@
     "paceZone4": "Umbral",
     "paceZone5": "Intervalo",
     "setThresholdHint": "Añade tu ritmo umbral en el Perfil para ver aquí tus propias zonas de ritmo.",
-    "setCssHint": "Añade tu CSS en el Perfil para ver aquí tus propias zonas de ritmo de natación."
+    "setCssHint": "Añade tu CSS en el Perfil para ver aquí tus propias zonas de ritmo de natación.",
+    "kg": "kg",
+    "bodyweight": "Peso corporal",
+    "secShort": "s",
+    "avgSpeed": "Velocidad media prevista",
+    "atThisSpeed": "≈ %{duration} a %{speed} km/h",
+    "exerciseLabel": "Ejercicio",
+    "sets": "Series",
+    "reps": "Reps",
+    "holdSeconds": "Mantener",
+    "load": "Carga",
+    "rest": "Descanso entre series",
+    "exerciseTime": "≈ %{duration} con descansos",
+    "restShort": "%{sec} s descanso"
   },
   "stepTimeline": {
     "total": "Total %{duration} · %{count} bloques"
@@ -405,5 +420,47 @@
     "locationPlaceholder": "p. ej. Valencia",
     "save": "Guardar carrera",
     "saveFailed": "No se pudo guardar la carrera"
+  },
+  "exercise": {
+    "back_squat": "Sentadilla trasera",
+    "front_squat": "Sentadilla frontal",
+    "goblet_squat": "Sentadilla goblet",
+    "bulgarian_split_squat": "Sentadilla búlgara",
+    "lunge": "Zancada",
+    "step_up": "Subida al cajón",
+    "leg_press": "Prensa de piernas",
+    "calf_raise": "Elevación de talones",
+    "deadlift": "Peso muerto",
+    "romanian_deadlift": "Peso muerto rumano",
+    "hip_thrust": "Hip thrust",
+    "glute_bridge": "Puente de glúteos",
+    "single_leg_rdl": "Peso muerto a una pierna",
+    "kettlebell_swing": "Swing con kettlebell",
+    "bench_press": "Press de banca",
+    "overhead_press": "Press militar",
+    "push_up": "Flexiones",
+    "dips": "Fondos",
+    "pull_up": "Dominadas",
+    "lat_pulldown": "Jalón al pecho",
+    "barbell_row": "Remo con barra",
+    "dumbbell_row": "Remo con mancuerna",
+    "face_pull": "Face pull",
+    "plank": "Plancha",
+    "side_plank": "Plancha lateral",
+    "dead_bug": "Dead bug",
+    "hanging_leg_raise": "Elevación de piernas colgado",
+    "russian_twist": "Giro ruso",
+    "pallof_press": "Press Pallof",
+    "box_jump": "Salto al cajón",
+    "jump_squat": "Sentadilla con salto",
+    "skipping": "Skipping"
+  },
+  "exerciseGroup": {
+    "legs": "Piernas",
+    "posterior": "Cadena posterior",
+    "push": "Empuje",
+    "pull": "Tirón",
+    "core": "Core",
+    "power": "Potencia"
   }
 }

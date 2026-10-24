@@ -68,7 +68,8 @@
     "perKm": "/km",
     "per100m": "/100m",
     "kmh": "km/h",
-    "weeksShort": "%{count} Wo."
+    "weeksShort": "%{count} Wo.",
+    "km": "km"
   },
   "time": {
     "never": "nie",
@@ -266,7 +267,8 @@
     "add_warmup": "Aufwärmen",
     "add_main": "Hauptblock",
     "add_interval": "Intervallserie",
-    "add_cooldown": "Auslaufen"
+    "add_cooldown": "Auslaufen",
+    "add_exercise": "Übung"
   },
   "stepRow": {
     "time": "Zeit",
@@ -296,7 +298,20 @@
     "paceZone4": "Schwelle",
     "paceZone5": "Intervall",
     "setThresholdHint": "Trage im Profil deine Schwellenpace ein, um hier deine eigenen Pace-Zonen zu sehen.",
-    "setCssHint": "Trage im Profil deine CSS ein, um hier deine eigenen Schwimm-Pace-Zonen zu sehen."
+    "setCssHint": "Trage im Profil deine CSS ein, um hier deine eigenen Schwimm-Pace-Zonen zu sehen.",
+    "kg": "kg",
+    "bodyweight": "Körpergewicht",
+    "secShort": "s",
+    "avgSpeed": "Erwarteter Schnitt",
+    "atThisSpeed": "≈ %{duration} bei %{speed} km/h",
+    "exerciseLabel": "Übung",
+    "sets": "Sätze",
+    "reps": "Wdh.",
+    "holdSeconds": "Halten",
+    "load": "Gewicht",
+    "rest": "Pause zwischen Sätzen",
+    "exerciseTime": "≈ %{duration} inkl. Pausen",
+    "restShort": "%{sec} s Pause"
   },
   "stepTimeline": {
     "total": "Gesamt %{duration} · %{count} Blöcke"
@@ -405,5 +420,47 @@
     "locationPlaceholder": "z. B. Berlin",
     "save": "Wettkampf speichern",
     "saveFailed": "Wettkampf konnte nicht gespeichert werden"
+  },
+  "exercise": {
+    "back_squat": "Kniebeuge",
+    "front_squat": "Frontkniebeuge",
+    "goblet_squat": "Goblet Squat",
+    "bulgarian_split_squat": "Bulgarische Kniebeuge",
+    "lunge": "Ausfallschritt",
+    "step_up": "Step-up",
+    "leg_press": "Beinpresse",
+    "calf_raise": "Wadenheben",
+    "deadlift": "Kreuzheben",
+    "romanian_deadlift": "Rumänisches Kreuzheben",
+    "hip_thrust": "Hip Thrust",
+    "glute_bridge": "Glute Bridge",
+    "single_leg_rdl": "Einbeiniges Kreuzheben",
+    "kettlebell_swing": "Kettlebell-Swing",
+    "bench_press": "Bankdrücken",
+    "overhead_press": "Schulterdrücken",
+    "push_up": "Liegestütz",
+    "dips": "Dips",
+    "pull_up": "Klimmzug",
+    "lat_pulldown": "Latzug",
+    "barbell_row": "Langhantelrudern",
+    "dumbbell_row": "Kurzhantelrudern",
+    "face_pull": "Face Pull",
+    "plank": "Unterarmstütz",
+    "side_plank": "Seitstütz",
+    "dead_bug": "Dead Bug",
+    "hanging_leg_raise": "Hängendes Beinheben",
+    "russian_twist": "Russian Twist",
+    "pallof_press": "Pallof Press",
+    "box_jump": "Box Jump",
+    "jump_squat": "Sprungkniebeuge",
+    "skipping": "Skipping"
+  },
+  "exerciseGroup": {
+    "legs": "Beine",
+    "posterior": "Hintere Kette",
+    "push": "Drücken",
+    "pull": "Ziehen",
+    "core": "Rumpf",
+    "power": "Explosivkraft"
   }
 }

@@ -24,6 +24,7 @@ import { StepTimeline } from '@/components/StepTimeline';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { defaultExercise } from '@/domain/exercises';
 import { computeWorkoutMetrics } from '@/domain/workout';
 import { useT } from '@/i18n/useT';
 import { longDate, shiftDays, todayISO } from '@/lib/date';
@@ -67,6 +68,14 @@ const BLOCKS = {
     children: [leaf('interval', 3 * 60, 4), leaf('recovery', 2 * 60, 1)],
   }),
   cooldown: () => leaf('cooldown', 10 * 60, 1),
+  exercise: (): Step => ({
+    id: uid('st'),
+    type: 'steady',
+    repeatCount: 1,
+    children: [],
+    target: { rpe: 7 },
+    exercise: defaultExercise('back_squat'),
+  }),
 } as const;
 type BlockKind = keyof typeof BLOCKS;
 const BLOCK_ICON: Record<BlockKind, keyof typeof Ionicons.glyphMap> = {
@@ -74,6 +83,12 @@ const BLOCK_ICON: Record<BlockKind, keyof typeof Ionicons.glyphMap> = {
   main: 'remove',
   interval: 'repeat',
   cooldown: 'trending-down',
+  exercise: 'barbell-outline',
+};
+/** Strength sessions are built from exercises; the rest from time/distance blocks. */
+const BLOCKS_FOR: Record<'strength' | 'other', BlockKind[]> = {
+  strength: ['warmup', 'exercise', 'cooldown'],
+  other: ['warmup', 'main', 'interval', 'cooldown'],
 };
 
 /**
@@ -330,7 +345,7 @@ function WorkoutBuilderScreen() {
           </View>
 
           {/* Shape of the session */}
-          {structure.length > 0 ? (
+          {structure.length > 0 && watchedSport !== 'strength' ? (
             <StepTimeline structure={structure} sport={watchedSport} />
           ) : null}
 
@@ -387,7 +402,7 @@ function WorkoutBuilderScreen() {
             ) : null}
 
             <View className="flex-row flex-wrap gap-sm">
-              {(Object.keys(BLOCKS) as BlockKind[]).map((kind) => (
+              {BLOCKS_FOR[watchedSport === 'strength' ? 'strength' : 'other'].map((kind) => (
                 <Pressable
                   key={kind}
                   onPress={() => addStep(BLOCKS[kind]())}
