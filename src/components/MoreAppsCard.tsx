@@ -7,6 +7,7 @@ import bikefitIcon from '@/assets/images/promo/bikefit.png';
 import { Card } from '@/components/ui/Card';
 import { Text } from '@/components/ui/Text';
 import { useT } from '@/i18n/useT';
+import { AI_COACH_URL, BIKEFIT_URL, promoUrl } from '@/lib/promo';
 import { palette } from '@/theme/tokens';
 
 /**
@@ -19,13 +20,13 @@ const APPS = [
     key: 'bikefit',
     name: 'BikeFit AI',
     icon: bikefitIcon,
-    url: 'https://bikefit.coachonurai.com',
+    url: promoUrl(BIKEFIT_URL, 'profile'),
   },
   {
     key: 'aiCoach',
     name: 'CoachOnur AI',
     icon: aiCoachIcon,
-    url: 'https://www.coachonurai.com',
+    url: promoUrl(AI_COACH_URL, 'profile'),
   },
 ] as const;
 
