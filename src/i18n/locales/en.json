@@ -359,5 +359,10 @@
     "deleteConfirm": "Delete permanently",
     "wrongPassword": "Incorrect password.",
     "deleteFailed": "Couldn't delete your account. Check your connection and try again."
+  },
+  "promo": {
+    "title": "More from TriHonor",
+    "bikefit": "AI bike fit analysis from a video of you riding",
+    "aiCoach": "AI coaching and training plans built from your Garmin data"
   }
 }

@@ -359,5 +359,10 @@
     "deleteConfirm": "Kalıcı olarak sil",
     "wrongPassword": "Şifre hatalı.",
     "deleteFailed": "Hesap silinemedi. Bağlantını kontrol edip tekrar dene."
+  },
+  "promo": {
+    "title": "TriHonor'dan diğer uygulamalar",
+    "bikefit": "Sürüş videondan yapay zekâ destekli bisiklet fit analizi",
+    "aiCoach": "Garmin verilerinden yapay zekâ koçluğu ve antrenman planları"
   }
 }

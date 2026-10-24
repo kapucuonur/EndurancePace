@@ -359,5 +359,10 @@
     "deleteConfirm": "Endgültig löschen",
     "wrongPassword": "Falsches Passwort.",
     "deleteFailed": "Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut."
+  },
+  "promo": {
+    "title": "Mehr von TriHonor",
+    "bikefit": "KI-Bikefitting-Analyse aus einem Video deiner Fahrt",
+    "aiCoach": "KI-Coaching und Trainingspläne aus deinen Garmin-Daten"
   }
 }

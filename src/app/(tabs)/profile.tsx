@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Platform, ScrollView, TextInput, View } from 'react-native';
 
 import { DeleteAccountCard } from '@/components/DeleteAccountCard';
+import { MoreAppsCard } from '@/components/MoreAppsCard';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
@@ -207,6 +208,8 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
           </Card>
         </View>
+
+        <MoreAppsCard />
 
         <Button
           label={t('profile.viewTrends')}

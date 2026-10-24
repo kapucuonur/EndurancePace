@@ -359,5 +359,10 @@
     "deleteConfirm": "Elimina definitivamente",
     "wrongPassword": "Password errata.",
     "deleteFailed": "Impossibile eliminare l'account. Controlla la connessione e riprova."
+  },
+  "promo": {
+    "title": "Altro da TriHonor",
+    "bikefit": "Analisi del bike fit con IA da un video mentre pedali",
+    "aiCoach": "Coaching con IA e piani di allenamento dai tuoi dati Garmin"
   }
 }
