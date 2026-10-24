@@ -79,8 +79,8 @@ export default function TermsOfServiceScreen() {
           <Section title="2. Description of Service">
             <Text variant="body" style={{ color: palette.textMuted, lineHeight: 22 }}>
               EndurancePace provides endurance sports analytics, training load calculations
-              (TSS, CTL, ATL, TSB), pacing strategies, and workout synchronizations with
-              supported ecosystems (such as Garmin Connect and Huawei Health).
+              (TSS) and training zones, workout planning, coach–athlete messaging, and activity
+              import from Garmin Connect.
             </Text>
           </Section>
 
@@ -109,11 +109,10 @@ export default function TermsOfServiceScreen() {
 
           <Section title="4. Third-Party Services and APIs">
             <Text variant="body" style={{ color: palette.textMuted, lineHeight: 22 }}>
-              EndurancePace integrates with third-party fitness platforms including Garmin
-              Connect, Huawei Health Kit, and related APIs. Your use of those third-party
-              services is subject to their respective terms and privacy policies. We are not
-              liable for any downtime, data inaccuracy, or service changes originating from
-              third-party API providers.
+              EndurancePace integrates with third-party fitness platforms such as Garmin
+              Connect. Your use of those third-party services is subject to their respective
+              terms and privacy policies. We are not liable for any downtime, data inaccuracy,
+              or service changes originating from third-party API providers.
             </Text>
           </Section>
 

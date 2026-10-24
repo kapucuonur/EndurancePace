@@ -55,7 +55,7 @@ export default function PrivacyPolicyScreen() {
               EndurancePace Privacy Policy
             </Text>
             <Text variant="caption" muted>
-              Last Updated: September 7, 2026
+              Last Updated: October 24, 2026
             </Text>
           </View>
 
@@ -79,21 +79,22 @@ export default function PrivacyPolicyScreen() {
             </Paragraph>
             <Bullet text="Activity records: duration, distance, pace, speed, elevation, and workout categories (running, cycling, swimming, etc.)." />
             <Bullet text="Physiological and sensor metrics: heart rate, heart rate zones, cadence, power, and estimated caloric expenditure." />
-            <Bullet text="Geographic location & GPS tracks: route files and coordinates recorded during outdoor workouts to analyze pace and elevation." />
-            <Bullet text="Performance analytics: Training Stress Score (TSS), Chronic Training Load (CTL), Acute Training Load (ATL), and Training Stress Balance (TSB)." />
-            <Paragraph title="c. Third-Party Integrations (Garmin Connect, Huawei Health, etc.)">
-              With your explicit authorization via OAuth or API integration, EndurancePace
-              connects to external fitness ecosystems (such as Garmin Connect and Huawei Health
-              Kit). We only access data scopes for which you have granted permission,
-              specifically historical and ongoing activity records and fitness statistics.
+            <Bullet text="Activity location: the activity summaries we receive from Garmin may include the start location of a workout. We do not store full GPS route tracks." />
+            <Bullet text="Performance analytics: Training Stress Score (TSS) and training zones derived from your thresholds." />
+            <Paragraph title="c. Garmin Connect">
+              If you choose to connect your Garmin account, EndurancePace imports your recent
+              activity records and training thresholds (such as FTP and lactate threshold heart
+              rate) from Garmin Connect. Your Garmin sign-in details and session tokens are
+              stored encrypted and used only to sync your own data. You can disconnect at any
+              time.
             </Paragraph>
           </Section>
 
           <Section title="2. How We Use Your Data">
             <Bullet text="Deliver adaptive training plans, workout execution guidelines, and intelligent endurance pacing recommendations." />
-            <Bullet text="Calculate fatigue, fitness, and form trends (CTL / ATL / TSB) to help prevent overtraining and optimize race readiness." />
-            <Bullet text="Synchronize athletic workouts across your connected devices and platforms." />
-            <Bullet text="Facilitate communication and workout feedback between athletes and certified coaches." />
+            <Bullet text="Calculate training load (TSS) and heart rate, power and pace zones for your workouts." />
+            <Bullet text="Import completed workouts from your connected Garmin account." />
+            <Bullet text="Facilitate messages and workout feedback between athletes and coaches on the platform." />
             <Bullet text="Maintain platform security, authenticate accounts, and provide customer support." />
           </Section>
 
@@ -126,8 +127,9 @@ export default function PrivacyPolicyScreen() {
           <Section title="4. Security & Storage">
             <Text variant="body">
               All communications between your device and our servers are encrypted using
-              industry-standard TLS / HTTPS encryption. Athletic records, authentication tokens,
-              and credentials are encrypted at rest with stringent access controls.
+              industry-standard TLS / HTTPS encryption. Account passwords are stored only as
+              salted hashes, and third-party credentials and tokens (such as your Garmin
+              connection) are encrypted at rest. Access to our servers is restricted.
             </Text>
           </Section>
 
@@ -135,8 +137,8 @@ export default function PrivacyPolicyScreen() {
             <Text variant="body">
               You retain full ownership of your data. You have the right to:
             </Text>
-            <Bullet text="Disconnect external fitness services (Garmin, Huawei Health) at any time from Settings, which immediately halts syncing." />
-            <Bullet text="Export your workout history and training logs." />
+            <Bullet text="Disconnect Garmin at any time from Profile → Connections, which immediately stops syncing and removes the stored connection." />
+            <Bullet text="Request a copy of your data (workout history, plans and profile) by contacting us; we respond within 30 days." />
             <Bullet text="Delete your account and data at any time from Profile → Delete account in the app (web or mobile). All your personal information, credentials, and synced workout records are permanently removed from our databases." />
           </Section>
 
