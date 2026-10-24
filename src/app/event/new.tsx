@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Stack } from 'expo-router';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   TextInput,
@@ -55,6 +55,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
 }
 
 export default function NewEventScreen() {
+  const headerHeight = useHeaderHeight();
   const t = useT();
   const athlete = useAthlete();
   const createEvent = useAppStore((s) => s.createEvent);
@@ -102,7 +103,8 @@ export default function NewEventScreen() {
         }}
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-xl pb-40">
           <View className="gap-sm">

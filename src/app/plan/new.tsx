@@ -1,16 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Stack, useRouter } from 'expo-router';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  TextInput,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { z } from 'zod';
 
 import { PhaseAllocator } from '@/components/plan/PhaseAllocator';
@@ -36,6 +30,7 @@ const schema = z.object({ name: z.string().min(2) });
 type FormValues = z.infer<typeof schema>;
 
 export default function NewPlanScreen() {
+  const headerHeight = useHeaderHeight();
   const t = useT();
   const router = useRouter();
   const athlete = useAthlete();
@@ -111,7 +106,8 @@ export default function NewPlanScreen() {
         }}
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-xl pb-40">
           <Text variant="title">{t('planBuilder.title')}</Text>

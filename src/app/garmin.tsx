@@ -1,6 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
@@ -34,6 +42,7 @@ const THRESH_META: Record<ThreshKey, { labelKey: string; fmt: (n: number) => str
 };
 
 export default function GarminScreen() {
+  const headerHeight = useHeaderHeight();
   const t = useT();
   const garmin = useGarmin();
   const athlete = useAthlete();
@@ -91,217 +100,224 @@ export default function GarminScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <ScrollView
-        contentContainerClassName="p-lg gap-lg pb-24"
-        keyboardShouldPersistTaps="handled">
-        <View className="flex-row items-center gap-md">
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-brand">
-            <Ionicons name="watch-outline" size={24} color="#fff" />
-          </View>
-          <View className="flex-1">
-            <Text variant="title">{t('garmin.title')}</Text>
-            <Text variant="caption" muted>
-              {t('garmin.subtitle')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Status */}
-        {loading && !status ? (
-          <Text muted>{t('garmin.checking')}</Text>
-        ) : (
-          <View className="gap-sm rounded-lg border border-border bg-surface p-lg dark:border-border-dark dark:bg-surface-dark">
-            <View className="flex-row items-center gap-sm">
-              <View
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: connected ? palette.success : palette.textFaint }}
-              />
-              <Text variant="label">
-                {connected ? t('garmin.connected') : t('garmin.notConnected')}
-              </Text>
+      <KeyboardAvoidingView
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}
+        className="flex-1">
+        <ScrollView
+          contentContainerClassName="p-lg gap-lg pb-24"
+          keyboardShouldPersistTaps="handled">
+          <View className="flex-row items-center gap-md">
+            <View className="h-11 w-11 items-center justify-center rounded-xl bg-brand">
+              <Ionicons name="watch-outline" size={24} color="#fff" />
             </View>
-            {connected ? (
-              <>
-                <Text variant="caption" muted>
-                  {status?.displayName || status?.garminEmail}
-                </Text>
-                <Text variant="caption" muted>
-                  {t('garmin.lastSync', { time: timeAgo(status?.lastSyncAt ?? null, t) })}
-                </Text>
-              </>
-            ) : null}
-            {cooldown > 0 ? (
-              <Text variant="caption" className="text-warning">
-                {t('garmin.rateLimited', { minutes: Math.ceil(cooldown / 60) })}
-              </Text>
-            ) : null}
-            {status?.lastError && status.state === 'error' ? (
-              <Text variant="caption" className="text-warning">
-                {t('garmin.lastError', { error: status.lastError })}
-              </Text>
-            ) : null}
-          </View>
-        )}
-
-        {error ? (
-          <View className="flex-row items-center gap-xs rounded-md bg-danger/10 px-md py-2">
-            <Ionicons name="alert-circle" size={15} color={palette.danger} />
-            <Text variant="caption" className="flex-1 text-danger">
-              {error}
-            </Text>
-          </View>
-        ) : null}
-
-        {/* MFA step */}
-        {needsMfa ? (
-          <View className="gap-md">
-            <Text variant="heading">{t('garmin.enterCode')}</Text>
-            <Text variant="caption" muted>
-              {t('garmin.codeSubtitle')}
-            </Text>
-            <Field
-              label={t('garmin.verificationCode')}
-              value={code}
-              onChangeText={setCode}
-              placeholder={t('garmin.codePlaceholder')}
-              keyboardType="number-pad"
-              autoComplete="one-time-code"
-            />
-            <Button
-              label={t('garmin.verifyConnect')}
-              onPress={onVerify}
-              loading={busy}
-              disabled={code.trim().length < 4 || busy}
-            />
-            <Button label={t('garmin.startOver')} variant="ghost" onPress={onStartOver} />
-          </View>
-        ) : !connected ? (
-          <View className="gap-md">
-            {/* Privacy note — shown BEFORE any credentials are entered. */}
-            <View className="gap-xs rounded-lg border border-border bg-brand-tint p-md dark:border-border-dark dark:bg-surface-alt-dark">
-              <View className="flex-row items-center gap-xs">
-                <Ionicons name="lock-closed" size={14} color={palette.brand} />
-                <Text variant="label">{t('garmin.beforeSignIn')}</Text>
-              </View>
+            <View className="flex-1">
+              <Text variant="title">{t('garmin.title')}</Text>
               <Text variant="caption" muted>
-                {t('garmin.privacyNote')}
+                {t('garmin.subtitle')}
               </Text>
             </View>
-
-            <Field
-              label={t('garmin.garminEmail')}
-              value={email}
-              onChangeText={setEmail}
-              placeholder={t('login.emailPlaceholder')}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-            <Field
-              label={t('garmin.garminPassword')}
-              value={password}
-              onChangeText={setPassword}
-              placeholder={t('garmin.passwordPlaceholder')}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-            <Button
-              label={t('garmin.connect')}
-              onPress={onConnect}
-              loading={busy}
-              disabled={email.trim().length < 4 || password.length < 1 || busy || cooldown > 0}
-            />
           </View>
-        ) : (
-          <View className="gap-md">
-            <Button
-              label={t('garmin.syncNow')}
-              onPress={() => void garminSync()}
-              loading={busy}
-              disabled={busy || cooldown > 0}
-            />
-            <Text variant="caption" muted className="text-center">
-              {t('garmin.syncNote')}
-            </Text>
 
-            {lastSync?.status === 'ok' ? (
-              <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
-                <Text variant="label">{t('garmin.lastSyncLabel')}</Text>
-                <Text variant="caption" muted>
-                  {t('garmin.lastSyncResult', {
-                    imported: lastSync.imported,
-                    matched: lastSync.matched,
-                    updated: lastSync.updated,
-                  })}
-                  {lastSync.skipped
-                    ? t('garmin.skippedSuffix', { count: lastSync.skipped })
-                    : ''}
+          {/* Status */}
+          {loading && !status ? (
+            <Text muted>{t('garmin.checking')}</Text>
+          ) : (
+            <View className="gap-sm rounded-lg border border-border bg-surface p-lg dark:border-border-dark dark:bg-surface-dark">
+              <View className="flex-row items-center gap-sm">
+                <View
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: connected ? palette.success : palette.textFaint }}
+                />
+                <Text variant="label">
+                  {connected ? t('garmin.connected') : t('garmin.notConnected')}
                 </Text>
               </View>
-            ) : null}
-            {lastSync?.status === 'skipped' ? (
-              <Text variant="caption" muted className="text-center">
-                {t('garmin.syncedRecently')}
-              </Text>
-            ) : null}
-
-            <View className="mt-md gap-sm border-t border-border pt-md dark:border-border-dark">
-              <Text variant="heading">{t('garmin.trainingThresholds')}</Text>
-              {metrics ? (
-                <ThresholdImport
-                  t={t}
-                  metrics={metrics}
-                  current={athlete?.thresholds ?? {}}
-                  busy={busy}
-                  onApply={async (patch) => {
-                    await updateThresholds(patch);
-                    Alert.alert(
-                      t('garmin.thresholdsApplied'),
-                      t('garmin.thresholdsAppliedBody'),
-                    );
-                  }}
-                />
-              ) : (
+              {connected ? (
                 <>
                   <Text variant="caption" muted>
-                    {t('garmin.thresholdsIntro')}
+                    {status?.displayName || status?.garminEmail}
                   </Text>
-                  <Button
-                    label={t('garmin.importFromGarmin')}
-                    variant="secondary"
-                    onPress={() => void garminFetchMetrics()}
-                    loading={busy}
-                    disabled={busy || cooldown > 0}
-                  />
-                </>
-              )}
-            </View>
-
-            {metrics && hasInsights(metrics.insights) ? (
-              <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
-                <Text variant="label">{t('garmin.insights')}</Text>
-                {metrics.insights.vo2MaxRunning ? (
                   <Text variant="caption" muted>
-                    {t('garmin.vo2max', { run: metrics.insights.vo2MaxRunning })}
-                    {metrics.insights.vo2MaxCycling
-                      ? t('garmin.vo2maxBike', { bike: metrics.insights.vo2MaxCycling })
+                    {t('garmin.lastSync', { time: timeAgo(status?.lastSyncAt ?? null, t) })}
+                  </Text>
+                </>
+              ) : null}
+              {cooldown > 0 ? (
+                <Text variant="caption" className="text-warning">
+                  {t('garmin.rateLimited', { minutes: Math.ceil(cooldown / 60) })}
+                </Text>
+              ) : null}
+              {status?.lastError && status.state === 'error' ? (
+                <Text variant="caption" className="text-warning">
+                  {t('garmin.lastError', { error: status.lastError })}
+                </Text>
+              ) : null}
+            </View>
+          )}
+
+          {error ? (
+            <View className="flex-row items-center gap-xs rounded-md bg-danger/10 px-md py-2">
+              <Ionicons name="alert-circle" size={15} color={palette.danger} />
+              <Text variant="caption" className="flex-1 text-danger">
+                {error}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* MFA step */}
+          {needsMfa ? (
+            <View className="gap-md">
+              <Text variant="heading">{t('garmin.enterCode')}</Text>
+              <Text variant="caption" muted>
+                {t('garmin.codeSubtitle')}
+              </Text>
+              <Field
+                label={t('garmin.verificationCode')}
+                value={code}
+                onChangeText={setCode}
+                placeholder={t('garmin.codePlaceholder')}
+                keyboardType="number-pad"
+                autoComplete="one-time-code"
+              />
+              <Button
+                label={t('garmin.verifyConnect')}
+                onPress={onVerify}
+                loading={busy}
+                disabled={code.trim().length < 4 || busy}
+              />
+              <Button label={t('garmin.startOver')} variant="ghost" onPress={onStartOver} />
+            </View>
+          ) : !connected ? (
+            <View className="gap-md">
+              {/* Privacy note — shown BEFORE any credentials are entered. */}
+              <View className="gap-xs rounded-lg border border-border bg-brand-tint p-md dark:border-border-dark dark:bg-surface-alt-dark">
+                <View className="flex-row items-center gap-xs">
+                  <Ionicons name="lock-closed" size={14} color={palette.brand} />
+                  <Text variant="label">{t('garmin.beforeSignIn')}</Text>
+                </View>
+                <Text variant="caption" muted>
+                  {t('garmin.privacyNote')}
+                </Text>
+              </View>
+
+              <Field
+                label={t('garmin.garminEmail')}
+                value={email}
+                onChangeText={setEmail}
+                placeholder={t('login.emailPlaceholder')}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+              <Field
+                label={t('garmin.garminPassword')}
+                value={password}
+                onChangeText={setPassword}
+                placeholder={t('garmin.passwordPlaceholder')}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+              <Button
+                label={t('garmin.connect')}
+                onPress={onConnect}
+                loading={busy}
+                disabled={
+                  email.trim().length < 4 || password.length < 1 || busy || cooldown > 0
+                }
+              />
+            </View>
+          ) : (
+            <View className="gap-md">
+              <Button
+                label={t('garmin.syncNow')}
+                onPress={() => void garminSync()}
+                loading={busy}
+                disabled={busy || cooldown > 0}
+              />
+              <Text variant="caption" muted className="text-center">
+                {t('garmin.syncNote')}
+              </Text>
+
+              {lastSync?.status === 'ok' ? (
+                <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
+                  <Text variant="label">{t('garmin.lastSyncLabel')}</Text>
+                  <Text variant="caption" muted>
+                    {t('garmin.lastSyncResult', {
+                      imported: lastSync.imported,
+                      matched: lastSync.matched,
+                      updated: lastSync.updated,
+                    })}
+                    {lastSync.skipped
+                      ? t('garmin.skippedSuffix', { count: lastSync.skipped })
                       : ''}
                   </Text>
-                ) : null}
-                {metrics.insights.racePredictions ? (
-                  <Text variant="caption" muted>
-                    {t('garmin.racePredictions', {
-                      value: racePred(metrics.insights.racePredictions),
-                    })}
-                  </Text>
-                ) : null}
-              </View>
-            ) : null}
+                </View>
+              ) : null}
+              {lastSync?.status === 'skipped' ? (
+                <Text variant="caption" muted className="text-center">
+                  {t('garmin.syncedRecently')}
+                </Text>
+              ) : null}
 
-            <Button label={t('garmin.disconnect')} variant="ghost" onPress={onDisconnect} />
-          </View>
-        )}
-      </ScrollView>
+              <View className="mt-md gap-sm border-t border-border pt-md dark:border-border-dark">
+                <Text variant="heading">{t('garmin.trainingThresholds')}</Text>
+                {metrics ? (
+                  <ThresholdImport
+                    t={t}
+                    metrics={metrics}
+                    current={athlete?.thresholds ?? {}}
+                    busy={busy}
+                    onApply={async (patch) => {
+                      await updateThresholds(patch);
+                      Alert.alert(
+                        t('garmin.thresholdsApplied'),
+                        t('garmin.thresholdsAppliedBody'),
+                      );
+                    }}
+                  />
+                ) : (
+                  <>
+                    <Text variant="caption" muted>
+                      {t('garmin.thresholdsIntro')}
+                    </Text>
+                    <Button
+                      label={t('garmin.importFromGarmin')}
+                      variant="secondary"
+                      onPress={() => void garminFetchMetrics()}
+                      loading={busy}
+                      disabled={busy || cooldown > 0}
+                    />
+                  </>
+                )}
+              </View>
+
+              {metrics && hasInsights(metrics.insights) ? (
+                <View className="gap-xs rounded-md border border-border bg-surface p-md dark:border-border-dark dark:bg-surface-dark">
+                  <Text variant="label">{t('garmin.insights')}</Text>
+                  {metrics.insights.vo2MaxRunning ? (
+                    <Text variant="caption" muted>
+                      {t('garmin.vo2max', { run: metrics.insights.vo2MaxRunning })}
+                      {metrics.insights.vo2MaxCycling
+                        ? t('garmin.vo2maxBike', { bike: metrics.insights.vo2MaxCycling })
+                        : ''}
+                    </Text>
+                  ) : null}
+                  {metrics.insights.racePredictions ? (
+                    <Text variant="caption" muted>
+                      {t('garmin.racePredictions', {
+                        value: racePred(metrics.insights.racePredictions),
+                      })}
+                    </Text>
+                  ) : null}
+                </View>
+              ) : null}
+
+              <Button label={t('garmin.disconnect')} variant="ghost" onPress={onDisconnect} />
+            </View>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }

@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   TextInput,
@@ -27,6 +27,7 @@ function sameDay(a: string, b: string): boolean {
 }
 
 export default function ConversationScreen() {
+  const headerHeight = useHeaderHeight();
   const { partnerId } = useLocalSearchParams<{ partnerId: string }>();
   const t = useT();
   const me = useAthlete();
@@ -104,8 +105,8 @@ export default function ConversationScreen() {
       <Stack.Screen options={{ title: partner?.name ?? t('nav.messages') }} />
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={90}>
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}>
         {loading && messages.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator color={palette.brand} />

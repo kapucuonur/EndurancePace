@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   Alert,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   TextInput,
@@ -78,6 +78,7 @@ function newRepeat(): Step {
 }
 
 export default function WorkoutBuilderScreen() {
+  const headerHeight = useHeaderHeight();
   const params = useLocalSearchParams<{
     date?: string;
     id?: string;
@@ -179,7 +180,8 @@ export default function WorkoutBuilderScreen() {
         }}
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-lg pb-40">
           {/* Metadata */}

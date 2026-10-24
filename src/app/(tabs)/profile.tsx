@@ -1,7 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Platform, ScrollView, TextInput, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { DeleteAccountCard } from '@/components/DeleteAccountCard';
 import { MoreAppsCard } from '@/components/MoreAppsCard';
@@ -105,131 +112,135 @@ export default function ProfileScreen() {
         <Ionicons name="person-circle-outline" size={36} color={palette.brand} />
       </View>
 
-      <ScrollView contentContainerClassName="p-lg gap-lg pb-24">
-        <View className="gap-sm">
-          <Text variant="heading">{t('profile.thresholds')}</Text>
-          {FIELDS.map((f) => (
-            <View
-              key={f.key}
-              className="flex-row items-center justify-between rounded-md border border-border bg-surface px-md py-2 dark:border-border-dark dark:bg-surface-dark">
-              <View className="flex-1">
-                <Text variant="label">{t(f.labelKey)}</Text>
-                <Text variant="caption" muted>
-                  {t(f.hintKey)}
-                  {(f.key === 'runThresholdPaceSecPerKm' || f.key === 'cssSecPer100m') &&
-                  draft[f.key]
-                    ? ` · ${formatPace(Number(draft[f.key]))}`
-                    : ''}
-                </Text>
+      <KeyboardAvoidingView behavior="padding" className="flex-1">
+        <ScrollView contentContainerClassName="p-lg gap-lg pb-24">
+          <View className="gap-sm">
+            <Text variant="heading">{t('profile.thresholds')}</Text>
+            {FIELDS.map((f) => (
+              <View
+                key={f.key}
+                className="flex-row items-center justify-between rounded-md border border-border bg-surface px-md py-2 dark:border-border-dark dark:bg-surface-dark">
+                <View className="flex-1">
+                  <Text variant="label">{t(f.labelKey)}</Text>
+                  <Text variant="caption" muted>
+                    {t(f.hintKey)}
+                    {(f.key === 'runThresholdPaceSecPerKm' || f.key === 'cssSecPer100m') &&
+                    draft[f.key]
+                      ? ` · ${formatPace(Number(draft[f.key]))}`
+                      : ''}
+                  </Text>
+                </View>
+                <TextInput
+                  value={draft[f.key] ?? ''}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, [f.key]: v }))}
+                  keyboardType="number-pad"
+                  className="w-20 rounded-md border border-border bg-bg px-sm py-1.5 text-right text-base text-fg dark:border-border-dark dark:bg-bg-dark dark:text-fg-dark"
+                />
               </View>
-              <TextInput
-                value={draft[f.key] ?? ''}
-                onChangeText={(v) => setDraft((d) => ({ ...d, [f.key]: v }))}
-                keyboardType="number-pad"
-                className="w-20 rounded-md border border-border bg-bg px-sm py-1.5 text-right text-base text-fg dark:border-border-dark dark:bg-bg-dark dark:text-fg-dark"
-              />
-            </View>
-          ))}
-          <Button label={t('profile.saveZones')} onPress={onSave} loading={saving} />
-        </View>
-
-        <View className="gap-sm">
-          <Text variant="heading">{t('profile.calculatedZones')}</Text>
-          <ZoneTable title={t('profile.zonesHr')} zones={athlete.hrZones} unit="bpm" />
-          <ZoneTable title={t('profile.zonesPower')} zones={athlete.powerZones} unit="w" />
-          <ZoneTable
-            title={t('profile.zonesRunPace')}
-            zones={athlete.runPaceZones}
-            unit="pace"
-            paceSuffix="/km"
-          />
-          <ZoneTable
-            title={t('profile.zonesSwimPace')}
-            zones={swimZones}
-            unit="pace"
-            paceSuffix="/100m"
-          />
-        </View>
-
-        {/* On web the language menu lives in the top navbar instead. */}
-        {Platform.OS !== 'web' ? (
-          <View className="gap-sm">
-            <Text variant="heading">{t('profile.language')}</Text>
-            <View className="flex-row flex-wrap gap-sm">
-              {SUPPORTED_LOCALES.map((loc) => {
-                const on = loc === locale;
-                return (
-                  <Button
-                    key={loc}
-                    label={LOCALE_LABELS[loc]}
-                    variant={on ? 'primary' : 'secondary'}
-                    onPress={() => void setLocale(loc)}
-                  />
-                );
-              })}
-            </View>
+            ))}
+            <Button label={t('profile.saveZones')} onPress={onSave} loading={saving} />
           </View>
-        ) : null}
 
-        {isCoach ? (
           <View className="gap-sm">
-            <Text variant="heading">{t('profile.coaching')}</Text>
+            <Text variant="heading">{t('profile.calculatedZones')}</Text>
+            <ZoneTable title={t('profile.zonesHr')} zones={athlete.hrZones} unit="bpm" />
+            <ZoneTable title={t('profile.zonesPower')} zones={athlete.powerZones} unit="w" />
+            <ZoneTable
+              title={t('profile.zonesRunPace')}
+              zones={athlete.runPaceZones}
+              unit="pace"
+              paceSuffix="/km"
+            />
+            <ZoneTable
+              title={t('profile.zonesSwimPace')}
+              zones={swimZones}
+              unit="pace"
+              paceSuffix="/100m"
+            />
+          </View>
+
+          {/* On web the language menu lives in the top navbar instead. */}
+          {Platform.OS !== 'web' ? (
+            <View className="gap-sm">
+              <Text variant="heading">{t('profile.language')}</Text>
+              <View className="flex-row flex-wrap gap-sm">
+                {SUPPORTED_LOCALES.map((loc) => {
+                  const on = loc === locale;
+                  return (
+                    <Button
+                      key={loc}
+                      label={LOCALE_LABELS[loc]}
+                      variant={on ? 'primary' : 'secondary'}
+                      onPress={() => void setLocale(loc)}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          ) : null}
+
+          {isCoach ? (
+            <View className="gap-sm">
+              <Text variant="heading">{t('profile.coaching')}</Text>
+              <Card
+                onPress={() => router.push('/coach')}
+                className="flex-row items-center gap-md">
+                <Ionicons name="people-outline" size={22} color={palette.brand} />
+                <View className="flex-1">
+                  <Text variant="label">{t('profile.coachingAthletes')}</Text>
+                  <Text variant="caption" muted>
+                    {t('profile.coachingSubtitle')}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
+              </Card>
+            </View>
+          ) : null}
+
+          <View className="gap-sm">
+            <Text variant="heading">{t('profile.connections')}</Text>
             <Card
-              onPress={() => router.push('/coach')}
+              onPress={() => router.push('/garmin')}
               className="flex-row items-center gap-md">
-              <Ionicons name="people-outline" size={22} color={palette.brand} />
+              <Ionicons name="watch-outline" size={22} color={palette.brand} />
               <View className="flex-1">
-                <Text variant="label">{t('profile.coachingAthletes')}</Text>
+                <Text variant="label">{t('nav.garminConnect')}</Text>
                 <Text variant="caption" muted>
-                  {t('profile.coachingSubtitle')}
+                  {garmin.status?.connected
+                    ? t('profile.garminConnected', {
+                        suffix: garmin.status.garminEmail
+                          ? ` · ${garmin.status.garminEmail}`
+                          : '',
+                      })
+                    : t('profile.garminNotConnected')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
             </Card>
           </View>
-        ) : null}
 
-        <View className="gap-sm">
-          <Text variant="heading">{t('profile.connections')}</Text>
-          <Card onPress={() => router.push('/garmin')} className="flex-row items-center gap-md">
-            <Ionicons name="watch-outline" size={22} color={palette.brand} />
-            <View className="flex-1">
-              <Text variant="label">{t('nav.garminConnect')}</Text>
-              <Text variant="caption" muted>
-                {garmin.status?.connected
-                  ? t('profile.garminConnected', {
-                      suffix: garmin.status.garminEmail
-                        ? ` · ${garmin.status.garminEmail}`
-                        : '',
-                    })
-                  : t('profile.garminNotConnected')}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={palette.textFaint} />
-          </Card>
-        </View>
+          <MoreAppsCard />
 
-        <MoreAppsCard />
-
-        {/* Seed reset is a dev/mock convenience; production disables it server-side. */}
-        {USE_MOCK_API || __DEV__ ? (
-          <Button
-            label={t('profile.resetDemo')}
-            variant="ghost"
-            onPress={() => {
-              resetToSeed().catch((e) =>
-                Alert.alert(
-                  t('profile.resetUnavailable'),
-                  e instanceof Error ? e.message : String(e),
-                ),
-              );
-            }}
-          />
-        ) : null}
-        <Button label={t('profile.signOut')} variant="ghost" onPress={() => signOut()} />
-        <DeleteAccountCard />
-        {/* TODO: implement weight/birthdate editing, discipline toggles, and manual zone overrides */}
-      </ScrollView>
+          {/* Seed reset is a dev/mock convenience; production disables it server-side. */}
+          {USE_MOCK_API || __DEV__ ? (
+            <Button
+              label={t('profile.resetDemo')}
+              variant="ghost"
+              onPress={() => {
+                resetToSeed().catch((e) =>
+                  Alert.alert(
+                    t('profile.resetUnavailable'),
+                    e instanceof Error ? e.message : String(e),
+                  ),
+                );
+              }}
+            />
+          ) : null}
+          <Button label={t('profile.signOut')} variant="ghost" onPress={() => signOut()} />
+          <DeleteAccountCard />
+          {/* TODO: implement weight/birthdate editing, discipline toggles, and manual zone overrides */}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }

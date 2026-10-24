@@ -6,7 +6,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -224,9 +223,7 @@ export default function LoginScreen() {
     <View style={{ flex: 1, width, overflow: 'hidden', backgroundColor: palette.bg }}>
       {/* The stacked layout puts the dark photo hero under the status bar. */}
       <StatusBar style="light" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ minHeight: '100%', paddingBottom: 40 }}
