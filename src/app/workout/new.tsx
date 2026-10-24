@@ -5,8 +5,10 @@ import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   TextInput,
@@ -17,6 +19,7 @@ import { z } from 'zod';
 import { RepeatBlock } from '@/components/builder/RepeatBlock';
 import { Segmented } from '@/components/builder/Segmented';
 import { StepRow } from '@/components/builder/StepRow';
+import { SportGlyph } from '@/components/SportGlyph';
 import { StepTimeline } from '@/components/StepTimeline';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
@@ -24,10 +27,11 @@ import { Text } from '@/components/ui/Text';
 import { computeWorkoutMetrics } from '@/domain/workout';
 import { useT } from '@/i18n/useT';
 import { longDate, shiftDays, todayISO } from '@/lib/date';
-import { formatDurationShort, formatDuration } from '@/lib/format';
+import { formatDuration } from '@/lib/format';
 import { uid } from '@/lib/id';
 import { useKeyboardOffset } from '@/lib/keyboard';
 import { goBack } from '@/lib/nav';
+import { cloneStep, moveItem } from '@/lib/steps';
 import { useAppStore } from '@/store/useAppStore';
 import { SPORT_LABEL } from '@/theme/sport';
 import { palette } from '@/theme/tokens';
@@ -78,7 +82,33 @@ function newRepeat(): Step {
   };
 }
 
-export default function WorkoutBuilderScreen() {
+/**
+ * Route wrapper. When editing, wait until the workout is in the store before
+ * mounting the form: on a cold load (web refresh, deep link) the snapshot
+ * arrives after mount, and a form built from "not found" would show defaults
+ * and save a duplicate instead of updating.
+ */
+export default function WorkoutBuilderRoute() {
+  const t = useT();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const hydrated = useAppStore((s) => s.hydrated);
+  const found = useAppStore((s) => (id ? s.workouts.some((w) => w.id === id) : false));
+
+  if (id && !found) {
+    return (
+      <Screen className="items-center justify-center">
+        {hydrated ? (
+          <Text muted>{t('workoutDetail.notFound')}</Text>
+        ) : (
+          <ActivityIndicator color={palette.brand} />
+        )}
+      </Screen>
+    );
+  }
+  return <WorkoutBuilderScreen key={id ?? 'new'} />;
+}
+
+function WorkoutBuilderScreen() {
   const keyboardOffset = useKeyboardOffset(useHeaderHeight());
   const params = useLocalSearchParams<{
     date?: string;
@@ -90,9 +120,8 @@ export default function WorkoutBuilderScreen() {
   const assignTo = params.assignTo || undefined;
   const t = useT();
 
-  // Read the workout being edited once, at mount. Screens that link here
-  // (Detail, Library) already have data loaded, so `existing` is available
-  // synchronously; snapshotting it means later store updates don't stomp the
+  // Read the workout being edited once, at mount (the route wrapper guarantees
+  // it's loaded). Snapshotting it means later store updates don't stomp the
   // user's in-progress edits.
   const [existing] = useState(() =>
     params.id ? useAppStore.getState().workouts.find((w) => w.id === params.id) : undefined,
@@ -126,9 +155,22 @@ export default function WorkoutBuilderScreen() {
     [structure, watchedSport, thresholds],
   );
 
+  // One step (or interval-set header) open for editing at a time; the rest stay compact.
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const toggle = (id: string) => setExpandedId((cur) => (cur === id ? null : id));
+
   const updateStep = (idx: number, next: Step) =>
     setStructure((s) => s.map((st, i) => (i === idx ? next : st)));
   const removeStep = (idx: number) => setStructure((s) => s.filter((_, i) => i !== idx));
+  const duplicateStep = (idx: number) => {
+    const copy = cloneStep(structure[idx]);
+    setStructure((s) => [...s.slice(0, idx + 1), copy, ...s.slice(idx + 1)]);
+    setExpandedId(copy.id);
+  };
+  const addStep = (step: Step) => {
+    setStructure((s) => [...s, step]);
+    setExpandedId(step.id);
+  };
 
   const onSubmit = async (values: FormValues) => {
     const { durationSeconds, tss } = computeWorkoutMetrics(structure, values.sport, thresholds);
@@ -174,7 +216,11 @@ export default function WorkoutBuilderScreen() {
               : t('nav.newWorkout'),
           headerTitleAlign: 'center',
           headerLeft: () => (
-            <Pressable onPress={goBack} hitSlop={8} className="pr-md">
+            <Pressable
+              onPress={goBack}
+              hitSlop={8}
+              // Web's header has no leading inset, so the label would touch the edge.
+              className={Platform.OS === 'web' ? 'px-md' : 'pr-md'}>
               <Text className="text-brand">{t('common.cancel')}</Text>
             </Pressable>
           ),
@@ -184,59 +230,73 @@ export default function WorkoutBuilderScreen() {
         behavior="padding"
         keyboardVerticalOffset={keyboardOffset}
         className="flex-1">
-        <ScrollView contentContainerClassName="p-lg gap-lg pb-40">
-          {/* Metadata */}
-          <View className="gap-sm">
-            <Text variant="label" muted>
-              {t('workoutBuilder.titleLabel')}
-            </Text>
+        <ScrollView
+          contentContainerClassName="p-lg gap-lg pb-lg"
+          keyboardShouldPersistTaps="handled">
+          {/* Title, sport, schedule */}
+          <View className="gap-md">
             <Controller
               control={control}
               name="title"
               render={({ field, fieldState }) => (
-                <>
+                <View className="gap-xs">
                   <TextInput
                     value={field.value}
                     onChangeText={field.onChange}
                     placeholder={t('workoutBuilder.titlePlaceholder')}
                     placeholderTextColor={palette.textFaint}
-                    className="rounded-md border border-border bg-surface px-md py-3 text-base text-fg dark:border-border-dark dark:bg-surface-dark dark:text-fg-dark"
+                    accessibilityLabel={t('workoutBuilder.titleLabel')}
+                    className="border-b border-border pb-sm text-xl font-semibold text-fg dark:border-border-dark dark:text-fg-dark"
                   />
                   {fieldState.error ? (
-                    <Text variant="caption" className="text-danger">
+                    <Text variant="caption" style={{ color: palette.danger }}>
                       {t('workoutBuilder.titleError')}
                     </Text>
                   ) : null}
-                </>
+                </View>
               )}
             />
-          </View>
 
-          <View className="gap-sm">
-            <Text variant="label" muted>
-              {t('workoutBuilder.sportLabel')}
-            </Text>
             <Controller
               control={control}
               name="sport"
               render={({ field }) => (
-                <Segmented
-                  options={SPORTS.map((s) => ({ value: s, label: t(`sport.${s}`) }))}
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <View className="flex-row gap-sm" accessibilityRole="radiogroup">
+                  {SPORTS.map((s) => {
+                    const on = field.value === s;
+                    return (
+                      <Pressable
+                        key={s}
+                        onPress={() => field.onChange(s)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: on }}
+                        accessibilityLabel={t(`sport.${s}`)}
+                        className={`flex-1 items-center gap-1 rounded-lg border py-sm active:opacity-70 ${
+                          on
+                            ? 'border-brand bg-brand/10'
+                            : 'border-border bg-surface dark:border-border-dark dark:bg-surface-dark'
+                        }`}>
+                        <SportGlyph sport={s} size={20} />
+                        <Text
+                          variant="caption"
+                          style={{
+                            color: on ? palette.brand : undefined,
+                            fontWeight: on ? '600' : '400',
+                          }}>
+                          {t(`sport.${s}`)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               )}
             />
-          </View>
 
-          <View className="gap-sm">
-            <Text variant="label" muted>
-              {assignTo ? t('workoutBuilder.assignToLabel') : t('workoutBuilder.scheduleLabel')}
-            </Text>
             {assignTo ? (
-              <View className="flex-row items-center gap-xs rounded-md bg-brand/10 px-md py-2">
+              <View className="flex-row items-center gap-xs self-start rounded-full bg-brand/10 px-md py-1.5">
                 <Ionicons name="person" size={14} color={palette.brand} />
-                <Text variant="caption" className="text-brand">
+                <Text variant="caption" style={{ color: palette.brand }}>
+                  {t('workoutBuilder.assignToLabel')}:{' '}
                   {params.assignName || t('workoutBuilder.thisAthlete')}
                 </Text>
               </View>
@@ -251,17 +311,21 @@ export default function WorkoutBuilderScreen() {
               />
             )}
             {target === 'date' || assignTo ? (
-              <View className="flex-row items-center justify-between rounded-md border border-border bg-surface px-sm py-2 dark:border-border-dark dark:bg-surface-dark">
+              <View className="flex-row items-center justify-between rounded-md border border-border bg-surface px-xs py-1 dark:border-border-dark dark:bg-surface-dark">
                 <Pressable
                   onPress={() => setDate((d) => shiftDays(d, -1))}
-                  hitSlop={12}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('workoutBuilder.prevDay')}
                   className="p-sm">
                   <Ionicons name="chevron-back" size={20} color={palette.brand} />
                 </Pressable>
                 <Text variant="label">{longDate(date)}</Text>
                 <Pressable
                   onPress={() => setDate((d) => shiftDays(d, 1))}
-                  hitSlop={12}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('workoutBuilder.nextDay')}
                   className="p-sm">
                   <Ionicons name="chevron-forward" size={20} color={palette.brand} />
                 </Pressable>
@@ -273,18 +337,71 @@ export default function WorkoutBuilderScreen() {
             )}
           </View>
 
-          {/* Live metrics */}
-          <View className="gap-xs rounded-lg bg-brand/10 p-md">
-            <View className="flex-row gap-md">
-              <Metric
-                label={t('workoutBuilder.duration')}
-                value={formatDuration(metrics.durationSeconds)}
-              />
-              <Metric label={t('workoutBuilder.estTss')} value={String(metrics.tss)} />
-              <Metric
-                label={t('workoutBuilder.blocks')}
-                value={String(metrics.blocks.length)}
-              />
+          {/* Shape of the session */}
+          {structure.length > 0 ? (
+            <StepTimeline structure={structure} sport={watchedSport} />
+          ) : null}
+
+          {/* Steps */}
+          <View className="gap-sm">
+            <View className="flex-row items-baseline justify-between">
+              <Text variant="heading">{t('workoutBuilder.structure')}</Text>
+              <Text variant="caption" muted>
+                {t('workoutBuilder.tapToEdit')}
+              </Text>
+            </View>
+            {structure.map((step, idx) => {
+              const actions = {
+                onMoveUp: idx > 0 ? () => setStructure((s) => moveItem(s, idx, -1)) : undefined,
+                onMoveDown:
+                  idx < structure.length - 1
+                    ? () => setStructure((s) => moveItem(s, idx, 1))
+                    : undefined,
+                onDuplicate: () => duplicateStep(idx),
+                onRemove: () => removeStep(idx),
+              };
+              return step.children.length > 0 ? (
+                <RepeatBlock
+                  key={step.id}
+                  group={step}
+                  sport={watchedSport}
+                  expandedId={expandedId}
+                  onToggle={toggle}
+                  onChange={(next) => updateStep(idx, next)}
+                  {...actions}
+                />
+              ) : (
+                <StepRow
+                  key={step.id}
+                  step={step}
+                  sport={watchedSport}
+                  expanded={expandedId === step.id}
+                  onToggle={() => toggle(step.id)}
+                  onChange={(next) => updateStep(idx, next)}
+                  {...actions}
+                />
+              );
+            })}
+
+            <View className="flex-row gap-sm">
+              <Pressable
+                onPress={() => addStep(newLeaf())}
+                accessibilityRole="button"
+                className="flex-1 flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-md active:opacity-70 dark:border-border-dark">
+                <Ionicons name="add" size={16} color={palette.brand} />
+                <Text variant="caption" style={{ color: palette.brand }}>
+                  {t('workoutBuilder.step')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => addStep(newRepeat())}
+                accessibilityRole="button"
+                className="flex-1 flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-md active:opacity-70 dark:border-border-dark">
+                <Ionicons name="repeat" size={16} color={palette.brand} />
+                <Text variant="caption" style={{ color: palette.brand }}>
+                  {t('workoutBuilder.intervalSet')}
+                </Text>
+              </Pressable>
             </View>
             {metrics.hasHrEstimate ? (
               <Text variant="caption" muted>
@@ -292,55 +409,18 @@ export default function WorkoutBuilderScreen() {
               </Text>
             ) : null}
           </View>
+        </ScrollView>
 
-          {structure.length > 0 ? (
-            <StepTimeline structure={structure} sport={watchedSport} />
-          ) : null}
-
-          {/* Steps */}
-          <View className="gap-md">
-            <Text variant="heading">{t('workoutBuilder.structure')}</Text>
-            {structure.map((step, idx) =>
-              step.children.length > 0 ? (
-                <RepeatBlock
-                  key={step.id}
-                  group={step}
-                  sport={watchedSport}
-                  onChange={(next) => updateStep(idx, next)}
-                  onRemove={() => removeStep(idx)}
-                />
-              ) : (
-                <StepRow
-                  key={step.id}
-                  step={step}
-                  sport={watchedSport}
-                  onChange={(next) => updateStep(idx, next)}
-                  onRemove={() => removeStep(idx)}
-                />
-              ),
-            )}
-
-            <View className="flex-row gap-md">
-              <Pressable
-                onPress={() => setStructure((s) => [...s, newLeaf()])}
-                className="flex-1 flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-md dark:border-border-dark">
-                <Ionicons name="add" size={16} color={palette.brand} />
-                <Text variant="caption" className="text-brand">
-                  {t('workoutBuilder.step')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setStructure((s) => [...s, newRepeat()])}
-                className="flex-1 flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-md dark:border-border-dark">
-                <Ionicons name="repeat" size={16} color={palette.brand} />
-                <Text variant="caption" className="text-brand">
-                  {t('workoutBuilder.intervalSet')}
-                </Text>
-              </Pressable>
-            </View>
+        {/* Sticky footer: totals + save */}
+        <View className="flex-row items-center gap-md border-t border-border bg-bg px-lg py-sm dark:border-border-dark dark:bg-bg-dark">
+          <View>
+            <Text variant="heading">{formatDuration(metrics.durationSeconds)}</Text>
+            <Text variant="caption" muted>
+              {t('workoutBuilder.footerTss', { tss: metrics.tss })}
+            </Text>
           </View>
-
           <Button
+            className="flex-1"
             label={
               assignTo
                 ? t('workoutBuilder.assignWorkout')
@@ -350,24 +430,8 @@ export default function WorkoutBuilderScreen() {
             }
             onPress={handleSubmit(onSubmit)}
           />
-          <Text variant="caption" muted className="text-center">
-            {t('workoutBuilder.plannedSuffix', {
-              duration: formatDurationShort(metrics.durationSeconds),
-            })}
-          </Text>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </Screen>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="flex-1">
-      <Text variant="caption" muted>
-        {label}
-      </Text>
-      <Text variant="heading">{value}</Text>
-    </View>
   );
 }
