@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   TextInput,
@@ -97,7 +98,11 @@ export default function NewEventScreen() {
         options={{
           headerTitleAlign: 'center',
           headerLeft: () => (
-            <Pressable onPress={goBack} hitSlop={8} className="pr-md">
+            <Pressable
+              onPress={goBack}
+              hitSlop={8}
+              // Web's header has no leading inset, so the label would touch the edge.
+              className={Platform.OS === 'web' ? 'px-md' : 'pr-md'}>
               <Text className="text-brand">{t('common.cancel')}</Text>
             </Pressable>
           ),

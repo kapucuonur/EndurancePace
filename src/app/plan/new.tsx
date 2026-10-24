@@ -4,7 +4,14 @@ import { Stack, useRouter } from 'expo-router';
 import { useHeaderHeight } from 'expo-router/react-navigation';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Pressable, ScrollView, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 import { z } from 'zod';
 
 import { PhaseAllocator } from '@/components/plan/PhaseAllocator';
@@ -100,7 +107,11 @@ export default function NewPlanScreen() {
         options={{
           headerTitleAlign: 'center',
           headerLeft: () => (
-            <Pressable onPress={goBack} hitSlop={8} className="pr-md">
+            <Pressable
+              onPress={goBack}
+              hitSlop={8}
+              // Web's header has no leading inset, so the label would touch the edge.
+              className={Platform.OS === 'web' ? 'px-md' : 'pr-md'}>
               <Text className="text-brand">{t('common.cancel')}</Text>
             </Pressable>
           ),
