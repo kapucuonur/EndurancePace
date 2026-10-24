@@ -139,7 +139,6 @@
     "coaching": "Coaching",
     "coachingAthletes": "Atleti",
     "coachingSubtitle": "Vedi i calendari e assegna allenamenti",
-    "viewTrends": "Vedi l'andamento della forma",
     "resetDemo": "Reimposta i dati demo",
     "resetUnavailable": "Reimpostazione non disponibile",
     "signOut": "Esci",
@@ -364,5 +363,13 @@
     "title": "Altro da TriHonor",
     "bikefit": "Analisi del bike fit con IA da un video mentre pedali",
     "aiCoach": "Coaching con IA e piani di allenamento dai tuoi dati Garmin"
+  },
+  "nudge": {
+    "plansTitle": "Vuoi un piano fatto su misura?",
+    "plansBody": "CoachOnur AI crea e adatta il tuo piano di allenamento in base ai tuoi dati Garmin.",
+    "activityTitle": "Ottieni di più da questa sessione",
+    "activityBody": "CoachOnur AI analizza le tue attività Garmin e suggerisce recupero e prossimi allenamenti.",
+    "cta": "Prova CoachOnur AI",
+    "dismiss": "Chiudi"
   }
 }

@@ -139,7 +139,6 @@
     "coaching": "Antrenörlük",
     "coachingAthletes": "Sporcular",
     "coachingSubtitle": "Takvimleri gör ve antrenman ata",
-    "viewTrends": "Form trendlerini gör",
     "resetDemo": "Demo verisini sıfırla",
     "resetUnavailable": "Sıfırlama kullanılamıyor",
     "signOut": "Çıkış yap",
@@ -364,5 +363,13 @@
     "title": "TriHonor'dan diğer uygulamalar",
     "bikefit": "Sürüş videondan yapay zekâ destekli bisiklet fit analizi",
     "aiCoach": "Garmin verilerinden yapay zekâ koçluğu ve antrenman planları"
+  },
+  "nudge": {
+    "plansTitle": "Planını senin için hazırlayalım mı?",
+    "plansBody": "CoachOnur AI, Garmin verilerine göre antrenman planını oluşturur ve günceller.",
+    "activityTitle": "Bu antrenmandan daha fazlasını çıkar",
+    "activityBody": "CoachOnur AI, Garmin aktivitelerini analiz eder; toparlanma ve sonraki antrenman önerileri sunar.",
+    "cta": "CoachOnur AI'yi dene",
+    "dismiss": "Kapat"
   }
 }

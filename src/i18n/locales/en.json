@@ -139,7 +139,6 @@
     "coaching": "Coaching",
     "coachingAthletes": "Athletes",
     "coachingSubtitle": "View calendars and assign workouts",
-    "viewTrends": "View fitness trends",
     "resetDemo": "Reset demo data",
     "resetUnavailable": "Reset unavailable",
     "signOut": "Sign out",
@@ -364,5 +363,13 @@
     "title": "More from TriHonor",
     "bikefit": "AI bike fit analysis from a video of you riding",
     "aiCoach": "AI coaching and training plans built from your Garmin data"
+  },
+  "nudge": {
+    "plansTitle": "Want a plan built for you?",
+    "plansBody": "CoachOnur AI builds and adapts your training plan from your Garmin data.",
+    "activityTitle": "Get more out of this session",
+    "activityBody": "CoachOnur AI analyses your Garmin activities and suggests recovery and next workouts.",
+    "cta": "Try CoachOnur AI",
+    "dismiss": "Dismiss"
   }
 }

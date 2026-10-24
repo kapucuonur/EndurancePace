@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { AiCoachNudge } from '@/components/AiCoachNudge';
 import { PhaseTimeline } from '@/components/plan/PhaseTimeline';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
@@ -80,6 +81,8 @@ export default function PlanOverviewScreen() {
             );
           })
         )}
+
+        <AiCoachNudge context="plans" />
 
         <Text variant="heading" className="mt-md">
           {t('plans.upcomingRaces')}

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
+import { AiCoachNudge } from '@/components/AiCoachNudge';
 import { SportGlyph } from '@/components/SportGlyph';
 import { StepTimeline } from '@/components/StepTimeline';
 import { Button } from '@/components/ui/Button';
@@ -94,6 +95,9 @@ export default function WorkoutDetailScreen() {
         </View>
 
         {workout.completed ? <ActualCard workout={workout} t={t} /> : null}
+        {workout.source === 'garmin' && workout.completed ? (
+          <AiCoachNudge context="activity" />
+        ) : null}
 
         {workout.structure.length ? (
           <View className="gap-md">
