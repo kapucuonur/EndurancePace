@@ -46,6 +46,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected: on }}
+      aria-checked={on}
       className={`rounded-full border px-md py-2 ${
         on ? 'border-brand bg-brand/10' : 'border-border dark:border-border-dark'
       }`}>

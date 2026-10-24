@@ -21,6 +21,7 @@ export function ChipGroup<T extends string>({ options, value, onChange }: Props<
             onPress={() => onChange(o.value)}
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
+            aria-checked={on}
             className={`flex-row items-center gap-1.5 rounded-full border px-md py-1.5 active:opacity-70 ${
               on
                 ? 'border-brand bg-brand/10'

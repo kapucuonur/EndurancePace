@@ -647,6 +647,7 @@ function PacePresets({
               onPress={() => onPick(o.min, o.max)}
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
+              aria-checked={on}
               className={`rounded-full border px-md py-1.5 active:opacity-70 ${
                 on
                   ? 'border-brand bg-brand/10'
