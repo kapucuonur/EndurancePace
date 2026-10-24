@@ -19,6 +19,7 @@
  * back to a flat estimate so the number is never NaN.
  */
 
+import { exerciseSeconds } from '@/domain/exercises';
 import type { Sport, Step, StepTarget, ThresholdValues } from '@/types/domain';
 
 /** Representative Intensity Factor for each 5-zone number. */
@@ -65,6 +66,8 @@ export interface TimelineBlock {
   isHrEstimate: boolean;
   /** Set-repeat index this block belongs to, for grouping in the UI. */
   repeatGroup?: string;
+  /** The strength exercise, when this is one. */
+  exercise?: Step['exercise'];
 }
 
 function ifFromTarget(
@@ -107,10 +110,13 @@ function zoneFromTarget(target: StepTarget | undefined): number | undefined {
   return target?.hrZone ?? target?.powerZone;
 }
 
-/** Planned seconds for a step: its time, or distance ÷ (pace target or sport default). */
+/** Planned seconds for a step: its time, distance ÷ (speed, pace target or sport default),
+ *  or for a strength exercise the sets × (work + rest) estimate. */
 export function stepSeconds(step: Step, sport: Sport): number {
+  if (step.exercise) return exerciseSeconds(step.exercise);
   if (!step.duration) return 0;
   if (step.duration.kind === 'time') return step.duration.seconds;
+  if (step.duration.speedKmh) return step.duration.meters / (step.duration.speedKmh / 3.6);
 
   // distance-based: convert via the pace target midpoint or a sport default
   const pace = step.target?.paceTarget;
@@ -154,6 +160,7 @@ export function flattenSteps(
           intensityFactor: ifFromTarget(step.target, sport, thresholds),
           isHrEstimate: step.target?.hrZone != null,
           repeatGroup: groupId,
+          exercise: step.exercise,
         });
       }
     }
@@ -162,6 +169,8 @@ export function flattenSteps(
   structure.forEach((s) => visit(s));
   return out;
 }
+
+export { DEFAULT_SPEED_MPS };
 
 export function totalDurationSeconds(structure: Step[], sport: Sport): number {
   return flattenSteps(structure, sport).reduce((sum, b) => sum + b.seconds, 0);

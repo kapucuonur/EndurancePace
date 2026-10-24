@@ -164,7 +164,21 @@ export interface RaceEvent {
 
 /** A step is either time-based or distance-based, never both. */
 export type StepDuration =
-  { kind: 'time'; seconds: number } | { kind: 'distance'; meters: number };
+  | { kind: 'time'; seconds: number }
+  /** `speedKmh` = expected average speed, used to estimate time on the bike. */
+  | { kind: 'distance'; meters: number; speedKmh?: number };
+
+/**
+ * A strength exercise. `key` names an entry in `domain/exercises.ts`; for
+ * holds (plank) `reps` is the hold time in seconds. No weight = bodyweight.
+ */
+export interface StepExercise {
+  key: string;
+  sets: number;
+  reps: number;
+  weightKg?: number;
+  restSec: number;
+}
 
 /** Unit a pace target is expressed in — `sec_per_km` for run, `sec_per_100m` for swim. */
 export type PaceUnit = 'sec_per_km' | 'sec_per_100m';
@@ -198,6 +212,8 @@ export interface Step {
   /** Only meaningful for leaf steps. */
   duration?: StepDuration;
   target?: StepTarget;
+  /** Set on strength steps; time is then estimated from sets/reps/rest. */
+  exercise?: StepExercise;
   /** Repeat this block N times. 1 = no repeat. */
   repeatCount: number;
   /** Nested steps for interval sets. Empty for leaf steps. */
