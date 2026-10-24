@@ -78,6 +78,10 @@ const BLOCKS = {
   }),
 } as const;
 type BlockKind = keyof typeof BLOCKS;
+
+function mainBlockFor(sport: Sport): Step {
+  return sport === 'strength' ? BLOCKS.exercise() : BLOCKS.main();
+}
 const BLOCK_ICON: Record<BlockKind, keyof typeof Ionicons.glyphMap> = {
   warmup: 'trending-up',
   main: 'remove',
@@ -141,7 +145,17 @@ function WorkoutBuilderScreen() {
   const assignWorkoutTo = useAppStore((s) => s.assignWorkoutTo);
   const thresholds = useAppStore((s) => s.athlete?.thresholds);
 
-  const [structure, setStructure] = useState<Step[]>(() => existing?.structure ?? []);
+  const initialSport: Sport =
+    existing?.sport ??
+    (SPORTS.includes(params.sport as Sport) ? (params.sport as Sport) : 'run');
+  // A new workout opens with its main block ready to edit; warm-up, intervals
+  // and cool-down are optional extras added from the chips below.
+  const [starter, setStarter] = useState<Step | null>(() =>
+    existing ? null : mainBlockFor(initialSport),
+  );
+  const [structure, setStructure] = useState<Step[]>(
+    () => existing?.structure ?? (starter ? [starter] : []),
+  );
   const [target, setTarget] = useState<'date' | 'library'>(() =>
     existing?.isTemplate && !assignTo ? 'library' : 'date',
   );
@@ -151,9 +165,7 @@ function WorkoutBuilderScreen() {
     resolver: zodResolver(schema),
     defaultValues: {
       title: existing?.title ?? '',
-      sport:
-        existing?.sport ??
-        (SPORTS.includes(params.sport as Sport) ? (params.sport as Sport) : 'run'),
+      sport: initialSport,
       description: existing?.description ?? '',
     },
   });
@@ -166,7 +178,7 @@ function WorkoutBuilderScreen() {
   );
 
   // One step (or interval-set header) open for editing at a time; the rest stay compact.
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(starter?.id ?? null);
   const toggle = (id: string) => setExpandedId((cur) => (cur === id ? null : id));
 
   const updateStep = (idx: number, next: Step) =>
@@ -177,10 +189,40 @@ function WorkoutBuilderScreen() {
     setStructure((s) => [...s.slice(0, idx + 1), copy, ...s.slice(idx + 1)]);
     setExpandedId(copy.id);
   };
+  // Warm-ups go first, cool-downs last, everything else just before the cool-down.
   const addStep = (step: Step) => {
-    setStructure((s) => [...s, step]);
+    setStructure((s) => {
+      const isWarmup = (x: Step) => x.type === 'warmup' && !x.exercise;
+      const isCooldown = (x: Step) => x.type === 'cooldown' && !x.exercise;
+      let at = s.length;
+      if (isWarmup(step)) at = s.filter(isWarmup).length;
+      else if (!isCooldown(step)) {
+        const firstCooldown = s.findIndex(isCooldown);
+        if (firstCooldown >= 0) at = firstCooldown;
+      }
+      return [...s.slice(0, at), step, ...s.slice(at)];
+    });
     setExpandedId(step.id);
   };
+
+  // Switching between strength and an endurance sport before touching the
+  // starter block swaps it for the right kind (exercise ↔ main block).
+  const [lastSport, setLastSport] = useState(watchedSport);
+  if (watchedSport !== lastSport) {
+    setLastSport(watchedSport);
+    const onlyStarter =
+      starter &&
+      structure.length === 1 &&
+      structure[0] === starter &&
+      expandedId === starter.id;
+    const kindChanged = (watchedSport === 'strength') !== (lastSport === 'strength');
+    if (onlyStarter && kindChanged) {
+      const next = mainBlockFor(watchedSport);
+      setStarter(next);
+      setStructure([next]);
+      setExpandedId(next.id);
+    }
+  }
 
   const onSubmit = async (values: FormValues) => {
     const { durationSeconds, tss } = computeWorkoutMetrics(structure, values.sport, thresholds);

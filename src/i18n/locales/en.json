@@ -49,7 +49,7 @@
     "interval": "Interval",
     "recovery": "Recovery",
     "cooldown": "Cool-down",
-    "steady": "Steady"
+    "steady": "Main block"
   },
   "status": {
     "planned": "planned",

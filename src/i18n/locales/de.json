@@ -49,7 +49,7 @@
     "interval": "Intervall",
     "recovery": "Erholung",
     "cooldown": "Auslaufen",
-    "steady": "Gleichmäßig"
+    "steady": "Hauptblock"
   },
   "status": {
     "planned": "geplant",

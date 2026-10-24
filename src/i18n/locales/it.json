@@ -49,7 +49,7 @@
     "interval": "Intervallo",
     "recovery": "Recupero",
     "cooldown": "Defaticamento",
-    "steady": "Costante"
+    "steady": "Blocco principale"
   },
   "status": {
     "planned": "pianificato",
