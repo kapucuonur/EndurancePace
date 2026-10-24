@@ -211,11 +211,6 @@ export default function ProfileScreen() {
 
         <MoreAppsCard />
 
-        <Button
-          label={t('profile.viewTrends')}
-          variant="secondary"
-          onPress={() => router.push('/trends')}
-        />
         {/* Seed reset is a dev/mock convenience; production disables it server-side. */}
         {USE_MOCK_API || __DEV__ ? (
           <Button
