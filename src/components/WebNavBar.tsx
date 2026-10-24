@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBar, type BottomTabBarProps } from 'expo-router/js-tabs';
 import { useState } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable, useWindowDimensions, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from '@/i18n';
@@ -16,6 +16,10 @@ const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   messages: 'chatbubble-ellipses',
   profile: 'person',
 };
+
+// Below this width the five labelled tabs + language button don't fit in one
+// row (German/Russian labels are the longest), so tabs stack icon over label.
+const COMPACT_MAX_WIDTH = 760;
 
 /**
  * Web top navbar: the tab links on the left, a hamburger on the right that
@@ -32,10 +36,14 @@ function Bar({ state, descriptors, navigation }: BottomTabBarProps) {
   const locale = useLocale();
   const setLocale = useAppStore((s) => s.setLocale);
   const [menuOpen, setMenuOpen] = useState(false);
+  const compact = useWindowDimensions().width < COMPACT_MAX_WIDTH;
 
   return (
     <View className="relative z-50">
-      <View className="h-14 flex-row items-center border-b border-border bg-bg px-lg dark:border-border-dark dark:bg-bg-dark">
+      <View
+        className={`h-14 flex-row items-center border-b border-border bg-bg dark:border-border-dark dark:bg-bg-dark ${
+          compact ? 'px-xs' : 'px-lg'
+        }`}>
         {state.routes.map((route, i) => {
           const focused = state.index === i;
           const { options } = descriptors[route.key];
@@ -52,16 +60,56 @@ function Bar({ state, descriptors, navigation }: BottomTabBarProps) {
             if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
           };
 
+          const badge = options.tabBarBadge;
+          const icon = (
+            // Room for the badge so it doesn't sit on the inline label.
+            <View style={badge != null && !compact ? { marginRight: 6 } : undefined}>
+              <Ionicons
+                name={TAB_ICON[route.name] ?? 'ellipse-outline'}
+                size={compact ? 20 : 17}
+                color={color}
+              />
+              {badge != null ? (
+                <View
+                  className="absolute -right-2 -top-1.5 h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1"
+                  accessibilityElementsHidden>
+                  <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
+                    {String(badge)}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          );
+          const a11yLabel = badge != null ? `${label} (${badge})` : label;
+
+          if (compact) {
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: focused }}
+                accessibilityLabel={a11yLabel}
+                className="min-w-0 flex-1 items-center gap-0.5 rounded-md py-1 active:opacity-70">
+                {icon}
+                <Text
+                  numberOfLines={1}
+                  style={{ color, fontSize: 10, fontWeight: focused ? '700' : '500' }}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          }
+
           return (
             <Pressable
               key={route.key}
               onPress={onPress}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={a11yLabel}
               className="flex-row items-center gap-1.5 rounded-md px-md py-2 active:opacity-70">
-              <Ionicons
-                name={TAB_ICON[route.name] ?? 'ellipse-outline'}
-                size={17}
-                color={color}
-              />
+              {icon}
               <Text
                 variant="label"
                 style={{ color }}
@@ -72,15 +120,19 @@ function Bar({ state, descriptors, navigation }: BottomTabBarProps) {
           );
         })}
 
-        <View className="flex-1" />
+        {compact ? null : <View className="flex-1" />}
 
         <Pressable
           onPress={() => setMenuOpen((o) => !o)}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.language')}
           className="flex-row items-center gap-1 rounded-md px-sm py-2 active:opacity-70">
-          <Text variant="caption" muted>
-            {LOCALE_LABELS[locale]}
-          </Text>
+          {compact ? null : (
+            <Text variant="caption" muted>
+              {LOCALE_LABELS[locale]}
+            </Text>
+          )}
           <Ionicons
             name={menuOpen ? 'chevron-up' : 'menu'}
             size={18}
