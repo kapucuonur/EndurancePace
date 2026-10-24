@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -221,6 +222,8 @@ export default function LoginScreen() {
 
   return (
     <View style={{ flex: 1, width, overflow: 'hidden', backgroundColor: palette.bg }}>
+      {/* The stacked layout puts the dark photo hero under the status bar. */}
+      <StatusBar style="light" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}>
