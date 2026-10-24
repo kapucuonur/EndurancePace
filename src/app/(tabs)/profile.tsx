@@ -13,6 +13,7 @@ import { calcSwimPaceZones } from '@/domain/zones';
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from '@/i18n';
 import { useT } from '@/i18n/useT';
 import { formatPace } from '@/lib/format';
+import { USE_MOCK_API } from '@/services/config';
 import { useAppStore, useAthlete, useGarmin, useIsCoach, useLocale } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { ThresholdValues } from '@/types/domain';
@@ -212,18 +213,21 @@ export default function ProfileScreen() {
           variant="secondary"
           onPress={() => router.push('/trends')}
         />
-        <Button
-          label={t('profile.resetDemo')}
-          variant="ghost"
-          onPress={() => {
-            resetToSeed().catch((e) =>
-              Alert.alert(
-                t('profile.resetUnavailable'),
-                e instanceof Error ? e.message : String(e),
-              ),
-            );
-          }}
-        />
+        {/* Seed reset is a dev/mock convenience; production disables it server-side. */}
+        {USE_MOCK_API || __DEV__ ? (
+          <Button
+            label={t('profile.resetDemo')}
+            variant="ghost"
+            onPress={() => {
+              resetToSeed().catch((e) =>
+                Alert.alert(
+                  t('profile.resetUnavailable'),
+                  e instanceof Error ? e.message : String(e),
+                ),
+              );
+            }}
+          />
+        ) : null}
         <Button label={t('profile.signOut')} variant="ghost" onPress={() => signOut()} />
         <DeleteAccountCard />
         {/* TODO: implement weight/birthdate editing, discipline toggles, and manual zone overrides */}
