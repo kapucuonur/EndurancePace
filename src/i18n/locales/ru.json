@@ -253,8 +253,6 @@
     "thisAthlete": "этому спортсмену",
     "hrEstimateNote": "TSS — это оценка типа hrTSS для шагов по пульсовым зонам; из-за инерции пульса она неточна на коротких жёстких интервалах.",
     "structure": "Структура",
-    "step": "Шаг",
-    "intervalSet": "Интервальный сет",
     "createWorkout": "Создать тренировку",
     "saveChanges": "Сохранить изменения",
     "assignWorkout": "Назначить тренировку",
@@ -262,7 +260,13 @@
     "tapToEdit": "Нажмите на шаг, чтобы изменить",
     "prevDay": "Предыдущий день",
     "nextDay": "Следующий день",
-    "footerTss": "≈ %{tss} TSS"
+    "footerTss": "≈ %{tss} TSS",
+    "emptyTitle": "Блоков пока нет",
+    "emptyBody": "Добавьте только то, что нужно этой тренировке — для лёгкого бега хватит одного основного блока.",
+    "add_warmup": "Разминка",
+    "add_main": "Основной блок",
+    "add_interval": "Серия интервалов",
+    "add_cooldown": "Заминка"
   },
   "stepRow": {
     "time": "Время",
@@ -284,7 +288,15 @@
     "duplicate": "Дублировать",
     "repeatTimes": "%{count}×",
     "perRound": "%{duration} за повтор",
-    "repeatLabel": "Повторы"
+    "repeatLabel": "Повторы",
+    "minutesShort": "%{count} мин",
+    "paceZone1": "Лёгкий",
+    "paceZone2": "Выносливость",
+    "paceZone3": "Темп",
+    "paceZone4": "Порог",
+    "paceZone5": "Интервалы",
+    "setThresholdHint": "Укажите пороговый темп в Профиле, чтобы видеть здесь свои зоны темпа.",
+    "setCssHint": "Укажите CSS в Профиле, чтобы видеть здесь свои зоны темпа в плавании."
   },
   "stepTimeline": {
     "total": "Всего %{duration} · %{count} блоков"

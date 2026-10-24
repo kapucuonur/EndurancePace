@@ -1,14 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Platform, Pressable, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { ChipGroup } from '@/components/builder/ChipGroup';
 import { Segmented } from '@/components/builder/Segmented';
 import { Stepper } from '@/components/builder/Stepper';
 import { Text } from '@/components/ui/Text';
 import { stepSeconds } from '@/domain/workout';
+import { calcPaceZones } from '@/domain/zones';
 import { useT, type TranslateFn } from '@/i18n/useT';
 import { formatDistance, formatDuration, formatPace, parsePace } from '@/lib/format';
+import { useAppStore } from '@/store/useAppStore';
 import { palette, stepColors } from '@/theme/tokens';
 import type { PaceUnit, Sport, Step, StepTarget, StepType } from '@/types/domain';
 
@@ -16,6 +18,22 @@ const STEP_TYPES: StepType[] = ['warmup', 'interval', 'recovery', 'steady', 'coo
 
 /** Easy → hard, matching the step-type palette (recovery grey … interval red). */
 const ZONE_COLORS = ['#9AA0AB', '#7FB3FF', '#1FA971', '#F2994A', '#EB5757'];
+
+/** Quick picks; the stepper underneath fine-tunes anything in between. */
+const TIME_PRESETS_MIN = [5, 10, 15, 20, 25, 30, 40, 45, 60, 75, 90];
+const DISTANCE_PRESETS: Record<Sport, number[]> = {
+  run: [400, 800, 1000, 2000, 3000, 5000, 10000],
+  swim: [50, 100, 200, 300, 400, 800],
+  bike: [5000, 10000, 20000, 30000, 40000],
+  strength: [],
+};
+/** Fallback pace list (no threshold set): run /km, swim /100m. */
+function paceList(sport: Sport): number[] {
+  const [from, to, stepS] = sport === 'swim' ? [80, 150, 5] : [210, 420, 15];
+  const out: number[] = [];
+  for (let p = from; p <= to; p += stepS) out.push(p);
+  return out;
+}
 
 type DurationMode = 'time' | 'distance';
 type TargetMode = 'zone' | 'pace' | 'power' | 'rpe';
@@ -245,18 +263,42 @@ function StepEditor({
           onChange={setDurationMode}
         />
         {dMode === 'time' ? (
-          <Stepper
-            label={t('stepRow.time')}
-            value={seconds}
-            min={15}
-            step={timeStep}
-            format={formatDuration}
-            parse={parseDuration}
-            keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
-            onChange={(s) => onChange({ ...step, duration: { kind: 'time', seconds: s } })}
-          />
+          <>
+            <ChipGroup
+              options={TIME_PRESETS_MIN.map((m) => ({
+                value: String(m * 60),
+                label: t('stepRow.minutesShort', { count: m }),
+              }))}
+              value={String(seconds)}
+              onChange={(v) =>
+                onChange({ ...step, duration: { kind: 'time', seconds: Number(v) } })
+              }
+            />
+            <Stepper
+              label={t('stepRow.time')}
+              value={seconds}
+              min={15}
+              step={timeStep}
+              format={formatDuration}
+              parse={parseDuration}
+              keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+              onChange={(s) => onChange({ ...step, duration: { kind: 'time', seconds: s } })}
+            />
+          </>
         ) : (
           <>
+            {DISTANCE_PRESETS[sport].length ? (
+              <ChipGroup
+                options={DISTANCE_PRESETS[sport].map((m) => ({
+                  value: String(m),
+                  label: formatDistance(m),
+                }))}
+                value={String(meters)}
+                onChange={(v) =>
+                  onChange({ ...step, duration: { kind: 'distance', meters: Number(v) } })
+                }
+              />
+            ) : null}
             <Stepper
               label={t('stepRow.distance')}
               value={meters}
@@ -304,7 +346,14 @@ function StepEditor({
             onChange={(rpe) => onChange({ ...step, target: { rpe } })}
           />
         ) : tMode === 'pace' ? (
-          <View className="gap-xs">
+          <View className="gap-sm">
+            <PacePresets
+              sport={sport}
+              current={pace}
+              onPick={(min, max) =>
+                onChange({ ...step, target: { paceTarget: { unit: paceUnit, min, max } } })
+              }
+            />
             <View className="flex-row items-center gap-sm">
               <PaceBox
                 key={`slow-${paceUnit}`}
@@ -346,6 +395,85 @@ function StepEditor({
         )}
       </Section>
     </>
+  );
+}
+
+/**
+ * Pace quick picks. With a threshold pace (run) or CSS (swim) in the profile
+ * these are the athlete's own pace zones; otherwise a plain list of paces.
+ */
+function PacePresets({
+  sport,
+  current,
+  onPick,
+}: {
+  sport: Sport;
+  current: { min: number; max: number };
+  onPick: (min: number, max: number) => void;
+}) {
+  const t = useT();
+  const thresholds = useAppStore((s) => s.athlete?.thresholds);
+  const threshold =
+    sport === 'swim' ? thresholds?.cssSecPer100m : thresholds?.runThresholdPaceSecPerKm;
+  const zones = threshold ? calcPaceZones(threshold) : undefined;
+  const suffix = sport === 'swim' ? t('units.per100m') : t('units.perKm');
+
+  const options = zones
+    ? zones.map((z) => {
+        // Zone 1 is open-ended on the slow side; give it a sensible bound.
+        const max = z.max ?? Math.round(z.min * 1.15);
+        return {
+          key: `z${z.index}`,
+          label: `${t(`stepRow.paceZone${z.index}`)} ${formatPace(max)}–${formatPace(z.min)}`,
+          min: z.min,
+          max,
+        };
+      })
+    : paceList(sport).map((p) => ({
+        key: String(p),
+        label: formatPace(p),
+        min: p,
+        max: p + (sport === 'swim' ? 5 : 10),
+      }));
+
+  return (
+    <View className="gap-xs">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="gap-xs">
+        {options.map((o) => {
+          const on = current.min === o.min && current.max === o.max;
+          return (
+            <Pressable
+              key={o.key}
+              onPress={() => onPick(o.min, o.max)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: on }}
+              className={`rounded-full border px-md py-1.5 active:opacity-70 ${
+                on
+                  ? 'border-brand bg-brand/10'
+                  : 'border-border bg-surface dark:border-border-dark dark:bg-surface-dark'
+              }`}>
+              <Text
+                variant="caption"
+                style={{
+                  color: on ? palette.brand : undefined,
+                  fontWeight: on ? '600' : '400',
+                }}>
+                {o.label}
+                {zones ? '' : suffix}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+      {!zones ? (
+        <Text variant="caption" muted>
+          {t(sport === 'swim' ? 'stepRow.setCssHint' : 'stepRow.setThresholdHint')}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 

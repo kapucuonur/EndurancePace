@@ -253,8 +253,6 @@
     "thisAthlete": "bu sporcu",
     "hrEstimateNote": "TSS, nabız bölgesi adımları için hrTSS tarzı bir tahmindir — nabız gecikmesi kısa ve sert intervallerde bunu kabalaştırır.",
     "structure": "Yapı",
-    "step": "Adım",
-    "intervalSet": "İnterval seti",
     "createWorkout": "Antrenman oluştur",
     "saveChanges": "Değişiklikleri kaydet",
     "assignWorkout": "Antrenman ata",
@@ -262,7 +260,13 @@
     "tapToEdit": "Düzenlemek için adıma dokun",
     "prevDay": "Önceki gün",
     "nextDay": "Sonraki gün",
-    "footerTss": "≈ %{tss} TSS"
+    "footerTss": "≈ %{tss} TSS",
+    "emptyTitle": "Henüz blok yok",
+    "emptyBody": "Sadece bu antrenmana gerekenleri ekle — kolay bir koşu için tek bir ana blok yeterli.",
+    "add_warmup": "Isınma",
+    "add_main": "Ana blok",
+    "add_interval": "İnterval seti",
+    "add_cooldown": "Soğuma"
   },
   "stepRow": {
     "time": "Süre",
@@ -284,7 +288,15 @@
     "duplicate": "Kopyala",
     "repeatTimes": "%{count}×",
     "perRound": "tur başına %{duration}",
-    "repeatLabel": "Tekrar"
+    "repeatLabel": "Tekrar",
+    "minutesShort": "%{count} dk",
+    "paceZone1": "Kolay",
+    "paceZone2": "Dayanıklılık",
+    "paceZone3": "Tempo",
+    "paceZone4": "Eşik",
+    "paceZone5": "İnterval",
+    "setThresholdHint": "Kendi tempo bölgelerini burada görmek için Profil'e eşik temponu gir.",
+    "setCssHint": "Kendi yüzme tempo bölgelerini görmek için Profil'e CSS değerini gir."
   },
   "stepTimeline": {
     "total": "Toplam %{duration} · %{count} blok"

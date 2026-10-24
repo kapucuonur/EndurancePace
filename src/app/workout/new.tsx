@@ -45,42 +45,36 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-function newLeaf(type: Step['type'] = 'steady'): Step {
+function leaf(type: Step['type'], seconds: number, hrZone: 1 | 2 | 3 | 4 | 5): Step {
   return {
     id: uid('st'),
     type,
     repeatCount: 1,
     children: [],
-    duration: { kind: 'time', seconds: 600 },
-    target: { hrZone: 2 },
+    duration: { kind: 'time', seconds },
+    target: { hrZone },
   };
 }
 
-function newRepeat(): Step {
-  return {
+/** What each "add block" option drops in; everything is editable afterwards. */
+const BLOCKS = {
+  warmup: () => leaf('warmup', 10 * 60, 1),
+  main: () => leaf('steady', 30 * 60, 2),
+  interval: (): Step => ({
     id: uid('st'),
     type: 'interval',
-    repeatCount: 6,
-    children: [
-      {
-        id: uid('st'),
-        type: 'interval',
-        repeatCount: 1,
-        children: [],
-        duration: { kind: 'time', seconds: 180 },
-        target: { hrZone: 4 },
-      },
-      {
-        id: uid('st'),
-        type: 'recovery',
-        repeatCount: 1,
-        children: [],
-        duration: { kind: 'time', seconds: 120 },
-        target: { hrZone: 1 },
-      },
-    ],
-  };
-}
+    repeatCount: 5,
+    children: [leaf('interval', 3 * 60, 4), leaf('recovery', 2 * 60, 1)],
+  }),
+  cooldown: () => leaf('cooldown', 10 * 60, 1),
+} as const;
+type BlockKind = keyof typeof BLOCKS;
+const BLOCK_ICON: Record<BlockKind, keyof typeof Ionicons.glyphMap> = {
+  warmup: 'trending-up',
+  main: 'remove',
+  interval: 'repeat',
+  cooldown: 'trending-down',
+};
 
 /**
  * Route wrapper. When editing, wait until the workout is in the store before
@@ -131,9 +125,7 @@ function WorkoutBuilderScreen() {
   const assignWorkoutTo = useAppStore((s) => s.assignWorkoutTo);
   const thresholds = useAppStore((s) => s.athlete?.thresholds);
 
-  const [structure, setStructure] = useState<Step[]>(
-    () => existing?.structure ?? [newLeaf('warmup'), newRepeat(), newLeaf('cooldown')],
-  );
+  const [structure, setStructure] = useState<Step[]>(() => existing?.structure ?? []);
   const [target, setTarget] = useState<'date' | 'library'>(() =>
     existing?.isTemplate && !assignTo ? 'library' : 'date',
   );
@@ -346,9 +338,11 @@ function WorkoutBuilderScreen() {
           <View className="gap-sm">
             <View className="flex-row items-baseline justify-between">
               <Text variant="heading">{t('workoutBuilder.structure')}</Text>
-              <Text variant="caption" muted>
-                {t('workoutBuilder.tapToEdit')}
-              </Text>
+              {structure.length > 0 ? (
+                <Text variant="caption" muted>
+                  {t('workoutBuilder.tapToEdit')}
+                </Text>
+              ) : null}
             </View>
             {structure.map((step, idx) => {
               const actions = {
@@ -383,25 +377,28 @@ function WorkoutBuilderScreen() {
               );
             })}
 
-            <View className="flex-row gap-sm">
-              <Pressable
-                onPress={() => addStep(newLeaf())}
-                accessibilityRole="button"
-                className="flex-1 flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-md active:opacity-70 dark:border-border-dark">
-                <Ionicons name="add" size={16} color={palette.brand} />
-                <Text variant="caption" style={{ color: palette.brand }}>
-                  {t('workoutBuilder.step')}
+            {structure.length === 0 ? (
+              <View className="items-center gap-xs rounded-lg border border-dashed border-border px-lg py-lg dark:border-border-dark">
+                <Text variant="label">{t('workoutBuilder.emptyTitle')}</Text>
+                <Text variant="caption" muted className="text-center">
+                  {t('workoutBuilder.emptyBody')}
                 </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => addStep(newRepeat())}
-                accessibilityRole="button"
-                className="flex-1 flex-row items-center justify-center gap-xs rounded-md border border-dashed border-border py-md active:opacity-70 dark:border-border-dark">
-                <Ionicons name="repeat" size={16} color={palette.brand} />
-                <Text variant="caption" style={{ color: palette.brand }}>
-                  {t('workoutBuilder.intervalSet')}
-                </Text>
-              </Pressable>
+              </View>
+            ) : null}
+
+            <View className="flex-row flex-wrap gap-sm">
+              {(Object.keys(BLOCKS) as BlockKind[]).map((kind) => (
+                <Pressable
+                  key={kind}
+                  onPress={() => addStep(BLOCKS[kind]())}
+                  accessibilityRole="button"
+                  className="flex-row items-center gap-1.5 rounded-full border border-brand/40 bg-brand/5 px-md py-2 active:opacity-70">
+                  <Ionicons name={BLOCK_ICON[kind]} size={15} color={palette.brand} />
+                  <Text variant="caption" style={{ color: palette.brand, fontWeight: '600' }}>
+                    {t(`workoutBuilder.add_${kind}`)}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
             {metrics.hasHrEstimate ? (
               <Text variant="caption" muted>
@@ -429,6 +426,7 @@ function WorkoutBuilderScreen() {
                   : t('workoutBuilder.createWorkout')
             }
             onPress={handleSubmit(onSubmit)}
+            disabled={structure.length === 0}
           />
         </View>
       </KeyboardAvoidingView>

@@ -253,8 +253,6 @@
     "thisAthlete": "questo atleta",
     "hrEstimateNote": "Il TSS è una stima in stile hrTSS per gli step a zone di FC — il ritardo della FC lo rende impreciso su intervalli brevi e intensi.",
     "structure": "Struttura",
-    "step": "Step",
-    "intervalSet": "Serie di intervalli",
     "createWorkout": "Crea allenamento",
     "saveChanges": "Salva modifiche",
     "assignWorkout": "Assegna allenamento",
@@ -262,7 +260,13 @@
     "tapToEdit": "Tocca un passo per modificarlo",
     "prevDay": "Giorno precedente",
     "nextDay": "Giorno successivo",
-    "footerTss": "≈ %{tss} TSS"
+    "footerTss": "≈ %{tss} TSS",
+    "emptyTitle": "Ancora nessun blocco",
+    "emptyBody": "Aggiungi solo ciò che serve a questa sessione: per una corsa facile basta un blocco principale.",
+    "add_warmup": "Riscaldamento",
+    "add_main": "Blocco principale",
+    "add_interval": "Serie di intervalli",
+    "add_cooldown": "Defaticamento"
   },
   "stepRow": {
     "time": "Tempo",
@@ -284,7 +288,15 @@
     "duplicate": "Duplica",
     "repeatTimes": "%{count}×",
     "perRound": "%{duration} per serie",
-    "repeatLabel": "Ripetizioni"
+    "repeatLabel": "Ripetizioni",
+    "minutesShort": "%{count} min",
+    "paceZone1": "Facile",
+    "paceZone2": "Resistenza",
+    "paceZone3": "Tempo",
+    "paceZone4": "Soglia",
+    "paceZone5": "Intervallo",
+    "setThresholdHint": "Inserisci il tuo passo di soglia nel Profilo per vedere qui le tue zone di passo.",
+    "setCssHint": "Inserisci la tua CSS nel Profilo per vedere qui le tue zone di passo nel nuoto."
   },
   "stepTimeline": {
     "total": "Totale %{duration} · %{count} blocchi"

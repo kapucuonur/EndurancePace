@@ -253,8 +253,6 @@
     "thisAthlete": "este atleta",
     "hrEstimateNote": "El TSS es una estimación tipo hrTSS para los pasos por zonas de FC — el retardo de la FC lo hace impreciso en intervalos cortos e intensos.",
     "structure": "Estructura",
-    "step": "Paso",
-    "intervalSet": "Serie de intervalos",
     "createWorkout": "Crear entrenamiento",
     "saveChanges": "Guardar cambios",
     "assignWorkout": "Asignar entrenamiento",
@@ -262,7 +260,13 @@
     "tapToEdit": "Toca un paso para editarlo",
     "prevDay": "Día anterior",
     "nextDay": "Día siguiente",
-    "footerTss": "≈ %{tss} TSS"
+    "footerTss": "≈ %{tss} TSS",
+    "emptyTitle": "Aún no hay bloques",
+    "emptyBody": "Añade solo lo que necesita esta sesión: para un rodaje suave basta un bloque principal.",
+    "add_warmup": "Calentamiento",
+    "add_main": "Bloque principal",
+    "add_interval": "Serie de intervalos",
+    "add_cooldown": "Vuelta a la calma"
   },
   "stepRow": {
     "time": "Tiempo",
@@ -284,7 +288,15 @@
     "duplicate": "Duplicar",
     "repeatTimes": "%{count}×",
     "perRound": "%{duration} por serie",
-    "repeatLabel": "Repeticiones"
+    "repeatLabel": "Repeticiones",
+    "minutesShort": "%{count} min",
+    "paceZone1": "Suave",
+    "paceZone2": "Resistencia",
+    "paceZone3": "Tempo",
+    "paceZone4": "Umbral",
+    "paceZone5": "Intervalo",
+    "setThresholdHint": "Añade tu ritmo umbral en el Perfil para ver aquí tus propias zonas de ritmo.",
+    "setCssHint": "Añade tu CSS en el Perfil para ver aquí tus propias zonas de ritmo de natación."
   },
   "stepTimeline": {
     "total": "Total %{duration} · %{count} bloques"

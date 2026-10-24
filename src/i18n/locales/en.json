@@ -253,8 +253,6 @@
     "thisAthlete": "this athlete",
     "hrEstimateNote": "TSS is an hrTSS-style estimate for HR-zone steps — HR lag makes it rough on short, hard intervals.",
     "structure": "Structure",
-    "step": "Step",
-    "intervalSet": "Interval set",
     "createWorkout": "Create workout",
     "saveChanges": "Save changes",
     "assignWorkout": "Assign workout",
@@ -262,7 +260,13 @@
     "tapToEdit": "Tap a step to edit",
     "prevDay": "Previous day",
     "nextDay": "Next day",
-    "footerTss": "≈ %{tss} TSS"
+    "footerTss": "≈ %{tss} TSS",
+    "emptyTitle": "No blocks yet",
+    "emptyBody": "Add only what this session needs — a single main block is enough for an easy run.",
+    "add_warmup": "Warm-up",
+    "add_main": "Main block",
+    "add_interval": "Interval set",
+    "add_cooldown": "Cool-down"
   },
   "stepRow": {
     "time": "Time",
@@ -284,7 +288,15 @@
     "duplicate": "Duplicate",
     "repeatTimes": "%{count}×",
     "perRound": "%{duration} per round",
-    "repeatLabel": "Repeats"
+    "repeatLabel": "Repeats",
+    "minutesShort": "%{count} min",
+    "paceZone1": "Easy",
+    "paceZone2": "Endurance",
+    "paceZone3": "Tempo",
+    "paceZone4": "Threshold",
+    "paceZone5": "Interval",
+    "setThresholdHint": "Add your threshold pace in Profile to see your own pace zones here.",
+    "setCssHint": "Add your CSS in Profile to see your own swim pace zones here."
   },
   "stepTimeline": {
     "total": "Total %{duration} · %{count} blocks"

@@ -253,8 +253,6 @@
     "thisAthlete": "diesen Athleten",
     "hrEstimateNote": "Der TSS ist eine hrTSS-artige Schätzung für HF-Zonen-Schritte — der HF-Verzug macht ihn bei kurzen, harten Intervallen ungenau.",
     "structure": "Struktur",
-    "step": "Schritt",
-    "intervalSet": "Intervallsatz",
     "createWorkout": "Einheit erstellen",
     "saveChanges": "Änderungen speichern",
     "assignWorkout": "Einheit zuweisen",
@@ -262,7 +260,13 @@
     "tapToEdit": "Tippe auf einen Schritt zum Bearbeiten",
     "prevDay": "Vorheriger Tag",
     "nextDay": "Nächster Tag",
-    "footerTss": "≈ %{tss} TSS"
+    "footerTss": "≈ %{tss} TSS",
+    "emptyTitle": "Noch keine Blöcke",
+    "emptyBody": "Füge nur hinzu, was diese Einheit braucht – für einen lockeren Lauf reicht ein Hauptblock.",
+    "add_warmup": "Aufwärmen",
+    "add_main": "Hauptblock",
+    "add_interval": "Intervallserie",
+    "add_cooldown": "Auslaufen"
   },
   "stepRow": {
     "time": "Zeit",
@@ -284,7 +288,15 @@
     "duplicate": "Duplizieren",
     "repeatTimes": "%{count}×",
     "perRound": "%{duration} pro Runde",
-    "repeatLabel": "Wiederholungen"
+    "repeatLabel": "Wiederholungen",
+    "minutesShort": "%{count} Min.",
+    "paceZone1": "Locker",
+    "paceZone2": "Grundlage",
+    "paceZone3": "Tempo",
+    "paceZone4": "Schwelle",
+    "paceZone5": "Intervall",
+    "setThresholdHint": "Trage im Profil deine Schwellenpace ein, um hier deine eigenen Pace-Zonen zu sehen.",
+    "setCssHint": "Trage im Profil deine CSS ein, um hier deine eigenen Schwimm-Pace-Zonen zu sehen."
   },
   "stepTimeline": {
     "total": "Gesamt %{duration} · %{count} Blöcke"
