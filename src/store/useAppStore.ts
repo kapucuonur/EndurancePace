@@ -147,6 +147,8 @@ interface AppState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Permanently delete the account. Throws on a wrong password; signs out on success. */
+  deleteAccount: (password: string) => Promise<void>;
 
   // lifecycle
   hydrate: () => Promise<void>;
@@ -294,6 +296,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
       throw e;
     }
+  },
+
+  deleteAccount: async (password) => {
+    await auth.deleteAccount(password);
+    await get().signOut();
   },
 
   signOut: async () => {

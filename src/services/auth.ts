@@ -40,3 +40,14 @@ export async function signUp(email: string, password: string, name?: string): Pr
 export async function signOut(): Promise<void> {
   await clearToken();
 }
+
+/** Permanently delete the account server-side (password re-check), then drop the token. */
+export async function deleteAccount(password: string): Promise<void> {
+  if (!USE_MOCK_API) {
+    await apiFetch(API_BASE_URL, '/auth/account', {
+      method: 'DELETE',
+      body: JSON.stringify({ password }),
+    });
+  }
+  await clearToken();
+}
