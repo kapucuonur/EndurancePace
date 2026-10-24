@@ -26,7 +26,7 @@ export default function TermsOfServiceScreen() {
           justifyContent: 'space-between',
         }}>
         <Pressable
-          onPress={() => router.canGoBack() ? router.back() : router.replace('/login')}
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/login'))}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}>
           <Ionicons name="arrow-back" size={22} color={palette.brand} />
           <Text variant="caption" className="font-semibold text-brand">
@@ -60,27 +60,27 @@ export default function TermsOfServiceScreen() {
           </View>
 
           <Text variant="body">
-            These Terms of Service ("Terms") constitute a legally binding agreement between you and
-            EndurancePace / CoachOnur AI ("Company", "we", "us", or "our") concerning your access to
-            and use of the EndurancePace mobile and web applications. By accessing or using our
-            services, you acknowledge that you have read, understood, and agree to be bound by these
-            Terms.
+            These Terms of Service (&quot;Terms&quot;) constitute a legally binding agreement
+            between you and EndurancePace / CoachOnur AI (&quot;Company&quot;, &quot;we&quot;,
+            &quot;us&quot;, or &quot;our&quot;) concerning your access to and use of the
+            EndurancePace mobile and web applications. By accessing or using our services, you
+            acknowledge that you have read, understood, and agree to be bound by these Terms.
           </Text>
 
           <Section title="1. Eligibility and Account Registration">
             <Text variant="body" style={{ color: palette.textMuted, lineHeight: 22 }}>
               You must be at least 16 years of age to register an account. You agree to provide
-              accurate, current, and complete registration information and maintain the security of
-              your account credentials. You are responsible for all activities that occur under your
-              account.
+              accurate, current, and complete registration information and maintain the security
+              of your account credentials. You are responsible for all activities that occur
+              under your account.
             </Text>
           </Section>
 
           <Section title="2. Description of Service">
             <Text variant="body" style={{ color: palette.textMuted, lineHeight: 22 }}>
-              EndurancePace provides endurance sports analytics, training load calculations (TSS,
-              CTL, ATL, TSB), pacing strategies, and workout synchronizations with supported
-              ecosystems (such as Garmin Connect and Huawei Health).
+              EndurancePace provides endurance sports analytics, training load calculations
+              (TSS, CTL, ATL, TSB), pacing strategies, and workout synchronizations with
+              supported ecosystems (such as Garmin Connect and Huawei Health).
             </Text>
           </Section>
 
@@ -98,21 +98,22 @@ export default function TermsOfServiceScreen() {
                 IMPORTANT HEALTH NOTICE:
               </Text>
               <Text variant="caption" style={{ color: palette.text, lineHeight: 20 }}>
-                EndurancePace is a training analytics tool and NOT a medical device. The training plans,
-                metrics, and coaching recommendations provided are for athletic preparation and
-                informational purposes only. Always consult a licensed medical professional before
-                commencing any high-intensity endurance training program. You participate in physical
-                exercise at your own risk.
+                EndurancePace is a training analytics tool and NOT a medical device. The
+                training plans, metrics, and coaching recommendations provided are for athletic
+                preparation and informational purposes only. Always consult a licensed medical
+                professional before commencing any high-intensity endurance training program.
+                You participate in physical exercise at your own risk.
               </Text>
             </View>
           </Section>
 
           <Section title="4. Third-Party Services and APIs">
             <Text variant="body" style={{ color: palette.textMuted, lineHeight: 22 }}>
-              EndurancePace integrates with third-party fitness platforms including Garmin Connect,
-              Huawei Health Kit, and related APIs. Your use of those third-party services is subject
-              to their respective terms and privacy policies. We are not liable for any downtime,
-              data inaccuracy, or service changes originating from third-party API providers.
+              EndurancePace integrates with third-party fitness platforms including Garmin
+              Connect, Huawei Health Kit, and related APIs. Your use of those third-party
+              services is subject to their respective terms and privacy policies. We are not
+              liable for any downtime, data inaccuracy, or service changes originating from
+              third-party API providers.
             </Text>
           </Section>
 
@@ -124,9 +125,10 @@ export default function TermsOfServiceScreen() {
 
           <Section title="6. Termination of Service">
             <Text variant="body" style={{ color: palette.textMuted, lineHeight: 22 }}>
-              We reserve the right to suspend or terminate accounts that violate these Terms or engage
-              in abusive or fraudulent behavior. You may terminate your account at any time by
-              contacting support or deleting your account from within application settings.
+              We reserve the right to suspend or terminate accounts that violate these Terms or
+              engage in abusive or fraudulent behavior. You may terminate your account at any
+              time by contacting support or deleting your account from within application
+              settings.
             </Text>
           </Section>
 
@@ -134,7 +136,9 @@ export default function TermsOfServiceScreen() {
             <Text variant="body">
               For questions regarding this User Agreement, please contact:
             </Text>
-            <Text variant="body" style={{ fontWeight: '600', color: palette.brand, marginTop: 4 }}>
+            <Text
+              variant="body"
+              style={{ fontWeight: '600', color: palette.brand, marginTop: 4 }}>
               Email: legal@coachonurai.com
             </Text>
             <Text variant="body" muted style={{ marginTop: 2 }}>
