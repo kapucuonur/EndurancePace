@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
+import { CreateSheet } from '@/components/CreateSheet';
 import { SportGlyph } from '@/components/SportGlyph';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
@@ -33,6 +34,7 @@ export default function CalendarHomeScreen() {
   const [anchor, setAnchor] = useState<ISODate>(todayISO());
   const [selected, setSelected] = useState<ISODate>(todayISO());
   const [mode, setMode] = useState<Mode>('week');
+  const [createOpen, setCreateOpen] = useState(false);
 
   const allWorkouts = useAppStore((s) => s.workouts);
   const loading = useAppStore((s) => s.loading && !s.hydrated);
@@ -193,12 +195,17 @@ export default function CalendarHomeScreen() {
         </ScrollView>
       )}
 
-      {/* Floating add button */}
+      {/* Create button → sheet with sport picker and other "new" actions */}
       <Pressable
-        onPress={() => router.push({ pathname: '/workout/new', params: { date: selected } })}
-        className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-brand shadow-lg active:bg-brand-dark">
-        <Ionicons name="add" size={30} color="#fff" />
+        onPress={() => setCreateOpen(true)}
+        accessibilityRole="button"
+        className="absolute bottom-6 right-6 h-14 flex-row items-center gap-xs rounded-full bg-brand pl-md pr-lg shadow-lg active:bg-brand-dark">
+        <Ionicons name="add" size={26} color="#fff" />
+        <Text variant="label" style={{ color: '#fff', fontWeight: '700' }}>
+          {t('createSheet.button')}
+        </Text>
       </Pressable>
+      <CreateSheet visible={createOpen} onClose={() => setCreateOpen(false)} date={selected} />
     </Screen>
   );
 }

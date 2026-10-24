@@ -62,8 +62,12 @@ export default function LibraryScreen() {
         <Text variant="title">{t('library.title')}</Text>
         <Pressable
           onPress={() => router.push('/workout/new')}
-          className="h-10 w-10 items-center justify-center rounded-full bg-brand">
-          <Ionicons name="add" size={22} color="#fff" />
+          accessibilityRole="button"
+          className="h-10 flex-row items-center gap-1 rounded-full bg-brand pl-sm pr-md active:bg-brand-dark">
+          <Ionicons name="add" size={20} color="#fff" />
+          <Text variant="label" style={{ color: '#fff', fontWeight: '600' }}>
+            {t('createSheet.newShort')}
+          </Text>
         </Pressable>
       </View>
 

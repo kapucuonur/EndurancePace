@@ -462,5 +462,14 @@
     "pull": "Trazione",
     "core": "Core",
     "power": "Esplosività"
+  },
+  "createSheet": {
+    "button": "Crea allenamento",
+    "newShort": "Nuovo",
+    "newWorkout": "Nuovo allenamento",
+    "pickSport": "Scegli uno sport per iniziare",
+    "fromLibrary": "Scegli dalla libreria",
+    "newPlan": "Crea un piano di allenamento",
+    "addRace": "Aggiungi una gara"
   }
 }

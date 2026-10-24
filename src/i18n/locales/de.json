@@ -462,5 +462,14 @@
     "pull": "Ziehen",
     "core": "Rumpf",
     "power": "Explosivkraft"
+  },
+  "createSheet": {
+    "button": "Training erstellen",
+    "newShort": "Neu",
+    "newWorkout": "Neues Training",
+    "pickSport": "Wähle eine Sportart",
+    "fromLibrary": "Aus der Bibliothek wählen",
+    "newPlan": "Trainingsplan erstellen",
+    "addRace": "Wettkampf hinzufügen"
   }
 }

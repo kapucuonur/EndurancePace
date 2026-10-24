@@ -122,6 +122,7 @@ function WorkoutBuilderScreen() {
   const params = useLocalSearchParams<{
     date?: string;
     id?: string;
+    sport?: string;
     assignTo?: string;
     assignName?: string;
   }>();
@@ -150,7 +151,9 @@ function WorkoutBuilderScreen() {
     resolver: zodResolver(schema),
     defaultValues: {
       title: existing?.title ?? '',
-      sport: existing?.sport ?? 'run',
+      sport:
+        existing?.sport ??
+        (SPORTS.includes(params.sport as Sport) ? (params.sport as Sport) : 'run'),
       description: existing?.description ?? '',
     },
   });
@@ -277,6 +280,7 @@ function WorkoutBuilderScreen() {
                         onPress={() => field.onChange(s)}
                         accessibilityRole="radio"
                         accessibilityState={{ selected: on }}
+                        aria-checked={on}
                         accessibilityLabel={t(`sport.${s}`)}
                         className={`flex-1 items-center gap-1 rounded-lg border py-sm active:opacity-70 ${
                           on

@@ -462,5 +462,14 @@
     "pull": "Çekiş",
     "core": "Core",
     "power": "Patlayıcılık"
+  },
+  "createSheet": {
+    "button": "Antrenman oluştur",
+    "newShort": "Yeni",
+    "newWorkout": "Yeni antrenman",
+    "pickSport": "Başlamak için spor seç",
+    "fromLibrary": "Kütüphaneden seç",
+    "newPlan": "Antrenman planı oluştur",
+    "addRace": "Yarış ekle"
   }
 }

@@ -462,5 +462,14 @@
     "pull": "Tirón",
     "core": "Core",
     "power": "Potencia"
+  },
+  "createSheet": {
+    "button": "Crear entrenamiento",
+    "newShort": "Nuevo",
+    "newWorkout": "Nuevo entrenamiento",
+    "pickSport": "Elige un deporte para empezar",
+    "fromLibrary": "Elegir de la biblioteca",
+    "newPlan": "Crear un plan de entrenamiento",
+    "addRace": "Añadir una carrera"
   }
 }

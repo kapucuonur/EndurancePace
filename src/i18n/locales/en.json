@@ -462,5 +462,14 @@
     "pull": "Pull",
     "core": "Core",
     "power": "Power"
+  },
+  "createSheet": {
+    "button": "Create workout",
+    "newShort": "New",
+    "newWorkout": "New workout",
+    "pickSport": "Pick a sport to start",
+    "fromLibrary": "Pick from library",
+    "newPlan": "Create a training plan",
+    "addRace": "Add a race"
   }
 }
