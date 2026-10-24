@@ -26,7 +26,8 @@
     "garminConnect": "Garmin Connect",
     "coaching": "Entrenamiento",
     "athlete": "Atleta",
-    "messages": "Mensajes"
+    "messages": "Mensajes",
+    "newRace": "Nueva carrera"
   },
   "sport": {
     "swim": "Natación",
@@ -114,7 +115,9 @@
     "workoutsCount": "%{count} entrenamientos",
     "daysRemaining": "%{count} días restantes",
     "goalRace": "%{name} · competición %{priority}",
-    "upcomingRaces": "Próximas competiciones"
+    "upcomingRaces": "Próximas competiciones",
+    "addRace": "Añadir carrera",
+    "noRaces": "Aún no hay carreras. Añade tu carrera objetivo para planificar hacia ella."
   },
   "library": {
     "title": "Biblioteca de entrenamientos",
@@ -307,7 +310,8 @@
     "starts": "Empieza",
     "periodization": "Periodización",
     "planRuns": "El plan dura",
-    "createPlan": "Crear plan"
+    "createPlan": "Crear plan",
+    "addRace": "Añadir una carrera"
   },
   "planDetail": {
     "notFound": "Plan no encontrado.",
@@ -371,5 +375,24 @@
     "activityBody": "CoachOnur AI analiza tus actividades de Garmin y sugiere recuperación y próximos entrenamientos.",
     "cta": "Probar CoachOnur AI",
     "dismiss": "Cerrar"
+  },
+  "raceBuilder": {
+    "name": "Nombre de la carrera",
+    "namePlaceholder": "p. ej. Media Maratón de Valencia",
+    "nameError": "Ponle nombre a la carrera",
+    "date": "Fecha",
+    "pickDate": "Elige la fecha de la carrera",
+    "distance": "Distancia",
+    "distancePlaceholder": "p. ej. 10K, media, olímpico, 70.3",
+    "distanceError": "Añade una distancia",
+    "sport": "Deporte",
+    "priority": "Prioridad",
+    "priorityA": "A · objetivo principal",
+    "priorityB": "B · importante",
+    "priorityC": "C · carrera de preparación",
+    "location": "Lugar (opcional)",
+    "locationPlaceholder": "p. ej. Valencia",
+    "save": "Guardar carrera",
+    "saveFailed": "No se pudo guardar la carrera"
   }
 }

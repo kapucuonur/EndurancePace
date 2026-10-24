@@ -26,7 +26,8 @@
     "garminConnect": "Garmin Connect",
     "coaching": "Antrenörlük",
     "athlete": "Sporcu",
-    "messages": "Mesajlar"
+    "messages": "Mesajlar",
+    "newRace": "Yeni Yarış"
   },
   "sport": {
     "swim": "Yüzme",
@@ -114,7 +115,9 @@
     "workoutsCount": "%{count} antrenman",
     "daysRemaining": "%{count} gün kaldı",
     "goalRace": "%{name} · %{priority} yarışı",
-    "upcomingRaces": "Yaklaşan Yarışlar"
+    "upcomingRaces": "Yaklaşan Yarışlar",
+    "addRace": "Yarış ekle",
+    "noRaces": "Henüz yarış yok. Hedef yarışını ekle, planını ona göre kur."
   },
   "library": {
     "title": "Antrenman Kütüphanesi",
@@ -307,7 +310,8 @@
     "starts": "Başlangıç",
     "periodization": "Periyotlama",
     "planRuns": "Plan süresi",
-    "createPlan": "Plan oluştur"
+    "createPlan": "Plan oluştur",
+    "addRace": "Yarış ekle"
   },
   "planDetail": {
     "notFound": "Plan bulunamadı.",
@@ -371,5 +375,24 @@
     "activityBody": "CoachOnur AI, Garmin aktivitelerini analiz eder; toparlanma ve sonraki antrenman önerileri sunar.",
     "cta": "CoachOnur AI'yi dene",
     "dismiss": "Kapat"
+  },
+  "raceBuilder": {
+    "name": "Yarış adı",
+    "namePlaceholder": "örn. İstanbul Yarı Maratonu",
+    "nameError": "Yarışa bir ad ver",
+    "date": "Yarış tarihi",
+    "pickDate": "Yarış tarihini seç",
+    "distance": "Mesafe",
+    "distancePlaceholder": "örn. 10K, Yarı Maraton, Olimpik, 70.3",
+    "distanceError": "Mesafe ekle",
+    "sport": "Spor",
+    "priority": "Öncelik",
+    "priorityA": "A · ana hedef",
+    "priorityB": "B · önemli",
+    "priorityC": "C · hazırlık yarışı",
+    "location": "Yer (isteğe bağlı)",
+    "locationPlaceholder": "örn. İstanbul",
+    "save": "Yarışı kaydet",
+    "saveFailed": "Yarış kaydedilemedi"
   }
 }

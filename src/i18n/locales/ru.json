@@ -26,7 +26,8 @@
     "garminConnect": "Garmin Connect",
     "coaching": "Тренерство",
     "athlete": "Спортсмен",
-    "messages": "Сообщения"
+    "messages": "Сообщения",
+    "newRace": "Новый старт"
   },
   "sport": {
     "swim": "Плавание",
@@ -114,7 +115,9 @@
     "workoutsCount": "%{count} тренировок",
     "daysRemaining": "осталось %{count} дн.",
     "goalRace": "%{name} · старт кат. %{priority}",
-    "upcomingRaces": "Ближайшие старты"
+    "upcomingRaces": "Ближайшие старты",
+    "addRace": "Добавить старт",
+    "noRaces": "Стартов пока нет. Добавьте целевой старт, чтобы планировать к нему."
   },
   "library": {
     "title": "Библиотека тренировок",
@@ -307,7 +310,8 @@
     "starts": "Начало",
     "periodization": "Периодизация",
     "planRuns": "План длится",
-    "createPlan": "Создать план"
+    "createPlan": "Создать план",
+    "addRace": "Добавить старт"
   },
   "planDetail": {
     "notFound": "План не найден.",
@@ -371,5 +375,24 @@
     "activityBody": "CoachOnur AI анализирует ваши активности Garmin и предлагает восстановление и следующие тренировки.",
     "cta": "Попробовать CoachOnur AI",
     "dismiss": "Закрыть"
+  },
+  "raceBuilder": {
+    "name": "Название старта",
+    "namePlaceholder": "напр. Московский полумарафон",
+    "nameError": "Укажите название старта",
+    "date": "Дата",
+    "pickDate": "Выберите дату старта",
+    "distance": "Дистанция",
+    "distancePlaceholder": "напр. 10 км, полумарафон, олимпийка, 70.3",
+    "distanceError": "Укажите дистанцию",
+    "sport": "Вид спорта",
+    "priority": "Приоритет",
+    "priorityA": "A · главная цель",
+    "priorityB": "B · важный",
+    "priorityC": "C · подготовительный",
+    "location": "Место (необязательно)",
+    "locationPlaceholder": "напр. Москва",
+    "save": "Сохранить старт",
+    "saveFailed": "Не удалось сохранить старт"
   }
 }

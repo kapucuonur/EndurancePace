@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -37,6 +37,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function NewPlanScreen() {
   const t = useT();
+  const router = useRouter();
   const athlete = useAthlete();
   const events = useEvents();
   const createPlan = useAppStore((s) => s.createPlan);
@@ -174,6 +175,15 @@ export default function NewPlanScreen() {
                 </Text>
               </Pressable>
             ))}
+            <Pressable
+              onPress={() => router.push('/event/new')}
+              accessibilityRole="button"
+              className="flex-row items-center gap-1 self-start py-1 active:opacity-70">
+              <Ionicons name="add" size={18} color={palette.brand} />
+              <Text variant="label" style={{ color: palette.brand }}>
+                {t('planBuilder.addRace')}
+              </Text>
+            </Pressable>
           </View>
 
           {/* Start date */}

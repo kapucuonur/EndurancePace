@@ -79,6 +79,10 @@ export default function RootLayout() {
                 options={{ presentation: 'modal', title: t('nav.newPlan') }}
               />
               <Stack.Screen name="plan/[id]" options={{ title: t('nav.plan') }} />
+              <Stack.Screen
+                name="event/new"
+                options={{ presentation: 'modal', title: t('nav.newRace') }}
+              />
               <Stack.Screen name="trends" options={{ title: t('nav.fitnessTrends') }} />
               <Stack.Screen name="garmin" options={{ title: t('nav.garminConnect') }} />
               <Stack.Screen name="coach/index" options={{ title: t('nav.coaching') }} />

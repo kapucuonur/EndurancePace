@@ -26,7 +26,8 @@
     "garminConnect": "Garmin Connect",
     "coaching": "Coaching",
     "athlete": "Atleta",
-    "messages": "Messaggi"
+    "messages": "Messaggi",
+    "newRace": "Nuova gara"
   },
   "sport": {
     "swim": "Nuoto",
@@ -114,7 +115,9 @@
     "workoutsCount": "%{count} allenamenti",
     "daysRemaining": "%{count} giorni rimanenti",
     "goalRace": "%{name} · gara %{priority}",
-    "upcomingRaces": "Prossime gare"
+    "upcomingRaces": "Prossime gare",
+    "addRace": "Aggiungi gara",
+    "noRaces": "Nessuna gara. Aggiungi la tua gara obiettivo per pianificare verso di essa."
   },
   "library": {
     "title": "Libreria allenamenti",
@@ -307,7 +310,8 @@
     "starts": "Inizia",
     "periodization": "Periodizzazione",
     "planRuns": "Il piano dura",
-    "createPlan": "Crea piano"
+    "createPlan": "Crea piano",
+    "addRace": "Aggiungi una gara"
   },
   "planDetail": {
     "notFound": "Piano non trovato.",
@@ -371,5 +375,24 @@
     "activityBody": "CoachOnur AI analizza le tue attività Garmin e suggerisce recupero e prossimi allenamenti.",
     "cta": "Prova CoachOnur AI",
     "dismiss": "Chiudi"
+  },
+  "raceBuilder": {
+    "name": "Nome della gara",
+    "namePlaceholder": "es. Mezza Maratona di Roma",
+    "nameError": "Dai un nome alla gara",
+    "date": "Data",
+    "pickDate": "Scegli la data della gara",
+    "distance": "Distanza",
+    "distancePlaceholder": "es. 10K, mezza, olimpico, 70.3",
+    "distanceError": "Aggiungi una distanza",
+    "sport": "Sport",
+    "priority": "Priorità",
+    "priorityA": "A · obiettivo principale",
+    "priorityB": "B · importante",
+    "priorityC": "C · gara di preparazione",
+    "location": "Luogo (facoltativo)",
+    "locationPlaceholder": "es. Roma",
+    "save": "Salva gara",
+    "saveFailed": "Impossibile salvare la gara"
   }
 }

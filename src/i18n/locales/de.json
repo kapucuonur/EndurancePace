@@ -26,7 +26,8 @@
     "garminConnect": "Garmin Connect",
     "coaching": "Coaching",
     "athlete": "Athlet",
-    "messages": "Nachrichten"
+    "messages": "Nachrichten",
+    "newRace": "Neuer Wettkampf"
   },
   "sport": {
     "swim": "Schwimmen",
@@ -114,7 +115,9 @@
     "workoutsCount": "%{count} Einheiten",
     "daysRemaining": "%{count} Tage übrig",
     "goalRace": "%{name} · %{priority}-Wettkampf",
-    "upcomingRaces": "Kommende Wettkämpfe"
+    "upcomingRaces": "Kommende Wettkämpfe",
+    "addRace": "Wettkampf hinzufügen",
+    "noRaces": "Noch keine Wettkämpfe. Füge deinen Zielwettkampf hinzu, um darauf hin zu planen."
   },
   "library": {
     "title": "Einheiten-Bibliothek",
@@ -307,7 +310,8 @@
     "starts": "Beginnt",
     "periodization": "Periodisierung",
     "planRuns": "Plan läuft",
-    "createPlan": "Plan erstellen"
+    "createPlan": "Plan erstellen",
+    "addRace": "Wettkampf hinzufügen"
   },
   "planDetail": {
     "notFound": "Plan nicht gefunden.",
@@ -371,5 +375,24 @@
     "activityBody": "CoachOnur AI analysiert deine Garmin-Aktivitäten und schlägt Erholung und nächste Einheiten vor.",
     "cta": "CoachOnur AI testen",
     "dismiss": "Schließen"
+  },
+  "raceBuilder": {
+    "name": "Name des Wettkampfs",
+    "namePlaceholder": "z. B. Berlin-Halbmarathon",
+    "nameError": "Gib dem Wettkampf einen Namen",
+    "date": "Datum",
+    "pickDate": "Wähle das Wettkampfdatum",
+    "distance": "Distanz",
+    "distancePlaceholder": "z. B. 10K, Halbmarathon, Olympisch, 70.3",
+    "distanceError": "Gib eine Distanz an",
+    "sport": "Sportart",
+    "priority": "Priorität",
+    "priorityA": "A · Hauptziel",
+    "priorityB": "B · wichtig",
+    "priorityC": "C · Trainingswettkampf",
+    "location": "Ort (optional)",
+    "locationPlaceholder": "z. B. Berlin",
+    "save": "Wettkampf speichern",
+    "saveFailed": "Wettkampf konnte nicht gespeichert werden"
   }
 }

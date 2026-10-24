@@ -84,9 +84,20 @@ export default function PlanOverviewScreen() {
 
         <AiCoachNudge context="plans" />
 
-        <Text variant="heading" className="mt-md">
-          {t('plans.upcomingRaces')}
-        </Text>
+        <View className="mt-md flex-row items-center justify-between">
+          <Text variant="heading">{t('plans.upcomingRaces')}</Text>
+          <Pressable
+            onPress={() => router.push('/event/new')}
+            accessibilityRole="button"
+            hitSlop={8}
+            className="flex-row items-center gap-1 active:opacity-70">
+            <Ionicons name="add" size={18} color={palette.brand} />
+            <Text variant="label" style={{ color: palette.brand }}>
+              {t('plans.addRace')}
+            </Text>
+          </Pressable>
+        </View>
+        {events.length === 0 ? <Text muted>{t('plans.noRaces')}</Text> : null}
         {events
           .slice()
           .sort((a, b) => a.date.localeCompare(b.date))

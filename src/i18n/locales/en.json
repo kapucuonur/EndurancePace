@@ -26,7 +26,8 @@
     "garminConnect": "Garmin Connect",
     "coaching": "Coaching",
     "athlete": "Athlete",
-    "messages": "Messages"
+    "messages": "Messages",
+    "newRace": "New Race"
   },
   "sport": {
     "swim": "Swim",
@@ -114,7 +115,9 @@
     "workoutsCount": "%{count} workouts",
     "daysRemaining": "%{count} days remaining",
     "goalRace": "%{name} · %{priority} race",
-    "upcomingRaces": "Upcoming Races"
+    "upcomingRaces": "Upcoming Races",
+    "addRace": "Add race",
+    "noRaces": "No races yet. Add your goal race to plan toward it."
   },
   "library": {
     "title": "Workout Library",
@@ -307,7 +310,8 @@
     "starts": "Starts",
     "periodization": "Periodization",
     "planRuns": "Plan runs",
-    "createPlan": "Create plan"
+    "createPlan": "Create plan",
+    "addRace": "Add a race"
   },
   "planDetail": {
     "notFound": "Plan not found.",
@@ -371,5 +375,24 @@
     "activityBody": "CoachOnur AI analyses your Garmin activities and suggests recovery and next workouts.",
     "cta": "Try CoachOnur AI",
     "dismiss": "Dismiss"
+  },
+  "raceBuilder": {
+    "name": "Race name",
+    "namePlaceholder": "e.g. Istanbul Half Marathon",
+    "nameError": "Name your race",
+    "date": "Race date",
+    "pickDate": "Pick the race date",
+    "distance": "Distance",
+    "distancePlaceholder": "e.g. 10K, Half, Olympic, 70.3",
+    "distanceError": "Add a distance",
+    "sport": "Sport",
+    "priority": "Priority",
+    "priorityA": "A · main goal",
+    "priorityB": "B · important",
+    "priorityC": "C · training race",
+    "location": "Location (optional)",
+    "locationPlaceholder": "e.g. Istanbul",
+    "save": "Save race",
+    "saveFailed": "Couldn't save the race"
   }
 }
