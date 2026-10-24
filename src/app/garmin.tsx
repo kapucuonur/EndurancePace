@@ -15,6 +15,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useT, type TranslateFn } from '@/i18n/useT';
 import { formatDuration, formatPace } from '@/lib/format';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import { useAppStore, useAthlete, useGarmin } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
 import type { GarminMetrics, ThresholdValues } from '@/types/domain';
@@ -42,7 +43,7 @@ const THRESH_META: Record<ThreshKey, { labelKey: string; fmt: (n: number) => str
 };
 
 export default function GarminScreen() {
-  const headerHeight = useHeaderHeight();
+  const keyboardOffset = useKeyboardOffset(useHeaderHeight());
   const t = useT();
   const garmin = useGarmin();
   const athlete = useAthlete();
@@ -102,7 +103,7 @@ export default function GarminScreen() {
     <Screen edges={['left', 'right', 'bottom']}>
       <KeyboardAvoidingView
         behavior="padding"
-        keyboardVerticalOffset={headerHeight}
+        keyboardVerticalOffset={keyboardOffset}
         className="flex-1">
         <ScrollView
           contentContainerClassName="p-lg gap-lg pb-24"

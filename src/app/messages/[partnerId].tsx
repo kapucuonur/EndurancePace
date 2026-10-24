@@ -15,6 +15,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useT } from '@/i18n/useT';
 import { clockTime, dayHeading } from '@/lib/date';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import api from '@/services/api';
 import { useAppStore, useAthlete } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
@@ -27,7 +28,7 @@ function sameDay(a: string, b: string): boolean {
 }
 
 export default function ConversationScreen() {
-  const headerHeight = useHeaderHeight();
+  const keyboardOffset = useKeyboardOffset(useHeaderHeight());
   const { partnerId } = useLocalSearchParams<{ partnerId: string }>();
   const t = useT();
   const me = useAthlete();
@@ -106,7 +107,7 @@ export default function ConversationScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior="padding"
-        keyboardVerticalOffset={headerHeight}>
+        keyboardVerticalOffset={keyboardOffset}>
         {loading && messages.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator color={palette.brand} />

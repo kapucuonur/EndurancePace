@@ -21,6 +21,7 @@ import { calcSwimPaceZones } from '@/domain/zones';
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from '@/i18n';
 import { useT } from '@/i18n/useT';
 import { formatPace } from '@/lib/format';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import { USE_MOCK_API } from '@/services/config';
 import { useAppStore, useAthlete, useGarmin, useIsCoach, useLocale } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
@@ -50,6 +51,7 @@ const FIELDS: { key: FieldKey; labelKey: string; hintKey: string }[] = [
 ];
 
 export default function ProfileScreen() {
+  const keyboardOffset = useKeyboardOffset();
   const router = useRouter();
   const athlete = useAthlete();
   const updateThresholds = useAppStore((s) => s.updateThresholds);
@@ -112,7 +114,10 @@ export default function ProfileScreen() {
         <Ionicons name="person-circle-outline" size={36} color={palette.brand} />
       </View>
 
-      <KeyboardAvoidingView behavior="padding" className="flex-1">
+      <KeyboardAvoidingView
+        behavior="padding"
+        keyboardVerticalOffset={keyboardOffset}
+        className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-lg pb-24">
           <View className="gap-sm">
             <Text variant="heading">{t('profile.thresholds')}</Text>

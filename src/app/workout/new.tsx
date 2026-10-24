@@ -26,6 +26,7 @@ import { useT } from '@/i18n/useT';
 import { longDate, shiftDays, todayISO } from '@/lib/date';
 import { formatDurationShort, formatDuration } from '@/lib/format';
 import { uid } from '@/lib/id';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import { goBack } from '@/lib/nav';
 import { useAppStore } from '@/store/useAppStore';
 import { SPORT_LABEL } from '@/theme/sport';
@@ -78,7 +79,7 @@ function newRepeat(): Step {
 }
 
 export default function WorkoutBuilderScreen() {
-  const headerHeight = useHeaderHeight();
+  const keyboardOffset = useKeyboardOffset(useHeaderHeight());
   const params = useLocalSearchParams<{
     date?: string;
     id?: string;
@@ -181,7 +182,7 @@ export default function WorkoutBuilderScreen() {
       />
       <KeyboardAvoidingView
         behavior="padding"
-        keyboardVerticalOffset={headerHeight}
+        keyboardVerticalOffset={keyboardOffset}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-lg pb-40">
           {/* Metadata */}

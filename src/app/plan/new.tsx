@@ -20,6 +20,7 @@ import {
 } from '@/domain/plan';
 import { useT } from '@/i18n/useT';
 import { longDate, shiftDays, shiftWeeks, todayISO, weekStart } from '@/lib/date';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import { goBack } from '@/lib/nav';
 import { useAppStore, useAthlete, useEvents } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
@@ -30,7 +31,7 @@ const schema = z.object({ name: z.string().min(2) });
 type FormValues = z.infer<typeof schema>;
 
 export default function NewPlanScreen() {
-  const headerHeight = useHeaderHeight();
+  const keyboardOffset = useKeyboardOffset(useHeaderHeight());
   const t = useT();
   const router = useRouter();
   const athlete = useAthlete();
@@ -107,7 +108,7 @@ export default function NewPlanScreen() {
       />
       <KeyboardAvoidingView
         behavior="padding"
-        keyboardVerticalOffset={headerHeight}
+        keyboardVerticalOffset={keyboardOffset}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-xl pb-40">
           <Text variant="title">{t('planBuilder.title')}</Text>

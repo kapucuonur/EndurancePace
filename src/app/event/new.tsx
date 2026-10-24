@@ -19,6 +19,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useT } from '@/i18n/useT';
 import { todayISO } from '@/lib/date';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import { goBack } from '@/lib/nav';
 import { useAppStore, useAthlete } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
@@ -55,7 +56,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
 }
 
 export default function NewEventScreen() {
-  const headerHeight = useHeaderHeight();
+  const keyboardOffset = useKeyboardOffset(useHeaderHeight());
   const t = useT();
   const athlete = useAthlete();
   const createEvent = useAppStore((s) => s.createEvent);
@@ -104,7 +105,7 @@ export default function NewEventScreen() {
       />
       <KeyboardAvoidingView
         behavior="padding"
-        keyboardVerticalOffset={headerHeight}
+        keyboardVerticalOffset={keyboardOffset}
         className="flex-1">
         <ScrollView contentContainerClassName="p-lg gap-xl pb-40">
           <View className="gap-sm">

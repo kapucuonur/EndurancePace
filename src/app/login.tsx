@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { LOCALE_LABELS, SUPPORTED_LOCALES } from '@/i18n';
 import { useT } from '@/i18n/useT';
+import { useKeyboardOffset } from '@/lib/keyboard';
 import { USE_MOCK_API } from '@/services/config';
 import { useAppStore, useLocale } from '@/store/useAppStore';
 import { palette } from '@/theme/tokens';
@@ -38,6 +39,7 @@ const softShadow = {
 const GRADIENT = ['rgba(9,12,18,0.15)', 'rgba(9,12,18,0.55)', 'rgba(9,12,18,0.92)'] as const;
 
 export default function LoginScreen() {
+  const keyboardOffset = useKeyboardOffset();
   const router = useRouter();
   const t = useT();
   const { width, height } = useWindowDimensions();
@@ -223,7 +225,10 @@ export default function LoginScreen() {
     <View style={{ flex: 1, width, overflow: 'hidden', backgroundColor: palette.bg }}>
       {/* The stacked layout puts the dark photo hero under the status bar. */}
       <StatusBar style="light" />
-      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior="padding"
+        keyboardVerticalOffset={keyboardOffset}
+        style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ minHeight: '100%', paddingBottom: 40 }}
